@@ -22,21 +22,54 @@
 
 /* Begin PBXFileReference section */
 		0C2A8E7BA24448035BF90B6B /* DevNotchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevNotchApp.swift; sourceTree = "<group>"; };
+		170BD6157CEDB3B6FA91F47C /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		226921B48E15C0E46B5EEE23 /* NotchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchModel.swift; sourceTree = "<group>"; };
+		38509021E16BDB18F6FBE17A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		5411C5BB46F81E2A764FC1C0 /* CompactNotchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactNotchView.swift; sourceTree = "<group>"; };
+		64A645FB806E1DB1BA24B8D4 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		6E9AE897B99318F47C3D59D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6FAF3F53F074E10E9466D444 /* NotchGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchGeometry.swift; sourceTree = "<group>"; };
 		7967A7BFEE7F86B9E0EBF6C3 /* NotchWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchWindowController.swift; sourceTree = "<group>"; };
 		8375154B84A100212CEC229E /* HoveredNotchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoveredNotchView.swift; sourceTree = "<group>"; };
 		9A920EA084076C2CE77C8863 /* DevNotch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DevNotch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20DD1C3C6D4CECC6F3260DF /* ExpandedNotchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandedNotchView.swift; sourceTree = "<group>"; };
+		AFBF99E62A0D18065EB34CF3 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		D3CF85D4EE5E374DA48A3023 /* ScreenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenManager.swift; sourceTree = "<group>"; };
+		DD07E63E673D311A88287B05 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		E8C1CA5802081C6C4BBA324D /* NotchState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchState.swift; sourceTree = "<group>"; };
+		F632DCCA098E27062054EBDF /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		F76EE94C536A35743800598E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		F7A14BFF0D54E1FC7B8BB91C /* NotchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchView.swift; sourceTree = "<group>"; };
 		F8E8160BCB1A69E1FE1CA19C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		01DF75A825A794606856E504 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				64A645FB806E1DB1BA24B8D4 /* .gitkeep */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		05FBB3A350BE0DCC85685F0B /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				CBED5F6A6B9623DD24D72B12 /* Models */,
+				0708C40926089C0FE02DA136 /* Providers */,
+				41925314038FFB3E0A28A3F6 /* Services */,
+			);
+			path = AI;
+			sourceTree = "<group>";
+		};
+		0708C40926089C0FE02DA136 /* Providers */ = {
+			isa = PBXGroup;
+			children = (
+				38509021E16BDB18F6FBE17A /* .gitkeep */,
+			);
+			path = Providers;
+			sourceTree = "<group>";
+		};
 		235CF2E4F888FFB917D8BC48 /* Notch */ = {
 			isa = PBXGroup;
 			children = (
@@ -49,12 +82,36 @@
 			path = Notch;
 			sourceTree = "<group>";
 		};
+		41925314038FFB3E0A28A3F6 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				F76EE94C536A35743800598E /* .gitkeep */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		73908F554FA6B2C4F09D102D /* Shelf */ = {
+			isa = PBXGroup;
+			children = (
+				AFBF99E62A0D18065EB34CF3 /* .gitkeep */,
+			);
+			path = Shelf;
+			sourceTree = "<group>";
+		};
 		7E06F8339DE17B0512E8F61F /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				9A920EA084076C2CE77C8863 /* DevNotch.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		9790D7527F7B119F0B42749E /* Music */ = {
+			isa = PBXGroup;
+			children = (
+				170BD6157CEDB3B6FA91F47C /* .gitkeep */,
+			);
+			path = Music;
 			sourceTree = "<group>";
 		};
 		BF5015D1FF65550F0F2019AA /* App */ = {
@@ -65,6 +122,14 @@
 				6E9AE897B99318F47C3D59D3 /* Info.plist */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		CBED5F6A6B9623DD24D72B12 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				DD07E63E673D311A88287B05 /* .gitkeep */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		D3CE4EF0C47FC245C0745666 /* Views */ = {
@@ -86,21 +151,27 @@
 			);
 			sourceTree = "<group>";
 		};
+		EBB1851C5AEE408B3D5E8F19 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				F632DCCA098E27062054EBDF /* .gitkeep */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
 		F2E504A7B8D207E66B0EBC91 /* DevNotch */ = {
 			isa = PBXGroup;
 			children = (
+				05FBB3A350BE0DCC85685F0B /* AI */,
 				BF5015D1FF65550F0F2019AA /* App */,
+				9790D7527F7B119F0B42749E /* Music */,
 				235CF2E4F888FFB917D8BC48 /* Notch */,
+				01DF75A825A794606856E504 /* Settings */,
+				73908F554FA6B2C4F09D102D /* Shelf */,
+				EBB1851C5AEE408B3D5E8F19 /* Support */,
 				D3CE4EF0C47FC245C0745666 /* Views */,
 			);
 			path = DevNotch;
-			sourceTree = "<group>";
-		};
-		"TEMP_6F977443-4B41-4CC0-9B67-AA85D49C1D4B" /* AI */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = AI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
