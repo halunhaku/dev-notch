@@ -4,10 +4,15 @@ import SwiftUI
 struct ExpandedNotchView: View {
     @ObservedObject var model: NotchModel
     @ObservedObject var providerManager: AIProviderManager
+    var onOpenSettings: (() -> Void)? = nil
+
+    private var versionString: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Header: App Logo & Collapse Button
+            // Header: App Logo, Settings Button & Collapse Button
             HStack {
                 // App Logo & Title
                 HStack(spacing: 8) {
@@ -31,7 +36,7 @@ struct ExpandedNotchView: View {
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
 
-                    Text("v0.5.0")
+                    Text("v\(versionString)")
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.white.opacity(0.4))
                         .padding(.horizontal, 6)
@@ -42,18 +47,35 @@ struct ExpandedNotchView: View {
 
                 Spacer()
 
-                // Collapse Button
-                Button(action: {
-                    model.collapseToCompact()
-                }) {
-                    Image(systemName: "chevron.up")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.white.opacity(0.7))
-                        .frame(width: 24, height: 24)
-                        .background(Color.white.opacity(0.1))
-                        .clipShape(Circle())
+                HStack(spacing: 6) {
+                    // Settings Button
+                    if let openSettings = onOpenSettings {
+                        Button(action: openSettings) {
+                            Image(systemName: "gearshape")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.7))
+                                .frame(width: 24, height: 24)
+                                .background(Color.white.opacity(0.1))
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(.plain)
+                        .help("Open Settings")
+                    }
+
+                    // Collapse Button
+                    Button(action: {
+                        model.collapseToCompact()
+                    }) {
+                        Image(systemName: "chevron.up")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white.opacity(0.7))
+                            .frame(width: 24, height: 24)
+                            .background(Color.white.opacity(0.1))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .help("Collapse Notch")
                 }
-                .buttonStyle(.plain)
             }
 
             // Divider
@@ -112,7 +134,7 @@ struct ExpandedNotchView: View {
             // Bottom Hint
             HStack {
                 Spacer()
-                Text("Click ★ to set Primary • Tap outside to collapse")
+                Text("Click ★ to set Primary • Tap outside or Esc to collapse")
                     .font(.system(size: 9, weight: .regular))
                     .foregroundColor(.white.opacity(0.35))
                 Spacer()

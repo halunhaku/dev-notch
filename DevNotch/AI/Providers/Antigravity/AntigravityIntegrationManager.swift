@@ -38,12 +38,13 @@ struct AntigravityIntegrationManager: Sendable {
         }
 
         // 2. Build Antigravity hook specification
+        // Note: PreInvocation, PostInvocation, Stop are flat; PreToolUse, PostToolUse use matcher groups.
         let devNotchSpec: [String: Any] = [
             "enabled": true,
             "PreInvocation": [
                 [
                     "type": "command",
-                    "command": "'\(bridgeExecutablePath)' antigravity PreInvocation",
+                    "command": "\"\(bridgeExecutablePath)\" antigravity PreInvocation",
                     "timeout": 5
                 ]
             ],
@@ -53,7 +54,7 @@ struct AntigravityIntegrationManager: Sendable {
                     "hooks": [
                         [
                             "type": "command",
-                            "command": "'\(bridgeExecutablePath)' antigravity PreToolUse",
+                            "command": "\"\(bridgeExecutablePath)\" antigravity PreToolUse",
                             "timeout": 5
                         ]
                     ]
@@ -65,7 +66,7 @@ struct AntigravityIntegrationManager: Sendable {
                     "hooks": [
                         [
                             "type": "command",
-                            "command": "'\(bridgeExecutablePath)' antigravity PostToolUse",
+                            "command": "\"\(bridgeExecutablePath)\" antigravity PostToolUse",
                             "timeout": 5
                         ]
                     ]
@@ -74,14 +75,14 @@ struct AntigravityIntegrationManager: Sendable {
             "PostInvocation": [
                 [
                     "type": "command",
-                    "command": "'\(bridgeExecutablePath)' antigravity PostInvocation",
+                    "command": "\"\(bridgeExecutablePath)\" antigravity PostInvocation",
                     "timeout": 5
                 ]
             ],
             "Stop": [
                 [
                     "type": "command",
-                    "command": "'\(bridgeExecutablePath)' antigravity Stop",
+                    "command": "\"\(bridgeExecutablePath)\" antigravity Stop",
                     "timeout": 5
                 ]
             ]

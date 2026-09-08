@@ -1,31 +1,119 @@
 import AppKit
+import SwiftUI
+import Combine
+import os.log
 
-/// Application delegate initializing and holding the lifecycle of NotchWindowController and AI providers.
+private let logger = Logger(subsystem: "com.halunhaku.DevNotch", category: "AppDelegate")
+
+/// Application delegate coordinating Notch window, global hotkey, menu bar item, and preferences.
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     var notchWindowController: NotchWindowController?
-    let providerManager = AIProviderManager()
+    let preferences = PreferencesStore()
+    lazy var providerManager = AIProviderManager()
+
+    private var hotKeyManager: GlobalHotKeyManager?
+    private var statusItemController: StatusItemController?
+    private var cancellables = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Skip UI and live background process launch when running under XCTest
+        // Skip UI and background services when running under XCTest
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
             return
         }
 
-        let controller = NotchWindowController(providerManager: providerManager)
+        // 1. Initialize Notch Window Controller
+        let controller = NotchWindowController(
+            providerManager: providerManager,
+            onOpenSettings: { [weak self] in
+                self?.openSettingsWindow()
+            }
+        )
         self.notchWindowController = controller
         controller.showNotchWindow()
 
-        // Start observing AI providers
+        // 2. Initialize Status Bar Item
+        self.statusItemController = StatusItemController(
+            preferences: preferences,
+            manager: providerManager,
+            onOpenNotch: { [weak self] in
+                self?.notchWindowController?.expand()
+            },
+            onOpenSettings: { [weak self] in
+                self?.openSettingsWindow()
+            }
+        )
+
+        // 3. Initialize Global Hotkey
+        setupGlobalHotkey()
+
+        // 4. Start AI Providers
         providerManager.start()
+
+        // 5. Observe primary provider preference sync
+        setupPreferenceBindings()
+    }
+
+    private func setupGlobalHotkey() {
+        let hotKey = GlobalHotKeyManager()
+        self.hotKeyManager = hotKey
+
+        if preferences.globalHotkeyEnabled {
+            hotKey.register(shortcut: preferences.globalHotkey) { [weak self] in
+                self?.notchWindowController?.toggleExpansion()
+            }
+        }
+
+        // Re-register whenever shortcut or toggle preference changes
+        preferences.$globalHotkeyEnabled
+            .sink { [weak self] enabled in
+                guard let self = self else { return }
+                if enabled {
+                    self.hotKeyManager?.register(shortcut: self.preferences.globalHotkey) { [weak self] in
+                        self?.notchWindowController?.toggleExpansion()
+                    }
+                } else {
+                    self.hotKeyManager?.unregister()
+                }
+            }
+            .store(in: &cancellables)
+
+        preferences.$globalHotkey
+            .sink { [weak self] newShortcut in
+                guard let self = self, self.preferences.globalHotkeyEnabled else { return }
+                self.hotKeyManager?.register(shortcut: newShortcut) { [weak self] in
+                    self?.notchWindowController?.toggleExpansion()
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    private func setupPreferenceBindings() {
+        // Sync preferred primary provider from preferences to manager
+        preferences.$preferredPrimaryProviderID
+            .sink { [weak self] newPrimary in
+                self?.providerManager.setPrimaryProvider(newPrimary)
+            }
+            .store(in: &cancellables)
+    }
+
+    /// Opens the native macOS Settings window and activates Dev Notch to the foreground.
+    func openSettingsWindow() {
+        NSApp.activate(ignoringOtherApps: true)
+        if #available(macOS 14.0, *) {
+            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        } else {
+            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        hotKeyManager?.unregister()
         providerManager.stop()
+        logger.info("Dev Notch terminated cleanly")
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        // Keep running as an accessory overlay in the status/notch area
         return false
     }
 }

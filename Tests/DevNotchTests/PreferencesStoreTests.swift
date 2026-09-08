@@ -1,0 +1,104 @@
+import XCTest
+@testable import DevNotch
+
+final class MockLaunchAtLoginManager: LaunchAtLoginManaging {
+    var isEnabled: Bool = false
+    var shouldThrow: Bool = false
+
+    func setEnabled(_ enabled: Bool) throws {
+        if shouldThrow {
+            throw NSError(domain: "SMAppServiceError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Permission denied"])
+        }
+        isEnabled = enabled
+    }
+}
+
+@MainActor
+final class PreferencesStoreTests: XCTestCase {
+    private let testPrefix = "devnotch_test_"
+
+    override func setUp() {
+        super.setUp()
+        clearUserDefaults()
+    }
+
+    override func tearDown() {
+        clearUserDefaults()
+        super.tearDown()
+    }
+
+    private func clearUserDefaults() {
+        let keys = [
+            "devnotch_show_menu_bar_item",
+            "devnotch_global_hotkey_enabled",
+            "devnotch_global_hotkey_data",
+            "devnotch_preferred_primary_id",
+            "devnotch_task_pulse_enabled",
+            "devnotch_show_completed_activity",
+            "devnotch_completed_display_duration",
+            "devnotch_auto_collapse_enabled",
+            "devnotch_provider_enabled_map"
+        ]
+        for key in keys {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+    }
+
+    func testDefaultValues() {
+        let mockLaunch = MockLaunchAtLoginManager()
+        let store = PreferencesStore(launchManager: mockLaunch)
+
+        XCTAssertTrue(store.showMenuBarItem)
+        XCTAssertFalse(store.launchAtLogin)
+        XCTAssertTrue(store.globalHotkeyEnabled)
+        XCTAssertEqual(store.globalHotkey, KeyboardShortcutDefinition.defaultToggleNotch)
+        XCTAssertEqual(store.preferredPrimaryProviderID, .codex)
+        XCTAssertTrue(store.taskPulseEnabled)
+        XCTAssertTrue(store.showCompletedActivity)
+        XCTAssertEqual(store.completedDisplayDuration, 3.0)
+        XCTAssertTrue(store.autoCollapseEnabled)
+
+        for id in AIProviderID.allCases {
+            XCTAssertTrue(store.isProviderEnabled(id))
+        }
+    }
+
+    func testMigrationFromOldPreferredPrimaryID() {
+        // Simulate existing Phase 3-6 installation having stored "deepseek"
+        UserDefaults.standard.set("deepseek", forKey: "devnotch_preferred_primary_id")
+
+        let mockLaunch = MockLaunchAtLoginManager()
+        let store = PreferencesStore(launchManager: mockLaunch)
+
+        XCTAssertEqual(store.preferredPrimaryProviderID, .deepseek)
+    }
+
+    func testProviderEnableDisablePersistence() {
+        let mockLaunch = MockLaunchAtLoginManager()
+        let store = PreferencesStore(launchManager: mockLaunch)
+
+        XCTAssertTrue(store.isProviderEnabled(.claude))
+        store.setProviderEnabled(.claude, enabled: false)
+        XCTAssertFalse(store.isProviderEnabled(.claude))
+
+        // Create new store instance to test persistence
+        let store2 = PreferencesStore(launchManager: mockLaunch)
+        XCTAssertFalse(store2.isProviderEnabled(.claude))
+        XCTAssertTrue(store2.isProviderEnabled(.codex))
+
+        // Re-enable
+        store2.setProviderEnabled(.claude, enabled: true)
+        XCTAssertTrue(store2.isProviderEnabled(.claude))
+    }
+
+    func testCompletedDurationValues() {
+        let mockLaunch = MockLaunchAtLoginManager()
+        let store = PreferencesStore(launchManager: mockLaunch)
+
+        store.completedDisplayDuration = 2.0
+        XCTAssertEqual(store.completedDisplayDuration, 2.0)
+
+        let store2 = PreferencesStore(launchManager: mockLaunch)
+        XCTAssertEqual(store2.completedDisplayDuration, 2.0)
+    }
+}

@@ -7,7 +7,14 @@ struct DevNotchApp: App {
 
     var body: some Scene {
         Settings {
-            EmptyView()
+            SettingsView(
+                preferences: appDelegate.preferences,
+                manager: appDelegate.providerManager,
+                onShortcutChanged: { newShortcut in
+                    // Sync immediately
+                    appDelegate.preferences.globalHotkey = newShortcut
+                }
+            )
         }
     }
 }

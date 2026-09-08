@@ -6,6 +6,7 @@ struct NotchView: View {
     @ObservedObject var model: NotchModel
     @ObservedObject var screenManager: ScreenManager
     @ObservedObject var providerManager: AIProviderManager
+    var onOpenSettings: (() -> Void)? = nil
 
     private var activeScreen: NSScreen {
         screenManager.currentScreen ?? NSScreen.main ?? NSScreen.screens[0]
@@ -68,7 +69,8 @@ struct NotchView: View {
                     case .expanded:
                         ExpandedNotchView(
                             model: model,
-                            providerManager: providerManager
+                            providerManager: providerManager,
+                            onOpenSettings: onOpenSettings
                         )
                         .transition(.opacity.combined(with: .scale(scale: 0.98)))
                     }

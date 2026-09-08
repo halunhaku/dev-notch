@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import Combine
+import Carbon
 
 /// Custom NSPanel configured specifically for floating notch overlays.
 final class NotchPanel: NSPanel {
@@ -46,18 +47,22 @@ final class NotchWindowController: NSWindowController {
     let model: NotchModel
     let screenManager: ScreenManager
     let providerManager: AIProviderManager
+    var onOpenSettings: (() -> Void)?
 
     private var cancellables = Set<AnyCancellable>()
     private var globalClickMonitor: Any?
+    private var localEscMonitor: Any?
 
     init(
         model: NotchModel = NotchModel(),
         screenManager: ScreenManager = ScreenManager(),
-        providerManager: AIProviderManager = AIProviderManager()
+        providerManager: AIProviderManager = AIProviderManager(),
+        onOpenSettings: (() -> Void)? = nil
     ) {
         self.model = model
         self.screenManager = screenManager
         self.providerManager = providerManager
+        self.onOpenSettings = onOpenSettings
 
         let initialScreen = screenManager.currentScreen ?? NSScreen.main ?? NSScreen.screens[0]
         let initialFrame = NotchGeometry.windowFrame(for: .compact, on: initialScreen)
@@ -80,7 +85,10 @@ final class NotchWindowController: NSWindowController {
         let rootView = NotchView(
             model: model,
             screenManager: screenManager,
-            providerManager: providerManager
+            providerManager: providerManager,
+            onOpenSettings: { [weak self] in
+                self?.onOpenSettings?()
+            }
         )
         let hostingView = NSHostingView(rootView: rootView)
 
@@ -108,6 +116,7 @@ final class NotchWindowController: NSWindowController {
                 guard let self = self else { return }
                 self.updateWindowFrame(for: newState, animated: true)
                 self.handleOutsideClickMonitoring(for: newState)
+                self.handleEscapeKeyMonitoring(for: newState)
             }
             .store(in: &cancellables)
 
@@ -126,6 +135,22 @@ final class NotchWindowController: NSWindowController {
         window?.orderFrontRegardless()
     }
 
+    /// Expands the notch into full dashboard state.
+    func expand() {
+        withAnimation(.spring(response: 0.34, dampingFraction: 0.8)) {
+            model.state = .expanded
+        }
+    }
+
+    /// Toggles between compact and expanded states (triggered by Global Hotkey).
+    func toggleExpansion() {
+        if model.state == .expanded {
+            model.collapseToCompact()
+        } else {
+            expand()
+        }
+    }
+
     /// Resizes and repositions the panel frame smoothly to match the target state.
     func updateWindowFrame(for state: NotchState, animated: Bool) {
         guard let window = self.window, let screen = screenManager.currentScreen else { return }
@@ -134,7 +159,6 @@ final class NotchWindowController: NSWindowController {
         if animated {
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = 0.32
-                // Fluid spring-like timing curve
                 context.timingFunction = CAMediaTimingFunction(controlPoints: 0.16, 1.0, 0.3, 1.0)
                 window.animator().setFrame(targetFrame, display: true)
             }
@@ -161,9 +185,33 @@ final class NotchWindowController: NSWindowController {
         }
     }
 
+    private func handleEscapeKeyMonitoring(for state: NotchState) {
+        if state == .expanded {
+            if localEscMonitor == nil {
+                localEscMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown]) { [weak self] event in
+                    if event.keyCode == UInt16(kVK_Escape) {
+                        Task { @MainActor in
+                            self?.model.collapseToCompact()
+                        }
+                        return nil
+                    }
+                    return event
+                }
+            }
+        } else {
+            if let monitor = localEscMonitor {
+                NSEvent.removeMonitor(monitor)
+                localEscMonitor = nil
+            }
+        }
+    }
+
     deinit {
         MainActor.assumeIsolated {
             if let monitor = self.globalClickMonitor {
+                NSEvent.removeMonitor(monitor)
+            }
+            if let monitor = self.localEscMonitor {
                 NSEvent.removeMonitor(monitor)
             }
         }

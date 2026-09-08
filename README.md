@@ -12,14 +12,17 @@
 - **Phase 4：DeepSeek 真实余额接入与 Generic Provider Metrics 架构升级（已完成）**
 - **Phase 5：Claude Code Provider 接入与 Live Activity 桥接（已完成）**
 - **Phase 6：Google Antigravity Provider + Generic AI Activity + Task Pulse（已完成）**
+- **Phase 7：系统全局快捷键 + 菜单栏状态图标 + 原生设置面板 + 自启动（已完成）**
 
 ---
 
 ## 🛠 技术栈
 
 - **开发语言**：100% Swift 5.9+ / Swift 6 现代并发规范（Actor 隔离、Sendable 检查）
-- **UI 框架**：SwiftUI
-- **窗口系统**：AppKit（`NSPanel` + `NSHostingView` + `NSWindowController`）
+- **UI 框架**：SwiftUI（含原生 `Settings` 场景与多标签设置页）
+- **窗口系统**：AppKit（`NSPanel` + `NSStatusItem` + `NSWindowController`）
+- **系统底层桥接**：Apple 原生 `Carbon.HIToolbox` 全局快捷键（**0 隐私权限**，无需 Accessibility 或 Input Monitoring）
+- **自启动服务**：Apple 原生现代 `ServiceManagement.SMAppService`（macOS 14+）
 - **跨进程桥接**：100% Swift 原生编译的独立 CLI 桥接工具（`DevNotchActivityBridge` / `DevNotchClaudeBridge`，无 Node/Python/jq 依赖）
 - **构建与测试**：`xcodegen` + `xcodebuild` + `XCTest`
 - **目标平台**：macOS 14.0+ (Sonoma / Sequoia)
@@ -48,19 +51,26 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
 
 ## ✨ 核心架构与功能
 
-### 1. 通用度量与活动架构 (Generic Metrics & AI Activity)
-- **多维度度量体系 (`AIProviderMetric`)**：
-  - `.usageWindow`：周期性限额窗口（Codex 5h / Weekly）。
-  - `.balance`：高精度货币余额（DeepSeek `¥0.73`，采用 `Decimal` 金融精度）。
-  - `.credits`：点数与额度状态。
-  - `.context`：模型上下文窗口占用率（`AIContextMetric`）。
-  - `.sessionCost`：会话累计开销金额（`AISessionCostMetric`）。
-- **通用活动状态模型 (`AIActivityState`)**：
-  - 标准状态机：`idle`、`working`、`waitingForApproval`、`completed`、`failed`。
-  - 瞬态完成反馈：任务完成时刘海紧凑态短暂展示 `✓ Done` 约 3 秒后自然恢复。
-  - 防强退看门狗：会话未正常触发 Stop 退出时，45 秒超时自动降级恢复为 `idle`。
+### 1. 完整产品形态与系统级能力 (Phase 7)
+- **零权限原生全局快捷键 (Global Hotkey)**：
+  - 基于 Apple 系统底层 `Carbon.RegisterEventHotKey` 实现，**无需申请辅助功能 (Accessibility) 权限，无需申请输入监控 (Input Monitoring) 权限**。
+  - 默认全局快捷键：`⌃⌥Space`（Control + Option + 空格键），可从任意 App（Finder、终端、浏览器）一键呼出展开刘海看板，再次按下折叠。
+  - 展开态支持按 `Esc` 键快速收回。
+  - 内置 `ShortcutRecorderView` 快捷键录制组件，严禁无修饰键（单字母/单空格）注册，防止输入误拦截。
+- **原生菜单栏状态图标 (Menu Bar Status Item)**：
+  - 基于 `NSStatusItem` 呈现模板图标，深浅色模式自适应。
+  - 动态呈现所有已启用 Provider 的简明状态与用量摘要（数据严格来自内存快照，无异步阻塞 I/O）。
+  - 支持快捷展开刘海（Open Dev Notch）、一键全量刷新（Refresh All）、设置（Settings…）与退出（Quit）。
+  - 用户可在设置中一键开启或关闭菜单栏图标。
+- **原生多标签设置窗口 (Settings Scene)**：
+  - 基于 SwiftUI `Settings` 场景构建，分为 **General**、**AI Providers**、**Integrations**、**About** 四大标签页。
+  - 解决 `LSUIElement = true` 辅窗应用激活前台获得键盘焦点的问题，关闭设置后自动回归无 Dock 栏辅助工具形态。
+  - **开机自启动**：接入系统原生 `SMAppService.mainApp`，与系统“登录项”安全同步，不使用旧版 LaunchAgent 脚本 hack。
+  - **Provider 启闭控制**：用户可自由勾选启用/禁用特定提供商，禁用后不启动子进程、不发起轮询、自动将 Primary 运行时回退至健康就绪的 Provider。
+- **Antigravity CLI 官方 Hook 真实端到端验证通过**：
+  - 真实 `agy` CLI 执行 -> 触发官方 `~/.gemini/config/hooks.json` 钩子 -> 调用 `DevNotchActivityBridge` -> 写入原子快照 -> 驱动 Dev Notch 状态流转（working -> completed）实测 100% 成功。
 
-### 2. Task Pulse 任务流式光环
+### 2. Task Pulse 任务流式光环 (Phase 6)
 - **克制优雅的原生微光带 (`TaskPulseView`)**：
   - 位于刘海底部曲面边缘的 1.5pt 动态光带，不破坏窗口几何尺寸，不截获鼠标点击。
   - **Working 态**：青蓝微弱渐变呼吸微光（`opacity: 0.35` ~ `0.95`）。
@@ -74,19 +84,9 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
 | :--- | :--- | :--- | :--- |
 | **OpenAI Codex** | ChatGPT OAuth | 5h 滚动额度 (0%)、Weekly 配额 (84%) | 官方 App-Server 进程与配额全链路已验证 |
 | **DeepSeek** | API Key (via OpenCode) | 账户余额 (¥0.73)、充值金/赠金细项 | 官方 API `GET /user/balance` 实时验证通过 |
-| **Google Antigravity** | Google Account OAuth | CLI v1.1.27 探测、活动钩子桥接、Task Pulse | 本机 CLI 与配置验证通过；Desktop 未安装；配额接口未公开 |
+| **Google Antigravity** | Google Account OAuth | CLI v1.1.27 探测、官方 Hooks 真实 E2E 验证通过 | 本机 CLI 与真实 Hooks 验证通过；Desktop 未安装；配额接口未公开 |
 | **Anthropic Claude Code** | 官方 CLI v2.1.236 | 上下文占用、活动钩子桥接、Task Pulse | 本机未登录认证（认证验证待补齐）；桥接与安全融合已验证 |
 | **OpenCode Go** | 本地 CLI v1.18.20 | 多窗口模型自适应 (5h/Weekly/Monthly) | 本机 CLI 探测通过；云端订阅待配置 |
-
-### 4. 统一活动桥接与脱敏安全 (`DevNotchActivityBridge`)
-- **白名单元数据清洗 (`ActivityPayloadSanitizer`)**：
-  - 仅提取会话 ID、模型、项目名、上下文比例、开销金额、活动状态与时间戳。
-  - **严格剔除并丢弃**：Prompt 内容、Response 内容、Tool 输入参数、Shell 命令行内容与源代码。
-- **原子无网络 IPC (`ActivityIPCWriter`)**：
-  - 通过原子替换写入 `~/Library/Application Support/DevNotch/Activities/{providerID}.json`。
-- **非侵入式配置保护**：
-  - Claude：安全合并 `~/.claude/settings.json`，保留已有第三方钩子（如 `_otty_grok`）与自定义状态栏。
-  - Antigravity：按标准在 `~/.gemini/config/hooks.json` 注册独立命名钩子 `dev-notch-antigravity`，卸载时精准清理自身项。
 
 ---
 
@@ -94,16 +94,22 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
 
 - **No credential leakage was observed in the implemented tests and log inspection.**
 - **AI Activity only processes local session metadata, strictly excluding prompts, responses, tool inputs, and source code content.**
+- **Global Hotkey uses native Carbon event tables, requiring ZERO Accessibility or Input Monitoring permissions.**
 - 应用程序始终坚持 Local-First，无任何远程遥测或私密数据留存。
 
 ---
 
-## 🧪 自动化测试套件 (64 个测试全部通过)
+## 🧪 自动化测试套件 (79 个测试全部通过)
 
 内置全面的单元与集成回归测试，包括：
-- `TaskPulseTests`：Working/Approval/Completed 状态光环、Reduce Motion 减弱动态效果、多 Provider 并行执行隔离。
-- `AntigravityDiscoveryTests` & `AntigravityIntegrationTests` & `AntigravityActivityTests`：CLI/Desktop 探测、版本提取、配置安全融合、载荷脱敏审计、原子 IPC。
-- `ClaudeParsingTests` & `ClaudeIntegrationTests` & `ClaudeActivityTests`：安全钩子融合、活动状态机流转、超时看门狗。
-- `DeepSeekParsingTests` & `DeepSeekClientTests` & `DeepSeekCredentialTests`：官方余额 API 协议断言。
+- `PreferencesStoreTests`：默认值、迁移旧版 Primary 偏好、菜单栏持久化、Provider 启闭持久化、瞬态完成时长配置。
+- `KeyboardShortcutTests`：按键序列化、快捷键字符格式化、非法无修饰键拦截、Carbon 标志位双向映射。
+- `GlobalHotKeyTests`：快捷键双向切换折叠/展开、注册失败优雅处理、注销生命周期。
+- `LaunchAtLoginTests`：自启动状态抽象、系统注册异常捕获。
+- `StatusItemMenuTests`：零 I/O 菜单快照生成、菜单栏图标显隐响应。
+- `TaskPulseTests`：工作态光环、减弱动态效果、双工作态隔离。
+- `AntigravityDiscoveryTests` & `AntigravityIntegrationTests` & `AntigravityActivityTests`：CLI 探测、真实钩子结构、脱敏审计、原子 IPC。
+- `ClaudeParsingTests` & `ClaudeIntegrationTests` & `ClaudeActivityTests`：CLI 认证模式、钩子合并、45s 超时看门狗。
+- `DeepSeekParsingTests` & `DeepSeekClientTests` & `DeepSeekCredentialTests`：官方余额 API 与 MockURLProtocol 状态码验证。
 - `AIProviderManagerTests`：五厂商并行调度、Primary 持久化、容灾回退、超时与异常隔离。
 - `AIUsageWindowTests` & `GenericMetricsTests` & `CodexParsingTests` & `OpenCodeParsingTests`。
