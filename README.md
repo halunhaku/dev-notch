@@ -63,6 +63,11 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
   test
 ```
 
+## 📄 License
+
+MIT — 见 [LICENSE](LICENSE)。项目为 100% 原创实现，无第三方代码引入，故无需第三方 notices 文件。
+
+
 ---
 
 ## ✨ 核心架构与功能
