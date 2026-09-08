@@ -32,9 +32,23 @@ targets:
     deploymentTarget: "14.0"
     sources:
       - path: DevNotchClaudeBridge
+      - path: DevNotch/AI/Services/Activity
     settings:
       base:
         PRODUCT_NAME: DevNotchClaudeBridge
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "-"
+        SWIFT_STRICT_CONCURRENCY: complete
+  DevNotchActivityBridge:
+    type: tool
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: DevNotchActivityBridge
+      - path: DevNotch/AI/Services/Activity
+    settings:
+      base:
+        PRODUCT_NAME: DevNotchActivityBridge
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "-"
         SWIFT_STRICT_CONCURRENCY: complete

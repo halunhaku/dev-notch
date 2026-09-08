@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Root visual container for Dev Notch, managing the black island shape,
-/// borders, shadows, and state transitions.
+/// borders, shadows, generic Task Pulse, and state transitions.
 struct NotchView: View {
     @ObservedObject var model: NotchModel
     @ObservedObject var screenManager: ScreenManager
@@ -72,6 +72,17 @@ struct NotchView: View {
                         )
                         .transition(.opacity.combined(with: .scale(scale: 0.98)))
                     }
+                }
+
+                // Generic Task Pulse Horizon Line (indicates active working session)
+                VStack {
+                    Spacer()
+                    TaskPulseView(
+                        state: providerManager.activePrimaryActivityState,
+                        isTransientDone: providerManager.activePrimaryIsTransientDone
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 2)
                 }
             }
             .frame(width: visualSize.width, height: visualSize.height)

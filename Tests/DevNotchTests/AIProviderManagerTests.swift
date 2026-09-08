@@ -143,7 +143,9 @@ final class AIProviderManagerTests: XCTestCase {
         manager.start()
         try? await Task.sleep(nanoseconds: 50_000_000)
 
+        // Preferred is still .codex
         XCTAssertEqual(manager.preferredPrimaryID, .codex)
+        // Active runtime fallback is .openCodeGo because it is ready
         XCTAssertEqual(manager.activePrimaryID, .openCodeGo)
         XCTAssertEqual(manager.primaryCompactMetric.value, "60%")
         XCTAssertEqual(manager.primaryDisplayName, "OpenCode Go")
@@ -205,43 +207,53 @@ final class AIProviderManagerTests: XCTestCase {
         XCTAssertEqual(manager.activePrimaryID, .claude)
         XCTAssertEqual(manager.primaryCompactMetric.value, "Working")
 
-        // Persisted
         let saved = UserDefaults.standard.string(forKey: "devnotch_preferred_primary_id")
         XCTAssertEqual(saved, "claude")
     }
 
-    func testClaudeFailureDoesNotAffectCodexOrDeepSeek() async {
+    func testAntigravityPrimarySelectionAndPersistence() async {
         let registry = AIProviderRegistry()
-        let codex = MockTestProvider(
-            id: .codex,
-            displayName: "Codex",
+        let codex = MockTestProvider(id: .codex, displayName: "Codex", status: .ready)
+        let agy = MockTestProvider(
+            id: .antigravity,
+            displayName: "Google Antigravity",
             status: .ready,
-            compactMetric: AICompactMetric(label: "Codex", value: "84%", severity: .normal)
-        )
-        let deepseek = MockTestProvider(
-            id: .deepseek,
-            displayName: "DeepSeek",
-            status: .ready,
-            compactMetric: AICompactMetric(label: "DeepSeek", value: "¥0.73", severity: .normal)
-        )
-        let claude = MockTestProvider(
-            id: .claude,
-            displayName: "Claude Code",
-            status: .unavailable(reason: "CLI missing")
+            compactMetric: AICompactMetric(label: "Antigravity", value: "Ready", severity: .normal)
         )
 
         registry.register(codex)
-        registry.register(deepseek)
+        registry.register(agy)
+
+        let manager = AIProviderManager(registry: registry)
+        manager.setPrimaryProvider(.antigravity)
+        manager.start()
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        XCTAssertEqual(manager.preferredPrimaryID, .antigravity)
+        XCTAssertEqual(manager.activePrimaryID, .antigravity)
+        XCTAssertEqual(manager.primaryCompactMetric.label, "Antigravity")
+
+        let saved = UserDefaults.standard.string(forKey: "devnotch_preferred_primary_id")
+        XCTAssertEqual(saved, "antigravity")
+    }
+
+    func testAntigravityFailureDoesNotAffectCodexOrClaude() async {
+        let registry = AIProviderRegistry()
+        let codex = MockTestProvider(id: .codex, displayName: "Codex", status: .ready)
+        let claude = MockTestProvider(id: .claude, displayName: "Claude Code", status: .ready)
+        let agy = MockTestProvider(id: .antigravity, displayName: "Google Antigravity", status: .error(message: "Launch failure"))
+
+        registry.register(codex)
         registry.register(claude)
+        registry.register(agy)
 
         let manager = AIProviderManager(registry: registry)
         manager.start()
         try? await Task.sleep(nanoseconds: 50_000_000)
 
-        // Codex and DeepSeek remain healthy and ready
         XCTAssertEqual(manager.snapshots[.codex]?.status, .ready)
-        XCTAssertEqual(manager.snapshots[.deepseek]?.status, .ready)
-        XCTAssertEqual(manager.snapshots[.claude]?.status, .unavailable(reason: "CLI missing"))
+        XCTAssertEqual(manager.snapshots[.claude]?.status, .ready)
+        XCTAssertEqual(manager.snapshots[.antigravity]?.status, .error(message: "Launch failure"))
     }
 
     func testProviderRefreshErrorAndTimeoutIsolation() async {

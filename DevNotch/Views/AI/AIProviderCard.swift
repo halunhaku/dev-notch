@@ -135,6 +135,11 @@ struct AIProviderCard: View {
                         .font(.system(size: 9))
                         .foregroundColor(.white.opacity(0.5))
                         .padding(.vertical, 1)
+                } else if snapshot.id == .antigravity {
+                    Text("Usage quota not exposed through machine-readable interface")
+                        .font(.system(size: 9))
+                        .foregroundColor(.white.opacity(0.5))
+                        .padding(.vertical, 1)
                 } else {
                     Text("No metric data available")
                         .font(.system(size: 10))
@@ -142,8 +147,8 @@ struct AIProviderCard: View {
                         .padding(.vertical, 2)
                 }
 
-                // Claude Live Activity Control Row
-                if snapshot.id == .claude {
+                // Live Activity Control Row (Claude & Antigravity)
+                if snapshot.id == .claude || snapshot.id == .antigravity {
                     HStack {
                         HStack(spacing: 4) {
                             Circle()
@@ -197,7 +202,7 @@ struct AIProviderCard: View {
 
             case .notInstalled:
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("CLI not found")
+                    Text("CLI/App not found")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(.red.opacity(0.9))
 
@@ -255,6 +260,7 @@ struct AIProviderCard: View {
         case .openCodeGo: return "Configure OpenCode Go in ~/.local/share/opencode/auth.json"
         case .deepseek: return "Set DEEPSEEK_API_KEY or configure in OpenCode"
         case .claude: return "Run `claude auth login` in Terminal"
+        case .antigravity: return "Sign in using Google Account in Antigravity CLI or Desktop"
         default: return "Authentication required for this provider"
         }
     }

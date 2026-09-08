@@ -142,6 +142,32 @@ final class AIProviderManager: ObservableObject {
         primarySnapshot?.status ?? .checking
     }
 
+    /// Current live activity state of the active primary provider (drives Task Pulse).
+    var activePrimaryActivityState: AIActivityState {
+        if activePrimaryID == .claude,
+           let claude = registry.provider(for: .claude) as? ClaudeProvider {
+            return claude.activityBridge.activitySnapshot.state
+        }
+        if activePrimaryID == .antigravity,
+           let agy = registry.provider(for: .antigravity) as? AntigravityProvider {
+            return agy.activityBridge.activitySnapshot.state
+        }
+        return .idle
+    }
+
+    /// Transient completion indicator of the active primary provider (drives Task Pulse success flash).
+    var activePrimaryIsTransientDone: Bool {
+        if activePrimaryID == .claude,
+           let claude = registry.provider(for: .claude) as? ClaudeProvider {
+            return claude.activityBridge.isTransientDone
+        }
+        if activePrimaryID == .antigravity,
+           let agy = registry.provider(for: .antigravity) as? AntigravityProvider {
+            return agy.activityBridge.isTransientDone
+        }
+        return false
+    }
+
     /// Explicitly updates the user's preferred Primary Provider and persists preference.
     func setPrimaryProvider(_ id: AIProviderID) {
         guard preferredPrimaryID != id else { return }
@@ -222,6 +248,23 @@ final class AIProviderManager: ObservableObject {
         }
     }
 
+    /// Toggles Antigravity Live Activity hooks in `~/.gemini/config/hooks.json`.
+    func toggleAntigravityLiveActivity() {
+        guard let agy = registry.provider(for: .antigravity) as? AntigravityProvider else { return }
+        do {
+            if agy.isLiveActivityInstalled {
+                try agy.disableLiveActivity()
+            } else {
+                try agy.enableLiveActivity()
+            }
+            Task {
+                await self.updateSnapshot(for: .antigravity)
+            }
+        } catch {
+            logger.error("Failed to toggle Antigravity Live Activity: \(error.localizedDescription)")
+        }
+    }
+
     // MARK: - Internal Synchronization
 
     private func setupBindings() {
@@ -247,6 +290,12 @@ final class AIProviderManager: ObservableObject {
                 }
             } else if let claude = provider as? ClaudeProvider {
                 claude.onStateChanged = { [weak self] in
+                    Task { @MainActor [weak self] in
+                        await self?.updateSnapshot(for: pid)
+                    }
+                }
+            } else if let agy = provider as? AntigravityProvider {
+                agy.onStateChanged = { [weak self] in
                     Task { @MainActor [weak self] in
                         await self?.updateSnapshot(for: pid)
                     }
@@ -278,6 +327,8 @@ final class AIProviderManager: ObservableObject {
         var liveActivityInstalled = false
         if let claude = provider as? ClaudeProvider {
             liveActivityInstalled = claude.isLiveActivityInstalled
+        } else if let agy = provider as? AntigravityProvider {
+            liveActivityInstalled = agy.isLiveActivityInstalled
         }
 
         self.snapshots[id] = AIProviderSnapshot(
