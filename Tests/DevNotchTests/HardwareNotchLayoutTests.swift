@@ -150,6 +150,7 @@ final class HardwareNotchLayoutTests: XCTestCase {
 
     @MainActor
     func testDisabledProviderFilteringInManager() {
+        UserDefaults.standard.removeObject(forKey: "devnotch_provider_enabled_map")
         let registry = AIProviderRegistry.makeDefaultRegistry()
         let manager = AIProviderManager(registry: registry)
         XCTAssertEqual(manager.providerIDs.count, 5)

@@ -17,7 +17,7 @@ final class PreferencesStore: ObservableObject {
     private static let keyCompletedDisplayDuration = "devnotch_completed_display_duration"
     private static let keyAutoCollapseEnabled = "devnotch_auto_collapse_enabled"
     private static let keyProviderEnabled = "devnotch_provider_enabled_map"
-
+    private static let keyOpenCodeApiKey = "devnotch_opencode_api_key"
     /// Static accessor for bridge helpers to query user's completed duration preference.
     nonisolated static var sharedCompletedDisplayDuration: Double {
         let dur = UserDefaults.standard.double(forKey: keyCompletedDisplayDuration)
@@ -30,8 +30,18 @@ final class PreferencesStore: ObservableObject {
         return savedMap[id.rawValue] ?? true
     }
 
+    /// Nonisolated static method to query user-configured OpenCode API key.
+    nonisolated static func getOpenCodeApiKey() -> String? {
+        let key = UserDefaults.standard.string(forKey: keyOpenCodeApiKey)?.trimmingCharacters(in: .whitespacesAndNewlines)
+        return (key?.isEmpty == false) ? key : nil
+    }
+
     @Published var showMenuBarItem: Bool {
         didSet { UserDefaults.standard.set(showMenuBarItem, forKey: Self.keyShowMenuBarItem) }
+    }
+
+    @Published var openCodeApiKey: String {
+        didSet { UserDefaults.standard.set(openCodeApiKey, forKey: Self.keyOpenCodeApiKey) }
     }
 
     @Published var launchAtLogin: Bool {
@@ -154,6 +164,8 @@ final class PreferencesStore: ObservableObject {
             map[id] = savedMap[id.rawValue] ?? true
         }
         self.providerEnabled = map
+        // OpenCode Go API key
+        self.openCodeApiKey = defaults.string(forKey: Self.keyOpenCodeApiKey) ?? ""
     }
 
     /// Checks if a provider is enabled by user.
@@ -170,5 +182,12 @@ final class PreferencesStore: ObservableObject {
         }
         UserDefaults.standard.set(rawMap, forKey: Self.keyProviderEnabled)
         logger.info("Provider \(id.rawValue) enabled state set to: \(enabled)")
+    }
+
+    /// Sets or clears the OpenCode Go API key.
+    func setOpenCodeApiKey(_ key: String) {
+        let clean = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.openCodeApiKey = clean
+        UserDefaults.standard.set(clean, forKey: Self.keyOpenCodeApiKey)
     }
 }

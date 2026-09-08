@@ -142,10 +142,15 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
 
     /// Inspects memory/config for OpenCode API key (without writing to disk or logs).
     private func resolveOpenCodeApiKey() -> String? {
+        // 1. Check user-configured key in Dev Notch Settings
+        if let userKey = PreferencesStore.getOpenCodeApiKey(), !userKey.isEmpty {
+            return userKey
+        }
+
+        // 2. Check environment variable
         if let envKey = ProcessInfo.processInfo.environment["OPENCODE_API_KEY"], !envKey.isEmpty {
             return envKey
         }
-
         let authPath = (("~/.local/share/opencode/auth.json" as NSString).expandingTildeInPath)
         guard FileManager.default.fileExists(atPath: authPath),
               let data = try? Data(contentsOf: URL(fileURLWithPath: authPath)) else {

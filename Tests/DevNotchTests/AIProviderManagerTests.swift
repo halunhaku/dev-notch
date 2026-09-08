@@ -66,10 +66,12 @@ final class AIProviderManagerTests: XCTestCase {
     override func setUp() {
         super.setUp()
         UserDefaults.standard.removeObject(forKey: "devnotch_preferred_primary_id")
+        UserDefaults.standard.removeObject(forKey: "devnotch_provider_enabled_map")
     }
 
     override func tearDown() {
         UserDefaults.standard.removeObject(forKey: "devnotch_preferred_primary_id")
+        UserDefaults.standard.removeObject(forKey: "devnotch_provider_enabled_map")
         super.tearDown()
     }
 
