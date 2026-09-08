@@ -7,6 +7,7 @@ private let logger = Logger(subsystem: "com.halunhaku.DevNotch", category: "Code
 final class CodexProvider: AIProvider, @unchecked Sendable {
     let id: AIProviderID = .codex
     let displayName: String = "Codex"
+    let refreshPolicy: AIProviderRefreshPolicy = .interval(60)
 
     private let appServer = CodexAppServer()
     private let lock = NSLock()
@@ -98,6 +99,10 @@ final class CodexProvider: AIProvider, @unchecked Sendable {
         updateStatus(.unavailable(reason: "Stopped"))
     }
 
+    func refresh() async {
+        await refreshSnapshot()
+    }
+
     /// Fetches latest account details via `account/read`.
     func fetchAccount() async throws -> AIAccount? {
         let result: CodexAccountReadResult = try await appServer.sendRequest(
@@ -114,6 +119,41 @@ final class CodexProvider: AIProvider, @unchecked Sendable {
             planType: acc.planType,
             accountType: acc.type
         )
+    }
+
+    /// Fetches all active metrics for Codex.
+    func fetchMetrics() async -> [AIProviderMetric] {
+        guard let usage = self.usage else { return [] }
+        return usage.windows.map { .usageWindow($0) }
+    }
+
+    /// Produces the concise metric for the Compact / Hovered notch states.
+    func compactMetric() async -> AICompactMetric {
+        let current = self.status
+        guard current == .ready, let usage = self.usage else {
+            let severity: AICompactMetricSeverity = (current == .notAuthenticated) ? .warning : (current == .ready ? .normal : .inactive)
+            return AICompactMetric(
+                label: displayName,
+                value: current.shortDescription,
+                secondaryValue: nil,
+                severity: severity
+            )
+        }
+
+        // Look for 5 Hour primary limit
+        let targetWindow = usage.windows.first(where: { $0.id == "5h" }) ?? usage.windows.first
+        if let window = targetWindow {
+            let remaining = Int(round(window.remainingPercent))
+            let severity: AICompactMetricSeverity = remaining < 20 ? .warning : .normal
+            return AICompactMetric(
+                label: displayName,
+                value: "\(remaining)%",
+                secondaryValue: "5h",
+                severity: severity
+            )
+        }
+
+        return AICompactMetric(label: displayName, value: "Ready", severity: .normal)
     }
 
     /// Fetches latest rate limits via `account/rateLimits/read`.

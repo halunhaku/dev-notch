@@ -4,26 +4,20 @@ import os.log
 
 private let logger = Logger(subsystem: "com.halunhaku.DevNotch", category: "AIProviderManager")
 
-/// Snapshot of an individual provider's current state and data.
+/// Snapshot of an individual provider's current state and generic metrics.
 struct AIProviderSnapshot: Identifiable, Equatable, Sendable {
     let id: AIProviderID
     let displayName: String
     let status: AIProviderStatus
     let account: AIAccount?
-    let usage: AIUsage?
+    let metrics: [AIProviderMetric]
+    let compactMetric: AICompactMetric
+    let credentialSource: String?
     let lastUpdated: Date?
     let errorMessage: String?
-
-    var primaryRemainingPercent: Double? {
-        usage?.primaryRemainingPercent
-    }
-
-    var primaryRemainingInt: Int? {
-        usage?.primaryRemainingInt
-    }
 }
 
-/// Central manager coordinating multi-provider lifecycle, status isolation,
+/// Central manager coordinating multi-provider lifecycle, generic metrics aggregation,
 /// and primary provider selection with automatic runtime fallback.
 @MainActor
 final class AIProviderManager: ObservableObject {
@@ -35,7 +29,7 @@ final class AIProviderManager: ObservableObject {
     @Published private(set) var isRefreshing: Bool = false
 
     private let registry: AIProviderRegistry
-    private var refreshTimer: AnyCancellable?
+    private var refreshTimers: [AIProviderID: AnyCancellable] = [:]
 
     init(registry: AIProviderRegistry = AIProviderRegistry.makeDefaultRegistry()) {
         self.registry = registry
@@ -49,7 +43,14 @@ final class AIProviderManager: ObservableObject {
                 displayName: provider.displayName,
                 status: .checking,
                 account: nil,
-                usage: nil,
+                metrics: [],
+                compactMetric: AICompactMetric(
+                    label: provider.displayName,
+                    value: "Checking…",
+                    secondaryValue: nil,
+                    severity: .inactive
+                ),
+                credentialSource: nil,
                 lastUpdated: nil,
                 errorMessage: nil
             )
@@ -84,12 +85,14 @@ final class AIProviderManager: ObservableObject {
         snapshots[activePrimaryID]
     }
 
-    var primaryRemainingPercent: Double? {
-        primarySnapshot?.primaryRemainingPercent
-    }
-
-    var primaryRemainingInt: Int? {
-        primarySnapshot?.primaryRemainingInt
+    /// Concise presentation metric for Compact and Hovered notch states.
+    var primaryCompactMetric: AICompactMetric {
+        primarySnapshot?.compactMetric ?? AICompactMetric(
+            label: activePrimaryID.displayName,
+            value: primaryStatus.shortDescription,
+            secondaryValue: nil,
+            severity: .inactive
+        )
     }
 
     var primaryDisplayName: String {
@@ -119,13 +122,16 @@ final class AIProviderManager: ObservableObject {
                 await self.updateSnapshot(for: provider.id)
             }
         }
-        setupPeriodicRefresh()
+        setupPeriodicRefreshes()
     }
 
     /// Stops all providers and cancels timers.
     func stop() {
-        refreshTimer?.cancel()
-        refreshTimer = nil
+        for (_, timer) in refreshTimers {
+            timer.cancel()
+        }
+        refreshTimers.removeAll()
+
         for provider in registry.allProviders {
             Task {
                 await provider.stop()
@@ -137,11 +143,7 @@ final class AIProviderManager: ObservableObject {
     func refresh(providerID: AIProviderID) {
         guard let provider = registry.provider(for: providerID) else { return }
         Task {
-            if let codex = provider as? CodexProvider {
-                await codex.refreshSnapshot()
-            } else if let openCode = provider as? OpenCodeGoProvider {
-                await openCode.refreshSnapshot()
-            }
+            await provider.refresh()
             await self.updateSnapshot(for: providerID)
         }
     }
@@ -155,14 +157,8 @@ final class AIProviderManager: ObservableObject {
             await withTaskGroup(of: Void.self) { group in
                 for provider in self.registry.allProviders {
                     group.addTask {
-                        do {
-                            if let codex = provider as? CodexProvider {
-                                await codex.refreshSnapshot()
-                            } else if let openCode = provider as? OpenCodeGoProvider {
-                                await openCode.refreshSnapshot()
-                            }
-                            await self.updateSnapshot(for: provider.id)
-                        }
+                        await provider.refresh()
+                        await self.updateSnapshot(for: provider.id)
                     }
                 }
             }
@@ -174,16 +170,23 @@ final class AIProviderManager: ObservableObject {
 
     private func setupBindings() {
         for provider in registry.allProviders {
+            let pid = provider.id
             if let codex = provider as? CodexProvider {
                 codex.onStateChanged = { [weak self] in
                     Task { @MainActor [weak self] in
-                        await self?.updateSnapshot(for: .codex)
+                        await self?.updateSnapshot(for: pid)
                     }
                 }
             } else if let openCode = provider as? OpenCodeGoProvider {
                 openCode.onStateChanged = { [weak self] in
                     Task { @MainActor [weak self] in
-                        await self?.updateSnapshot(for: .openCodeGo)
+                        await self?.updateSnapshot(for: pid)
+                    }
+                }
+            } else if let deepSeek = provider as? DeepSeekProvider {
+                deepSeek.onStateChanged = { [weak self] in
+                    Task { @MainActor [weak self] in
+                        await self?.updateSnapshot(for: pid)
                     }
                 }
             }
@@ -195,7 +198,8 @@ final class AIProviderManager: ObservableObject {
 
         let status = await provider.currentStatus()
         let account = try? await provider.fetchAccount()
-        let usage = try? await provider.fetchUsage()
+        let metrics = await provider.fetchMetrics()
+        let compact = await provider.compactMetric()
 
         var errorMsg: String? = nil
         if case .error(let msg) = status {
@@ -204,24 +208,41 @@ final class AIProviderManager: ObservableObject {
             errorMsg = reason
         }
 
+        var credSource: String? = nil
+        if let ds = provider as? DeepSeekProvider {
+            credSource = ds.credentialSource.map { "via \($0.rawValue)" }
+        }
+
         self.snapshots[id] = AIProviderSnapshot(
             id: id,
             displayName: provider.displayName,
             status: status,
             account: account,
-            usage: usage,
-            lastUpdated: usage?.updatedAt ?? Date(),
+            metrics: metrics,
+            compactMetric: compact,
+            credentialSource: credSource,
+            lastUpdated: Date(),
             errorMessage: errorMsg
         )
     }
 
-    private func setupPeriodicRefresh() {
-        refreshTimer?.cancel()
-        refreshTimer = Timer.publish(every: 60, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                self?.refreshAll()
+    private func setupPeriodicRefreshes() {
+        for (_, timer) in refreshTimers {
+            timer.cancel()
+        }
+        refreshTimers.removeAll()
+
+        for provider in registry.allProviders {
+            let pid = provider.id
+            if case .interval(let seconds) = provider.refreshPolicy {
+                let timer = Timer.publish(every: seconds, on: .main, in: .common)
+                    .autoconnect()
+                    .sink { [weak self] _ in
+                        self?.refresh(providerID: pid)
+                    }
+                refreshTimers[pid] = timer
             }
+        }
     }
 
     private static func loadPreferredPrimaryID() -> AIProviderID {

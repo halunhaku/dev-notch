@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Detailed status and usage card for an individual AI Provider snapshot.
+/// Detailed status and metrics card for an individual AI Provider snapshot.
 struct AIProviderCard: View {
     let snapshot: AIProviderSnapshot
     let isPrimary: Bool
@@ -24,17 +24,17 @@ struct AIProviderCard: View {
         switch snapshot.id {
         case .codex: return "chevron.left.forwardslash.chevron.right"
         case .openCodeGo: return "terminal.fill"
+        case .deepseek: return "brain"
         case .claude: return "sparkles"
         case .antigravity: return "atom"
-        case .deepseek: return "brain"
         case .grok: return "bolt.fill"
         }
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 9) {
-            // Header: Provider Identity, Primary Toggle, Status Pill
-            HStack(spacing: 7) {
+        VStack(alignment: .leading, spacing: 8) {
+            // Header: Provider Identity, Credential Source, Primary Toggle, Status Pill
+            HStack(spacing: 6) {
                 // Provider Glyph
                 ZStack {
                     RoundedRectangle(cornerRadius: 6)
@@ -50,6 +50,7 @@ struct AIProviderCard: View {
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.white)
 
+                // Plan Badge
                 Text(planTitle)
                     .font(.system(size: 9, weight: .medium))
                     .foregroundColor(.white.opacity(0.55))
@@ -57,6 +58,17 @@ struct AIProviderCard: View {
                     .padding(.vertical, 2)
                     .background(Color.white.opacity(0.08))
                     .clipShape(Capsule())
+
+                // Credential Source Badge (e.g. "via OpenCode")
+                if let source = snapshot.credentialSource {
+                    Text(source)
+                        .font(.system(size: 8, weight: .regular))
+                        .foregroundColor(.cyan.opacity(0.8))
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 1)
+                        .background(Color.cyan.opacity(0.1))
+                        .clipShape(Capsule())
+                }
 
                 // Primary Star / Pin Button
                 Button(action: onSetPrimary) {
@@ -97,31 +109,24 @@ struct AIProviderCard: View {
                 .clipShape(Capsule())
             }
 
-            // Body: 0...N Dynamic Quota Windows
+            // Body: Generic Provider Metrics or State Details
             switch snapshot.status {
             case .ready:
-                if let usage = snapshot.usage, !usage.windows.isEmpty {
+                if !snapshot.metrics.isEmpty {
                     VStack(spacing: 8) {
-                        ForEach(usage.windows) { window in
-                            AIUsageBar(window: window)
-                        }
-
-                        // Optional Credit Balance
-                        if let credits = usage.credits, let balance = credits.balance {
-                            HStack {
-                                Text("Credit Balance")
-                                    .font(.system(size: 10))
-                                    .foregroundColor(.white.opacity(0.6))
-                                Spacer()
-                                Text(balance)
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .foregroundColor(.white.opacity(0.9))
+                        ForEach(snapshot.metrics) { metric in
+                            switch metric {
+                            case .usageWindow(let window):
+                                AIUsageBar(window: window)
+                            case .balance(let balance):
+                                AIBalanceView(balance: balance)
+                            case .credits(let credits):
+                                AICreditsView(credits: credits)
                             }
-                            .padding(.top, 2)
                         }
                     }
                 } else {
-                    Text("Usage details unavailable")
+                    Text("No metric data available")
                         .font(.system(size: 10))
                         .foregroundColor(.white.opacity(0.6))
                         .padding(.vertical, 2)
@@ -207,6 +212,7 @@ struct AIProviderCard: View {
         switch id {
         case .codex: return "Run `codex login` in Terminal to authenticate"
         case .openCodeGo: return "Configure OpenCode Go in ~/.local/share/opencode/auth.json"
+        case .deepseek: return "Set DEEPSEEK_API_KEY or configure in OpenCode"
         case .claude: return "Run `claude login` in Terminal"
         default: return "Authentication required for this provider"
         }

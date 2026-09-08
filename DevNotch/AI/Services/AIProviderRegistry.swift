@@ -32,11 +32,12 @@ final class AIProviderRegistry: @unchecked Sendable {
         }
     }
 
-    /// Default registry configured for Dev Notch Phase 3.
+    /// Default registry configured for Dev Notch Phase 4.
     static func makeDefaultRegistry() -> AIProviderRegistry {
         let registry = AIProviderRegistry()
         registry.register(CodexProvider())
         registry.register(OpenCodeGoProvider())
+        registry.register(DeepSeekProvider())
         return registry
     }
 }

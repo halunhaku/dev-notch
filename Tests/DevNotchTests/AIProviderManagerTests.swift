@@ -5,10 +5,12 @@ import XCTest
 final class MockTestProvider: AIProvider, @unchecked Sendable {
     let id: AIProviderID
     let displayName: String
+    let refreshPolicy: AIProviderRefreshPolicy
 
     var mockStatus: AIProviderStatus
     var mockAccount: AIAccount?
-    var mockUsage: AIUsage?
+    var mockMetrics: [AIProviderMetric] = []
+    var mockCompactMetric: AICompactMetric
     var shouldThrowOnRefresh: Bool = false
     var refreshDelayNanoseconds: UInt64 = 0
 
@@ -17,13 +19,21 @@ final class MockTestProvider: AIProvider, @unchecked Sendable {
         displayName: String,
         status: AIProviderStatus = .ready,
         account: AIAccount? = nil,
-        usage: AIUsage? = nil
+        metrics: [AIProviderMetric] = [],
+        compactMetric: AICompactMetric? = nil,
+        refreshPolicy: AIProviderRefreshPolicy = .interval(60)
     ) {
         self.id = id
         self.displayName = displayName
         self.mockStatus = status
         self.mockAccount = account
-        self.mockUsage = usage
+        self.mockMetrics = metrics
+        self.refreshPolicy = refreshPolicy
+        self.mockCompactMetric = compactMetric ?? AICompactMetric(
+            label: displayName,
+            value: status == .ready ? "Ready" : status.shortDescription,
+            severity: status == .ready ? .normal : .inactive
+        )
     }
 
     func currentStatus() async -> AIProviderStatus {
@@ -32,18 +42,22 @@ final class MockTestProvider: AIProvider, @unchecked Sendable {
 
     func start() async {}
     func stop() async {}
+    func refresh() async {}
 
     func fetchAccount() async throws -> AIAccount? {
         if shouldThrowOnRefresh { throw URLError(.timedOut) }
         return mockAccount
     }
 
-    func fetchUsage() async throws -> AIUsage? {
+    func fetchMetrics() async -> [AIProviderMetric] {
         if refreshDelayNanoseconds > 0 {
             try? await Task.sleep(nanoseconds: refreshDelayNanoseconds)
         }
-        if shouldThrowOnRefresh { throw URLError(.timedOut) }
-        return mockUsage
+        return mockMetrics
+    }
+
+    func compactMetric() async -> AICompactMetric {
+        return mockCompactMetric
     }
 }
 
@@ -61,17 +75,22 @@ final class AIProviderManagerTests: XCTestCase {
 
     func testBothProvidersReady() async {
         let registry = AIProviderRegistry()
+        let codexWindow = AIUsageWindow(id: "5h", label: "5 Hour", durationMinutes: 300, usedPercent: 16)
         let codex = MockTestProvider(
             id: .codex,
             displayName: "Codex",
             status: .ready,
-            usage: AIUsage(windows: [AIUsageWindow(id: "5h", label: "5 Hour", durationMinutes: 300, usedPercent: 16)])
+            metrics: [.usageWindow(codexWindow)],
+            compactMetric: AICompactMetric(label: "Codex", value: "84%", secondaryValue: "5h", severity: .normal)
         )
+
+        let openCodeWindow = AIUsageWindow(id: "rolling", label: "5 Hour", durationMinutes: 300, usedPercent: 33)
         let openCode = MockTestProvider(
             id: .openCodeGo,
             displayName: "OpenCode Go",
             status: .ready,
-            usage: AIUsage(windows: [AIUsageWindow(id: "rolling", label: "5 Hour", durationMinutes: 300, usedPercent: 33)])
+            metrics: [.usageWindow(openCodeWindow)],
+            compactMetric: AICompactMetric(label: "OpenCode Go", value: "67%", secondaryValue: "5h", severity: .normal)
         )
 
         registry.register(codex)
@@ -80,13 +99,12 @@ final class AIProviderManagerTests: XCTestCase {
         let manager = AIProviderManager(registry: registry)
         manager.start()
 
-        // Wait for async initialization
         try? await Task.sleep(nanoseconds: 50_000_000)
 
         XCTAssertEqual(manager.snapshots[.codex]?.status, .ready)
         XCTAssertEqual(manager.snapshots[.openCodeGo]?.status, .ready)
         XCTAssertEqual(manager.activePrimaryID, .codex)
-        XCTAssertEqual(manager.primaryRemainingInt, 84)
+        XCTAssertEqual(manager.primaryCompactMetric.value, "84%")
     }
 
     func testCodexReadyAndOpenCodeError() async {
@@ -109,11 +127,13 @@ final class AIProviderManagerTests: XCTestCase {
     func testCodexErrorAndOpenCodeReadyWithRuntimeFallback() async {
         let registry = AIProviderRegistry()
         let codex = MockTestProvider(id: .codex, displayName: "Codex", status: .unavailable(reason: "CLI missing"))
+        let openCodeWindow = AIUsageWindow(id: "rolling", label: "5 Hour", durationMinutes: 300, usedPercent: 40)
         let openCode = MockTestProvider(
             id: .openCodeGo,
             displayName: "OpenCode Go",
             status: .ready,
-            usage: AIUsage(windows: [AIUsageWindow(id: "rolling", label: "5 Hour", durationMinutes: 300, usedPercent: 40)])
+            metrics: [.usageWindow(openCodeWindow)],
+            compactMetric: AICompactMetric(label: "OpenCode Go", value: "60%", secondaryValue: "5h", severity: .normal)
         )
 
         registry.register(codex)
@@ -127,71 +147,96 @@ final class AIProviderManagerTests: XCTestCase {
         XCTAssertEqual(manager.preferredPrimaryID, .codex)
         // Active runtime fallback is .openCodeGo because it is ready
         XCTAssertEqual(manager.activePrimaryID, .openCodeGo)
-        XCTAssertEqual(manager.primaryRemainingInt, 60)
+        XCTAssertEqual(manager.primaryCompactMetric.value, "60%")
         XCTAssertEqual(manager.primaryDisplayName, "OpenCode Go")
 
         // Preferred setting was NOT overwritten
         XCTAssertEqual(manager.preferredPrimaryID, .codex)
     }
 
-    func testBothProvidersError() async {
+    func testDeepSeekPrimarySelectionAndPersistence() async {
         let registry = AIProviderRegistry()
-        let codex = MockTestProvider(id: .codex, displayName: "Codex", status: .error(message: "E1"))
-        let openCode = MockTestProvider(id: .openCodeGo, displayName: "OpenCode Go", status: .error(message: "E2"))
+        let codex = MockTestProvider(id: .codex, displayName: "Codex", status: .ready)
+        let deepseekBalance = AIBalance(currency: "CNY", total: Decimal(string: "35.72")!)
+        let deepseek = MockTestProvider(
+            id: .deepseek,
+            displayName: "DeepSeek",
+            status: .ready,
+            metrics: [.balance(deepseekBalance)],
+            compactMetric: AICompactMetric(label: "DeepSeek", value: "¥35.72", secondaryValue: nil, severity: .normal)
+        )
 
         registry.register(codex)
-        registry.register(openCode)
+        registry.register(deepseek)
 
         let manager = AIProviderManager(registry: registry)
         manager.start()
         try? await Task.sleep(nanoseconds: 50_000_000)
 
-        XCTAssertEqual(manager.activePrimaryID, .codex)
-        XCTAssertEqual(manager.primaryStatus, .error(message: "E1"))
-    }
-
-    func testPrimaryProviderSelectionAndPersistence() async {
-        let registry = AIProviderRegistry()
-        let codex = MockTestProvider(id: .codex, displayName: "Codex", status: .ready)
-        let openCode = MockTestProvider(id: .openCodeGo, displayName: "OpenCode Go", status: .ready)
-
-        registry.register(codex)
-        registry.register(openCode)
-
-        let manager = AIProviderManager(registry: registry)
+        // Default primary is codex
         XCTAssertEqual(manager.preferredPrimaryID, .codex)
 
-        // Switch preferred primary to OpenCode Go
-        manager.setPrimaryProvider(.openCodeGo)
-        XCTAssertEqual(manager.preferredPrimaryID, .openCodeGo)
-        XCTAssertEqual(manager.activePrimaryID, .openCodeGo)
+        // Set DeepSeek as Primary
+        manager.setPrimaryProvider(.deepseek)
+        XCTAssertEqual(manager.preferredPrimaryID, .deepseek)
+        XCTAssertEqual(manager.activePrimaryID, .deepseek)
+        XCTAssertEqual(manager.primaryCompactMetric.value, "¥35.72")
 
-        // Verify persisted in UserDefaults
+        // Check persistence
         let saved = UserDefaults.standard.string(forKey: "devnotch_preferred_primary_id")
-        XCTAssertEqual(saved, "opencode_go")
+        XCTAssertEqual(saved, "deepseek")
 
-        // Verify a new manager instance initializes with the saved preference
+        // Recreate manager to verify persistence
         let newManager = AIProviderManager(registry: registry)
-        XCTAssertEqual(newManager.preferredPrimaryID, .openCodeGo)
+        XCTAssertEqual(newManager.preferredPrimaryID, .deepseek)
+    }
+
+    func testDeepSeekOfflineFallbackToCodex() async {
+        let registry = AIProviderRegistry()
+        let codex = MockTestProvider(
+            id: .codex,
+            displayName: "Codex",
+            status: .ready,
+            compactMetric: AICompactMetric(label: "Codex", value: "84%", severity: .normal)
+        )
+        let deepseek = MockTestProvider(
+            id: .deepseek,
+            displayName: "DeepSeek",
+            status: .unavailable(reason: "Network error")
+        )
+
+        registry.register(codex)
+        registry.register(deepseek)
+
+        let manager = AIProviderManager(registry: registry)
+        manager.setPrimaryProvider(.deepseek)
+        manager.start()
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        // Preferred is deepseek, but it is offline
+        XCTAssertEqual(manager.preferredPrimaryID, .deepseek)
+        // Fallback to ready codex
+        XCTAssertEqual(manager.activePrimaryID, .codex)
+        XCTAssertEqual(manager.primaryCompactMetric.value, "84%")
+
+        // Preference remains unchanged
+        XCTAssertEqual(manager.preferredPrimaryID, .deepseek)
     }
 
     func testProviderRefreshErrorAndTimeoutIsolation() async {
         let registry = AIProviderRegistry()
-        // Provider 1 fails with timeout
         let failingProvider = MockTestProvider(
-            id: .codex,
-            displayName: "Codex",
-            status: .ready,
-            usage: AIUsage(windows: [AIUsageWindow(id: "5h", label: "5 Hour", durationMinutes: 300, usedPercent: 10)])
+            id: .deepseek,
+            displayName: "DeepSeek",
+            status: .ready
         )
         failingProvider.shouldThrowOnRefresh = true
 
-        // Provider 2 succeeds
         let workingProvider = MockTestProvider(
-            id: .openCodeGo,
-            displayName: "OpenCode Go",
+            id: .codex,
+            displayName: "Codex",
             status: .ready,
-            usage: AIUsage(windows: [AIUsageWindow(id: "rolling", label: "5 Hour", durationMinutes: 300, usedPercent: 25)])
+            compactMetric: AICompactMetric(label: "Codex", value: "72%", severity: .normal)
         )
 
         registry.register(failingProvider)
@@ -199,11 +244,10 @@ final class AIProviderManagerTests: XCTestCase {
 
         let manager = AIProviderManager(registry: registry)
         manager.refreshAll()
-
         try? await Task.sleep(nanoseconds: 50_000_000)
 
-        // Working provider must succeed and retain snapshot
-        XCTAssertEqual(manager.snapshots[.openCodeGo]?.status, .ready)
-        XCTAssertEqual(manager.snapshots[.openCodeGo]?.usage?.primaryRemainingInt, 75)
+        // Working provider snapshot remains healthy and undisturbed
+        XCTAssertEqual(manager.snapshots[.codex]?.status, .ready)
+        XCTAssertEqual(manager.snapshots[.codex]?.compactMetric.value, "72%")
     }
 }

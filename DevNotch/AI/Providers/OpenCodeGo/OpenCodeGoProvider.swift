@@ -7,6 +7,7 @@ private let logger = Logger(subsystem: "com.halunhaku.DevNotch", category: "Open
 final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
     let id: AIProviderID = .openCodeGo
     let displayName: String = "OpenCode Go"
+    let refreshPolicy: AIProviderRefreshPolicy = .interval(300)
 
     private let lock = NSLock()
     private var _status: AIProviderStatus = .checking
@@ -52,6 +53,10 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
         updateStatus(.unavailable(reason: "Stopped"))
     }
 
+    func refresh() async {
+        await refreshSnapshot()
+    }
+
     func fetchAccount() async throws -> AIAccount? {
         return account
     }
@@ -60,9 +65,46 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
         return usage
     }
 
+    /// Fetches all active metrics for OpenCode Go.
+    func fetchMetrics() async -> [AIProviderMetric] {
+        guard let usage = self.usage else { return [] }
+        var metrics: [AIProviderMetric] = usage.windows.map { .usageWindow($0) }
+        if let credits = usage.credits {
+            metrics.append(.credits(credits))
+        }
+        return metrics
+    }
+
+    /// Produces concise display metric for Compact / Hovered notch states.
+    func compactMetric() async -> AICompactMetric {
+        let current = self.status
+        guard current == .ready, let usage = self.usage else {
+            let severity: AICompactMetricSeverity = (current == .notAuthenticated) ? .warning : (current == .ready ? .normal : .inactive)
+            return AICompactMetric(
+                label: displayName,
+                value: current.shortDescription,
+                secondaryValue: nil,
+                severity: severity
+            )
+        }
+
+        let targetWindow = usage.windows.first(where: { $0.id == "rolling" }) ?? usage.windows.first
+        if let window = targetWindow {
+            let remaining = Int(round(window.remainingPercent))
+            let severity: AICompactMetricSeverity = remaining < 20 ? .warning : .normal
+            return AICompactMetric(
+                label: displayName,
+                value: "\(remaining)%",
+                secondaryValue: "5h",
+                severity: severity
+            )
+        }
+
+        return AICompactMetric(label: displayName, value: "Ready", severity: .normal)
+    }
+
     /// Performs snapshot refresh without leaking or persisting tokens.
     func refreshSnapshot() async {
-        // Read ephemeral credentials in memory only
         let apiKey = resolveOpenCodeApiKey()
 
         guard let key = apiKey, !key.isEmpty else {
@@ -75,7 +117,6 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
             return
         }
 
-        // Fetch usage from official Zen / Go endpoint
         do {
             let usageSnapshot = try await requestUsage(apiKey: key)
             lock.withLock {
@@ -92,12 +133,10 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
 
     /// Inspects memory/config for OpenCode API key (without writing to disk or logs).
     private func resolveOpenCodeApiKey() -> String? {
-        // 1. Environment variable
         if let envKey = ProcessInfo.processInfo.environment["OPENCODE_API_KEY"], !envKey.isEmpty {
             return envKey
         }
 
-        // 2. ~/.local/share/opencode/auth.json
         let authPath = (("~/.local/share/opencode/auth.json" as NSString).expandingTildeInPath)
         guard FileManager.default.fileExists(atPath: authPath),
               let data = try? Data(contentsOf: URL(fileURLWithPath: authPath)) else {
@@ -106,7 +145,6 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
 
         do {
             let json = try JSONDecoder().decode([String: OpenCodeLocalAuthEntry].self, from: data)
-            // Look for opencode / opencodego / zen credentials
             if let entry = json["opencode"] ?? json["opencodego"] ?? json["zen"] ?? json["go"] {
                 return entry.key ?? entry.token
             }
@@ -117,7 +155,6 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
         return nil
     }
 
-    /// Fetches usage payload from official endpoint.
     private func requestUsage(apiKey: String) async throws -> AIUsage {
         guard let url = URL(string: "https://opencode.ai/zen/go/v1/usage") else {
             throw URLError(.badURL)
@@ -139,7 +176,6 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
         return Self.mapPayloadToUsage(payload)
     }
 
-    /// Maps OpenCode Go payload into generic AIUsage with 0...N windows.
     static func mapPayloadToUsage(_ payload: OpenCodeGoUsagePayload, now: Date = Date()) -> AIUsage {
         var windows: [AIUsageWindow] = []
 

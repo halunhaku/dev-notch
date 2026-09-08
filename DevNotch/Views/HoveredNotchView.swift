@@ -5,20 +5,15 @@ struct HoveredNotchView: View {
     @ObservedObject var model: NotchModel
     @ObservedObject var providerManager: AIProviderManager
 
-    private var quotaSubtitle: String {
-        if providerManager.primaryStatus == .ready, let remaining = providerManager.primaryRemainingInt {
-            return "\(providerManager.primaryDisplayName): \(remaining)% remaining"
-        } else {
-            return "\(providerManager.primaryDisplayName): \(providerManager.primaryStatus.shortDescription)"
-        }
+    private var metric: AICompactMetric {
+        providerManager.primaryCompactMetric
     }
 
-    private var statusBadgeColor: Color {
-        switch providerManager.primaryStatus {
-        case .ready: return Color.green
-        case .checking: return Color.cyan
-        case .notAuthenticated: return Color.orange
-        case .notInstalled, .unavailable, .error: return Color.red
+    private var quotaSubtitle: String {
+        if let secondary = metric.secondaryValue {
+            return "\(metric.label): \(metric.value) (\(secondary))"
+        } else {
+            return "\(metric.label): \(metric.value)"
         }
     }
 
@@ -43,7 +38,7 @@ struct HoveredNotchView: View {
 
                 Text(quotaSubtitle)
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.white.opacity(0.75))
             }
 
             Spacer()
@@ -51,12 +46,12 @@ struct HoveredNotchView: View {
             // Status Indicator & Chevron
             HStack(spacing: 5) {
                 Circle()
-                    .fill(statusBadgeColor)
+                    .fill(metric.severity.color)
                     .frame(width: 6, height: 6)
 
                 Text(providerManager.primaryStatus.shortDescription)
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(statusBadgeColor.opacity(0.9))
+                    .foregroundColor(metric.severity.color.opacity(0.9))
 
                 Image(systemName: "chevron.down")
                     .font(.system(size: 10, weight: .bold))

@@ -1,55 +1,37 @@
 import SwiftUI
 
-/// Ultra-compact status view for the MacBook physical notch, showing the active Primary Provider.
+/// Ultra-compact status view for the MacBook physical notch, displaying the generic Compact Metric.
 struct AICompactStatusView: View {
     @ObservedObject var manager: AIProviderManager
 
-    private var statusColor: Color {
-        switch manager.primaryStatus {
-        case .ready: return Color.green
-        case .checking: return Color.cyan
-        case .notAuthenticated: return Color.orange
-        case .notInstalled, .unavailable, .error: return Color.red
-        }
-    }
-
-    private var isLowQuota: Bool {
-        if let remaining = manager.primaryRemainingInt, remaining < 20 {
-            return true
-        }
-        return false
+    private var metric: AICompactMetric {
+        manager.primaryCompactMetric
     }
 
     var body: some View {
         HStack(spacing: 7) {
-            // Left Indicator Dot
+            // Left Status Dot
             Circle()
-                .fill(statusColor)
+                .fill(metric.severity.color)
                 .frame(width: 5, height: 5)
                 .opacity(0.9)
 
             Spacer()
 
-            // Right Info: Primary Provider Name & Remaining Quota
-            if manager.primaryStatus == .ready, let remaining = manager.primaryRemainingInt {
-                HStack(spacing: 3) {
-                    Text(manager.primaryDisplayName)
-                        .font(.system(size: 9, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.85))
+            // Right Info: Label and Formatted Metric Value
+            HStack(spacing: 4) {
+                Text(metric.label)
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.85))
 
-                    Text("\(remaining)%")
-                        .font(.system(size: 9, weight: .bold, design: .monospaced))
-                        .foregroundColor(isLowQuota ? .orange : .white)
-                }
-            } else {
-                HStack(spacing: 3) {
-                    Text(manager.primaryDisplayName)
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundColor(.white.opacity(0.6))
+                Text(metric.value)
+                    .font(.system(size: 9, weight: .bold, design: .monospaced))
+                    .foregroundColor(metric.severity == .warning ? .orange : (metric.severity == .critical ? .red : .white))
 
-                    Image(systemName: "chevron.left.forwardslash.chevron.right")
-                        .font(.system(size: 8, weight: .bold))
-                        .foregroundColor(.white.opacity(0.4))
+                if let secondary = metric.secondaryValue {
+                    Text(secondary)
+                        .font(.system(size: 8, weight: .regular))
+                        .foregroundColor(.white.opacity(0.45))
                 }
             }
         }
