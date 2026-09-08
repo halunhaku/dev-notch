@@ -24,7 +24,7 @@
 ## 3. Packaging & Distribution Artifacts
 
 - PASS — DMG (`dist/DevNotch-1.0.0.dmg`)
-- PASS — SHA-256 (`9f06fd5fcd5055b9b52f3a192a7b435322ce96ff6372efaf7e3cf7ad139f647d`)
+- PASS — SHA-256 (`2226d8a6d45484be256dd14f46c3bb5f9420bf666979685a5c61c4a4ca30b562`)
 
 ## 4. Documentation & Policies
 
