@@ -2,6 +2,7 @@ import SwiftUI
 
 /// Expanded state displaying the multi-provider dashboard in Dev Notch.
 struct ExpandedNotchView: View {
+    @Environment(\.openSettings) private var openSettings
     @ObservedObject var model: NotchModel
     @ObservedObject var screenManager: ScreenManager
     @ObservedObject var providerManager: AIProviderManager
@@ -63,18 +64,21 @@ struct ExpandedNotchView: View {
 
                     // Right Wing: Settings Button & Collapse Button
                     HStack(spacing: 6) {
-                        if let openSettings = onOpenSettings {
-                            Button(action: openSettings) {
-                                Image(systemName: "gearshape")
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .foregroundColor(.white.opacity(0.7))
-                                    .frame(width: 22, height: 22)
-                                    .background(Color.white.opacity(0.1))
-                                    .clipShape(Circle())
-                            }
-                            .buttonStyle(.plain)
-                            .help("Open Settings")
+                        Button(action: {
+                            NSApp.setActivationPolicy(.regular)
+                            NSApp.activate(ignoringOtherApps: true)
+                            openSettings()
+                            onOpenSettings?()
+                        }) {
+                            Image(systemName: "gearshape")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.7))
+                                .frame(width: 22, height: 22)
+                                .background(Color.white.opacity(0.1))
+                                .clipShape(Circle())
                         }
+                        .buttonStyle(.plain)
+                        .help("Open Settings")
 
                         Button(action: {
                             model.collapseToCompact()
@@ -129,18 +133,21 @@ struct ExpandedNotchView: View {
                     Spacer()
 
                     HStack(spacing: 6) {
-                        if let openSettings = onOpenSettings {
-                            Button(action: openSettings) {
-                                Image(systemName: "gearshape")
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .foregroundColor(.white.opacity(0.7))
-                                    .frame(width: 24, height: 24)
-                                    .background(Color.white.opacity(0.1))
-                                    .clipShape(Circle())
-                            }
-                            .buttonStyle(.plain)
-                            .help("Open Settings")
+                        Button(action: {
+                            NSApp.setActivationPolicy(.regular)
+                            NSApp.activate(ignoringOtherApps: true)
+                            openSettings()
+                            onOpenSettings?()
+                        }) {
+                            Image(systemName: "gearshape")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.7))
+                                .frame(width: 24, height: 24)
+                                .background(Color.white.opacity(0.1))
+                                .clipShape(Circle())
                         }
+                        .buttonStyle(.plain)
+                        .help("Open Settings")
 
                         Button(action: {
                             model.collapseToCompact()

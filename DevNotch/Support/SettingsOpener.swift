@@ -27,54 +27,52 @@ enum SettingsOpener {
     private static var closeObserver: NSObjectProtocol?
 
     static func openSettings() {
-        // Reuse an existing Settings window instead of stacking duplicates.
-        if let existing = findSettingsWindow(), existing.isVisible {
-            NSApp.activate(ignoringOtherApps: true)
-            existing.makeKeyAndOrderFront(nil)
-            return
-        }
-
         NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+
         Task { @MainActor in
             // Give the Dock icon switch a runloop to take effect.
             try? await Task.sleep(for: .milliseconds(50))
             NSApp.activate(ignoringOtherApps: true)
+
+            // Always trigger SwiftUI's @Environment(\.openSettings)
             NotificationCenter.default.post(name: openSettingsRequest, object: nil)
 
-            // The Settings window is created asynchronously; poll briefly.
-            var settingsWindow: NSWindow?
-            for _ in 0..<10 {
+            // The Settings window is presented asynchronously; poll and bring to front.
+            for _ in 0..<15 {
                 try? await Task.sleep(for: .milliseconds(100))
-                if let found = findSettingsWindow() {
-                    settingsWindow = found
+                if let settingsWindow = findSettingsWindow() {
+                    settingsWindow.styleMask.insert(.miniaturizable)
+                    settingsWindow.makeKeyAndOrderFront(nil)
+                    settingsWindow.orderFrontRegardless()
+                    installCloseObserver(for: settingsWindow)
                     break
                 }
             }
-
-            guard let settingsWindow else {
-                logger.error("Settings window did not appear after openSettings request")
-                NSApp.setActivationPolicy(.accessory)
-                return
-            }
-
-            // Native Settings windows are fixed-size; keep minimize available.
-            settingsWindow.styleMask.insert(.miniaturizable)
-            settingsWindow.makeKeyAndOrderFront(nil)
-            settingsWindow.orderFrontRegardless()
-            installCloseObserver(for: settingsWindow)
         }
     }
+
     static func findSettingsWindow() -> NSWindow? {
-        NSApp.windows.first { window in
+        let knownTabTitles: Set<String> = [
+            "general", "ai providers", "integrations", "about", "settings", "preferences", "dev notch"
+        ]
+
+        return NSApp.windows.first { window in
             guard window.title != hiddenContextWindowTitle else { return false }
+            guard !(window is NotchPanel) else { return false }
+
             if let identifier = window.identifier?.rawValue,
                settingsWindowIdentifiers.contains(identifier) {
                 return true
             }
-            if window.isVisible, window.styleMask.contains(.titled),
-               window.title.localizedCaseInsensitiveContains("settings")
-                   || window.title.localizedCaseInsensitiveContains("preferences") {
-                return true
+            if window.styleMask.contains(.titled) {
+                let lowerTitle = window.title.lowercased()
+                if knownTabTitles.contains(where: { lowerTitle.contains($0) }) {
+                    return true
+                }
+                if window.standardWindowButton(.closeButton) != nil {
+                    return true
+                }
             }
             if let controller = window.contentViewController,
                String(describing: type(of: controller)).contains("Settings") {
