@@ -102,9 +102,8 @@ final class AntigravityProvider: AIProvider, @unchecked Sendable {
             return AICompactMetric(label: "Antigravity", value: "✓ Done", secondaryValue: nil, severity: .normal)
         }
 
-        // 2. Active Working state
-        let activity = activityBridge.activitySnapshot
-        if activity.state == .working {
+        // 2. Active Working state (respecting presentation dwell duration)
+        if activityBridge.presentationState == .working {
             return AICompactMetric(label: "Antigravity", value: "Working", secondaryValue: nil, severity: .normal)
         }
 

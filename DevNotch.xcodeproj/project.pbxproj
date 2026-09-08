@@ -44,6 +44,7 @@
 		43C550CE93DC273C26A3EB7A /* ActivityIPCWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF3D0276F9DB04DB2E6AD07 /* ActivityIPCWriter.swift */; };
 		473728715BBACA3248BF3A28 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 546212BF35BEF45271794B05 /* GeneralSettingsView.swift */; };
 		476BC60D770095EFDD52B5EF /* ExpandedNotchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20DD1C3C6D4CECC6F3260DF /* ExpandedNotchView.swift */; };
+		4AF709F3403A49D5A2DA894C /* HardwareNotchLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A577B63157E35B814A74A019 /* HardwareNotchLayoutTests.swift */; };
 		4C6C7166470E9B4C433C6491 /* ClaudeActivityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B83416308300F7EE8EAA5 /* ClaudeActivityTests.swift */; };
 		4CC3E48681F1F2480E5AB55D /* AISessionCostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953597BD8D997528D70099C9 /* AISessionCostView.swift */; };
 		4D6BF9181D88F12E506A385B /* KeyboardShortcutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E620D8DC1E886EFC68DB656B /* KeyboardShortcutTests.swift */; };
@@ -226,6 +227,7 @@
 		A19B51772EAB1D62883C0A0F /* ClaudeExecutableLocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeExecutableLocator.swift; sourceTree = "<group>"; };
 		A20DD1C3C6D4CECC6F3260DF /* ExpandedNotchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandedNotchView.swift; sourceTree = "<group>"; };
 		A2218DE016ED9CC1D5D11411 /* CodexProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexProvider.swift; sourceTree = "<group>"; };
+		A577B63157E35B814A74A019 /* HardwareNotchLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareNotchLayoutTests.swift; sourceTree = "<group>"; };
 		A6F8D4FEFE0AE50C7DF939C0 /* ClaudeIntegrationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeIntegrationManager.swift; sourceTree = "<group>"; };
 		A8DEF3DF5E0B5A01961DA280 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		ADEC65366BB8B0E9CE8DE328 /* ClaudeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeModels.swift; sourceTree = "<group>"; };
@@ -570,6 +572,7 @@
 				B9A6FA451E3498AAF759D39B /* DeepSeekParsingTests.swift */,
 				341A56656903F1116C849F23 /* GenericMetricsTests.swift */,
 				4AAEA948440399C5F836E362 /* GlobalHotKeyTests.swift */,
+				A577B63157E35B814A74A019 /* HardwareNotchLayoutTests.swift */,
 				E620D8DC1E886EFC68DB656B /* KeyboardShortcutTests.swift */,
 				8B23C3701C8498FFBED274EB /* LaunchAtLoginTests.swift */,
 				99C861ED7F7F52EE32D7E804 /* OpenCodeParsingTests.swift */,
@@ -822,6 +825,7 @@
 				B1A45D669946AC1250A8999A /* DeepSeekParsingTests.swift in Sources */,
 				C42FBA6261873223805D16B5 /* GenericMetricsTests.swift in Sources */,
 				FC6E9F1CC7B2FEF6E931D9B7 /* GlobalHotKeyTests.swift in Sources */,
+				4AF709F3403A49D5A2DA894C /* HardwareNotchLayoutTests.swift in Sources */,
 				4D6BF9181D88F12E506A385B /* KeyboardShortcutTests.swift in Sources */,
 				3D5007E687BBA6C3E32CB771 /* LaunchAtLoginTests.swift in Sources */,
 				1B73921198337A268D5D2F4B /* OpenCodeParsingTests.swift in Sources */,

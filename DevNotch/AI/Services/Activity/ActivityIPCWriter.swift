@@ -11,6 +11,23 @@ struct ActivityIPCWriter: Sendable {
         baseDirectoryURL.appendingPathComponent("Activities", isDirectory: true)
     }()
 
+    /// Appends a non-sensitive trace entry to `Activities/bridge.log`.
+    static func logTrace(provider: String, message: String) {
+        let logURL = activitiesDirectoryURL.appendingPathComponent("bridge.log")
+        let formatter = ISO8601DateFormatter()
+        let timestamp = formatter.string(from: Date())
+        let line = "[\(timestamp)] [\(provider)] \(message)\n"
+        if let data = line.data(using: .utf8) {
+            if let fileHandle = try? FileHandle(forWritingTo: logURL) {
+                defer { try? fileHandle.close() }
+                _ = try? fileHandle.seekToEnd()
+                try? fileHandle.write(contentsOf: data)
+            } else {
+                try? data.write(to: logURL)
+            }
+        }
+    }
+
     /// Writes a sanitized activity record atomically to `~/Library/Application Support/DevNotch/Activities/{providerID}.json`.
     static func write(record: SanitizedActivityRecord) throws {
         let fm = FileManager.default

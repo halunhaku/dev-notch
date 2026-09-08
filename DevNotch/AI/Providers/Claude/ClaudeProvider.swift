@@ -124,17 +124,14 @@ final class ClaudeProvider: AIProvider, @unchecked Sendable {
             return AICompactMetric(label: "Claude", value: "✓ Done", secondaryValue: nil, severity: .normal)
         }
 
-        // 2. Active Working state
-        let activity = activityBridge.activitySnapshot
-        if activity.state == .working {
+        // 2. Active Working state (respecting presentation dwell duration)
+        if activityBridge.presentationState == .working {
             return AICompactMetric(label: "Claude", value: "Working", secondaryValue: nil, severity: .normal)
         }
-
         // 3. Waiting for Approval
-        if activity.state == .waitingForApproval {
+        if activityBridge.activitySnapshot.state == .waitingForApproval {
             return AICompactMetric(label: "Claude", value: "Approval", secondaryValue: nil, severity: .warning)
         }
-
         // 4. Idle with Context Window metric
         if let context = activityBridge.contextMetric {
             let ctx = Int(round(context.usedPercent))

@@ -3,6 +3,7 @@ import SwiftUI
 /// Expanded state displaying the multi-provider dashboard in Dev Notch.
 struct ExpandedNotchView: View {
     @ObservedObject var model: NotchModel
+    @ObservedObject var screenManager: ScreenManager
     @ObservedObject var providerManager: AIProviderManager
     var onOpenSettings: (() -> Void)? = nil
 
@@ -10,72 +11,152 @@ struct ExpandedNotchView: View {
         BundleVersion.marketingVersion(infoDictionary: Bundle.main.infoDictionary ?? [:]) ?? "Unknown"
     }
 
+    private var notchModel: HardwareNotchModel {
+        screenManager.notchModel
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Header: App Logo, Settings Button & Collapse Button
-            HStack {
-                // App Logo & Title
-                HStack(spacing: 8) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.cyan.opacity(0.8), Color.blue.opacity(0.8)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 24, height: 24)
+            if notchModel.hasHardwareNotch {
+                let screen = screenManager.currentScreen ?? NSScreen.main ?? NSScreen.screens[0]
+                let totalWidth = NotchGeometry.visualSize(for: .expanded, on: screen).width
+                let wingWidth = notchModel.leftWingWidth(totalVisualWidth: totalWidth)
 
-                        Image(systemName: "chevron.left.forwardslash.chevron.right")
-                            .font(.system(size: 11, weight: .bold))
+                // Top Row: Wings on Left and Right of the physical camera notch
+                HStack(spacing: 0) {
+                    // Left Wing: App Logo, Title & Version
+                    HStack(spacing: 6) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.cyan.opacity(0.8), Color.blue.opacity(0.8)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 20, height: 20)
+
+                            Image(systemName: "chevron.left.forwardslash.chevron.right")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+
+                        Text("Dev Notch")
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundColor(.white)
+
+                        Text("v\(versionString)")
+                            .font(.system(size: 9, weight: .medium))
+                            .foregroundColor(.white.opacity(0.4))
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(Color.white.opacity(0.08))
+                            .clipShape(Capsule())
+                    }
+                    .frame(width: wingWidth, alignment: .leading)
+                    .padding(.leading, 12)
+
+                    // Center: Physical Hardware Notch Exclusion Zone
+                    Color.clear
+                        .frame(width: notchModel.hardwareNotchWidth, height: notchModel.hardwareNotchHeight)
+
+                    // Right Wing: Settings Button & Collapse Button
+                    HStack(spacing: 6) {
+                        if let openSettings = onOpenSettings {
+                            Button(action: openSettings) {
+                                Image(systemName: "gearshape")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .frame(width: 22, height: 22)
+                                    .background(Color.white.opacity(0.1))
+                                    .clipShape(Circle())
+                            }
+                            .buttonStyle(.plain)
+                            .help("Open Settings")
+                        }
+
+                        Button(action: {
+                            model.collapseToCompact()
+                        }) {
+                            Image(systemName: "chevron.up")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(.white.opacity(0.7))
+                                .frame(width: 22, height: 22)
+                                .background(Color.white.opacity(0.1))
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(.plain)
+                        .help("Collapse Notch")
+                    }
+                    .frame(width: wingWidth, alignment: .trailing)
+                    .padding(.trailing, 12)
+                }
+                .frame(height: notchModel.hardwareNotchHeight)
+            } else {
+                // Virtual Island: Unconstrained Top Row
+                HStack {
+                    HStack(spacing: 8) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.cyan.opacity(0.8), Color.blue.opacity(0.8)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 24, height: 24)
+
+                            Image(systemName: "chevron.left.forwardslash.chevron.right")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+
+                        Text("Dev Notch")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+
+                        Text("v\(versionString)")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.white.opacity(0.4))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.white.opacity(0.08))
+                            .clipShape(Capsule())
                     }
 
-                    Text("Dev Notch")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.white)
+                    Spacer()
 
-                    Text("v\(versionString)")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.white.opacity(0.4))
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.white.opacity(0.08))
-                        .clipShape(Capsule())
-                }
+                    HStack(spacing: 6) {
+                        if let openSettings = onOpenSettings {
+                            Button(action: openSettings) {
+                                Image(systemName: "gearshape")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .frame(width: 24, height: 24)
+                                    .background(Color.white.opacity(0.1))
+                                    .clipShape(Circle())
+                            }
+                            .buttonStyle(.plain)
+                            .help("Open Settings")
+                        }
 
-                Spacer()
-
-                HStack(spacing: 6) {
-                    // Settings Button
-                    if let openSettings = onOpenSettings {
-                        Button(action: openSettings) {
-                            Image(systemName: "gearshape")
-                                .font(.system(size: 10, weight: .semibold))
+                        Button(action: {
+                            model.collapseToCompact()
+                        }) {
+                            Image(systemName: "chevron.up")
+                                .font(.system(size: 10, weight: .bold))
                                 .foregroundColor(.white.opacity(0.7))
                                 .frame(width: 24, height: 24)
                                 .background(Color.white.opacity(0.1))
                                 .clipShape(Circle())
                         }
                         .buttonStyle(.plain)
-                        .help("Open Settings")
+                        .help("Collapse Notch")
                     }
-
-                    // Collapse Button
-                    Button(action: {
-                        model.collapseToCompact()
-                    }) {
-                        Image(systemName: "chevron.up")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.white.opacity(0.7))
-                            .frame(width: 24, height: 24)
-                            .background(Color.white.opacity(0.1))
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .help("Collapse Notch")
                 }
+                .padding(.top, 4)
             }
 
             // Divider

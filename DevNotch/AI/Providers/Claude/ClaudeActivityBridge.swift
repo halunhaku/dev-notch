@@ -17,14 +17,18 @@ final class ClaudeActivityBridge: @unchecked Sendable {
 
     private let lock = NSLock()
     private var _activitySnapshot: AIActivitySnapshot = AIActivitySnapshot(state: .idle)
+    private var _presentationState: AIActivityState = .idle
     private var _contextMetric: AIContextMetric?
     private var _sessionCostMetric: AISessionCostMetric?
     private var _isTransientDone: Bool = false
+    private var workingStartTime: Date?
+    private var dwellTimer: AnyCancellable?
     private var transientDoneTimer: AnyCancellable?
     private var staleCheckTimer: AnyCancellable?
     private var fileMonitorSource: DispatchSourceFileSystemObject?
     private var fileDescriptor: Int32 = -1
 
+    var workingMinimumPresentationDuration: TimeInterval = 0.9
     var onActivityChanged: (@Sendable () -> Void)?
 
     init() {
@@ -35,6 +39,9 @@ final class ClaudeActivityBridge: @unchecked Sendable {
 
     var activitySnapshot: AIActivitySnapshot {
         lock.withLock { _activitySnapshot }
+    }
+    var presentationState: AIActivityState {
+        lock.withLock { _presentationState }
     }
 
     var contextMetric: AIContextMetric? {
@@ -83,32 +90,125 @@ final class ClaudeActivityBridge: @unchecked Sendable {
                 self._contextMetric = context
                 self._sessionCostMetric = cost
             }
-
-            // Handle transition to completed: briefly display Done
-            if previousState == .working && rawState == .completed {
-                triggerTransientDone()
-            }
-
+            logger.info("Claude hook received: \(msg.activityState, privacy: .public)")
+            handleStateTransition(to: rawState)
             onActivityChanged?()
         } catch {
             logger.debug("Failed to decode session.json: \(error.localizedDescription)")
         }
     }
 
-    private func triggerTransientDone() {
+    private func handleStateTransition(to rawState: AIActivityState) {
+        switch rawState {
+        case .working:
+            let shouldNotify: Bool = lock.withLock {
+                if self._presentationState != .working {
+                    let old = self._presentationState
+                    self._presentationState = .working
+                    self._isTransientDone = false
+                    self.workingStartTime = Date()
+                    self.dwellTimer?.cancel()
+                    self.dwellTimer = nil
+                    self.transientDoneTimer?.cancel()
+                    self.transientDoneTimer = nil
+                    logger.info("Claude state: \(old.rawValue, privacy: .public) -> working")
+                    return true
+                }
+                return false
+            }
+            if shouldNotify {
+                onActivityChanged?()
+            }
+
+        case .completed:
+            let (currentState, elapsed) = lock.withLock { () -> (AIActivityState, TimeInterval) in
+                let time = self.workingStartTime.map { Date().timeIntervalSince($0) } ?? 0
+                return (self._presentationState, time)
+            }
+            let remainingDwell = max(0, workingMinimumPresentationDuration - elapsed)
+
+            if currentState == .working && remainingDwell > 0 {
+                dwellTimer?.cancel()
+                dwellTimer = Just(())
+                    .delay(for: .seconds(remainingDwell), scheduler: RunLoop.main)
+                    .sink { [weak self] in
+                        self?.transitionToCompleted()
+                    }
+            } else if currentState == .idle {
+                lock.withLock {
+                    self._presentationState = .working
+                    self.workingStartTime = Date()
+                }
+                onActivityChanged?()
+                dwellTimer?.cancel()
+                dwellTimer = Just(())
+                    .delay(for: .seconds(workingMinimumPresentationDuration), scheduler: RunLoop.main)
+                    .sink { [weak self] in
+                        self?.transitionToCompleted()
+                    }
+            } else {
+                transitionToCompleted()
+            }
+
+        case .waitingForApproval:
+            lock.withLock {
+                self._presentationState = .waitingForApproval
+                self._isTransientDone = false
+                self.dwellTimer?.cancel()
+                self.dwellTimer = nil
+                self.transientDoneTimer?.cancel()
+                self.transientDoneTimer = nil
+            }
+            onActivityChanged?()
+
+        case .failed:
+            lock.withLock {
+                self._presentationState = .failed
+                self._isTransientDone = false
+                self.dwellTimer?.cancel()
+                self.dwellTimer = nil
+                self.transientDoneTimer?.cancel()
+                self.transientDoneTimer = nil
+            }
+            onActivityChanged?()
+
+        case .idle:
+            let shouldReset: Bool = lock.withLock {
+                if !self._isTransientDone && self.dwellTimer == nil && self._presentationState != .idle {
+                    self._presentationState = .idle
+                    return true
+                }
+                return false
+            }
+            if shouldReset {
+                onActivityChanged?()
+            }
+        }
+    }
+
+    private func transitionToCompleted() {
+        dwellTimer?.cancel()
+        dwellTimer = nil
+
         lock.withLock {
+            self._presentationState = .idle
             self._isTransientDone = true
         }
+
+        let dur = PreferencesStore.sharedCompletedDisplayDuration
+        logger.info("Claude state: working -> completed; transient started: \(dur, privacy: .public)s")
         onActivityChanged?()
 
         transientDoneTimer?.cancel()
         transientDoneTimer = Just(())
-            .delay(for: .seconds(3.0), scheduler: RunLoop.main)
+            .delay(for: .seconds(dur), scheduler: RunLoop.main)
             .sink { [weak self] in
                 guard let self = self else { return }
                 self.lock.withLock {
                     self._isTransientDone = false
+                    self._presentationState = .idle
                 }
+                logger.info("Claude state: completed -> idle")
                 self.onActivityChanged?()
             }
     }

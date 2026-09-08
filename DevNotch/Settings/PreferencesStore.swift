@@ -18,6 +18,12 @@ final class PreferencesStore: ObservableObject {
     private static let keyAutoCollapseEnabled = "devnotch_auto_collapse_enabled"
     private static let keyProviderEnabled = "devnotch_provider_enabled_map"
 
+    /// Static accessor for bridge helpers to query user's completed duration preference.
+    nonisolated static var sharedCompletedDisplayDuration: Double {
+        let dur = UserDefaults.standard.double(forKey: keyCompletedDisplayDuration)
+        return dur > 0 ? dur : 3.0
+    }
+
     @Published var showMenuBarItem: Bool {
         didSet { UserDefaults.standard.set(showMenuBarItem, forKey: Self.keyShowMenuBarItem) }
     }

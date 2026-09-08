@@ -7,6 +7,6 @@ struct CompactNotchView: View {
     @ObservedObject var providerManager: AIProviderManager
 
     var body: some View {
-        AICompactStatusView(manager: providerManager)
+        AICompactStatusView(manager: providerManager, screenManager: screenManager)
     }
 }

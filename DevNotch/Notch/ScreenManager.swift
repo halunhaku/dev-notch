@@ -7,7 +7,7 @@ final class ScreenManager: ObservableObject {
     @Published private(set) var currentScreen: NSScreen?
     @Published private(set) var hasPhysicalNotch: Bool = false
     @Published private(set) var notchRect: CGRect = .zero
-
+    @Published private(set) var notchModel: HardwareNotchModel = .fallback
     private var cancellables = Set<AnyCancellable>()
 
     init() {
@@ -24,13 +24,14 @@ final class ScreenManager: ObservableObject {
         guard let screen = screen else {
             self.hasPhysicalNotch = false
             self.notchRect = .zero
+            self.notchModel = .fallback
             return
         }
 
         self.hasPhysicalNotch = NotchGeometry.hasNotch(on: screen)
         self.notchRect = NotchGeometry.notchBounds(on: screen)
+        self.notchModel = NotchGeometry.hardwareNotchModel(on: screen)
     }
-
     private func setupNotification() {
         NotificationCenter.default.publisher(for: NSApplication.didChangeScreenParametersNotification)
             .receive(on: RunLoop.main)

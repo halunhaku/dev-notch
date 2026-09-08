@@ -150,11 +150,11 @@ final class AIProviderManager: ObservableObject {
     var activePrimaryActivityState: AIActivityState {
         if activePrimaryID == .claude,
            let claude = registry.provider(for: .claude) as? ClaudeProvider {
-            return claude.activityBridge.activitySnapshot.state
+            return claude.activityBridge.presentationState
         }
         if activePrimaryID == .antigravity,
            let agy = registry.provider(for: .antigravity) as? AntigravityProvider {
-            return agy.activityBridge.activitySnapshot.state
+            return agy.activityBridge.presentationState
         }
         return .idle
     }

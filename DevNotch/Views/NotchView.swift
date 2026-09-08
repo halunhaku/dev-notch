@@ -62,6 +62,7 @@ struct NotchView: View {
                     case .hovered:
                         HoveredNotchView(
                             model: model,
+                            screenManager: screenManager,
                             providerManager: providerManager
                         )
                         .transition(.opacity.combined(with: .scale(scale: 0.98)))
@@ -69,6 +70,7 @@ struct NotchView: View {
                     case .expanded:
                         ExpandedNotchView(
                             model: model,
+                            screenManager: screenManager,
                             providerManager: providerManager,
                             onOpenSettings: onOpenSettings
                         )

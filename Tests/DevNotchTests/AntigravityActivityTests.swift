@@ -121,4 +121,45 @@ final class AntigravityActivityTests: XCTestCase {
         XCTAssertEqual(readRecord.sessionID, "test_agy_session")
         XCTAssertEqual(readRecord.activityState, "working")
     }
+
+    func testPresentationDwellPolicyGuaranteesWorkingVisibility() async throws {
+        let bridge = AntigravityActivityBridge()
+        bridge.workingMinimumPresentationDuration = 0.15
+
+        let workingRecord = SanitizedActivityRecord(
+            providerID: "antigravity",
+            activityState: "working"
+        )
+        try ActivityIPCWriter.write(record: workingRecord)
+        bridge.readSessionSnapshot()
+
+        XCTAssertEqual(bridge.activitySnapshot.state, .working)
+        XCTAssertEqual(bridge.presentationState, .working)
+
+        // Fast task completion within milliseconds
+        let completedRecord = SanitizedActivityRecord(
+            providerID: "antigravity",
+            activityState: "completed"
+        )
+        try ActivityIPCWriter.write(record: completedRecord)
+        bridge.readSessionSnapshot()
+
+        // Test 13: Activity dwell does not change underlying real state
+        XCTAssertEqual(bridge.activitySnapshot.state, .completed)
+
+        // Test 10 & 11: Presentation state holds working during minimum dwell duration
+        XCTAssertEqual(bridge.presentationState, .working)
+
+        // Wait for minimum dwell timer to elapse
+        try await Task.sleep(nanoseconds: 200_000_000)
+
+        // Now transient done is active
+        XCTAssertTrue(bridge.isTransientDone)
+    }
+
+    func testCompletedDurationRespectsPreferences() {
+        let dur = PreferencesStore.sharedCompletedDisplayDuration
+        XCTAssertGreaterThanOrEqual(dur, 2.0)
+        XCTAssertLessThanOrEqual(dur, 5.0)
+    }
 }
