@@ -159,7 +159,7 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
 
         do {
             let json = try JSONDecoder().decode([String: OpenCodeLocalAuthEntry].self, from: data)
-            if let entry = json["opencode"] ?? json["opencodego"] ?? json["zen"] ?? json["go"] {
+            if let entry = json["opencode-go"] ?? json["opencode_go"] ?? json["opencode"] ?? json["opencodego"] ?? json["zen"] ?? json["go"] {
                 return entry.key ?? entry.token
             }
         } catch {
@@ -193,45 +193,93 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
     static func mapPayloadToUsage(_ payload: OpenCodeGoUsagePayload, now: Date = Date()) -> (AIUsage, AICredits?) {
         var windows: [AIUsageWindow] = []
 
-        if let rolling = payload.rollingUsage {
-            let resetDate = rolling.resetInSec.map { now.addingTimeInterval(Double($0)) }
-            windows.append(
-                AIUsageWindow(
-                    id: "rolling",
-                    label: "5 Hour",
-                    durationMinutes: 300,
-                    usedPercent: rolling.usagePercent,
-                    resetsAt: resetDate
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let stdFormatter = ISO8601DateFormatter()
+
+        // 1. Real official API envelope (payload.usage)
+        if let real = payload.usage {
+            if let rolling = real.rolling, let pct = rolling.percent {
+                let reset = rolling.resetsAt.flatMap { isoFormatter.date(from: $0) ?? stdFormatter.date(from: $0) }
+                windows.append(
+                    AIUsageWindow(
+                        id: "rolling",
+                        label: "5 Hour",
+                        durationMinutes: 300,
+                        usedPercent: pct,
+                        resetsAt: reset
+                    )
                 )
-            )
+            }
+
+            if let weekly = real.weekly, let pct = weekly.percent {
+                let reset = weekly.resetsAt.flatMap { isoFormatter.date(from: $0) ?? stdFormatter.date(from: $0) }
+                windows.append(
+                    AIUsageWindow(
+                        id: "weekly",
+                        label: "Weekly",
+                        durationMinutes: 10080,
+                        usedPercent: pct,
+                        resetsAt: reset
+                    )
+                )
+            }
+
+            if let monthly = real.monthly, let pct = monthly.percent {
+                let reset = monthly.resetsAt.flatMap { isoFormatter.date(from: $0) ?? stdFormatter.date(from: $0) }
+                windows.append(
+                    AIUsageWindow(
+                        id: "monthly",
+                        label: "Monthly",
+                        durationMinutes: 43200,
+                        usedPercent: pct,
+                        resetsAt: reset
+                    )
+                )
+            }
         }
 
-        if let weekly = payload.weeklyUsage {
-            let resetDate = weekly.resetInSec.map { now.addingTimeInterval(Double($0)) }
-            windows.append(
-                AIUsageWindow(
-                    id: "weekly",
-                    label: "Weekly",
-                    durationMinutes: 10080,
-                    usedPercent: weekly.usagePercent,
-                    resetsAt: resetDate
+        // 2. Legacy mock format fallback
+        if windows.isEmpty {
+            if let rolling = payload.rollingUsage {
+                let resetDate = rolling.resetInSec.map { now.addingTimeInterval(Double($0)) }
+                windows.append(
+                    AIUsageWindow(
+                        id: "rolling",
+                        label: "5 Hour",
+                        durationMinutes: 300,
+                        usedPercent: rolling.usagePercent,
+                        resetsAt: resetDate
+                    )
                 )
-            )
-        }
+            }
 
-        if let monthly = payload.monthlyUsage {
-            let resetDate = monthly.resetInSec.map { now.addingTimeInterval(Double($0)) }
-            windows.append(
-                AIUsageWindow(
-                    id: "monthly",
-                    label: "Monthly",
-                    durationMinutes: 43200,
-                    usedPercent: monthly.usagePercent,
-                    resetsAt: resetDate
+            if let weekly = payload.weeklyUsage {
+                let resetDate = weekly.resetInSec.map { now.addingTimeInterval(Double($0)) }
+                windows.append(
+                    AIUsageWindow(
+                        id: "weekly",
+                        label: "Weekly",
+                        durationMinutes: 10080,
+                        usedPercent: weekly.usagePercent,
+                        resetsAt: resetDate
+                    )
                 )
-            )
-        }
+            }
 
+            if let monthly = payload.monthlyUsage {
+                let resetDate = monthly.resetInSec.map { now.addingTimeInterval(Double($0)) }
+                windows.append(
+                    AIUsageWindow(
+                        id: "monthly",
+                        label: "Monthly",
+                        durationMinutes: 43200,
+                        usedPercent: monthly.usagePercent,
+                        resetsAt: resetDate
+                    )
+                )
+            }
+        }
         let credits = payload.balance.map {
             AICredits(balance: String(format: "$%.2f", $0), unlimited: false)
         }

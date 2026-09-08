@@ -79,4 +79,45 @@ final class OpenCodeParsingTests: XCTestCase {
         let invalidJson = "{ malformed: json [ }".data(using: .utf8)!
         XCTAssertThrowsError(try JSONDecoder().decode(OpenCodeGoUsagePayload.self, from: invalidJson))
     }
+
+    func testRealOpenCodeGoOfficialApiPayloadParsing() throws {
+        let json = """
+        {
+          "usage": {
+            "rolling": {
+              "status": "ok",
+              "percent": 4,
+              "resetsAt": "2026-09-08T18:14:01.178Z"
+            },
+            "weekly": {
+              "status": "ok",
+              "percent": 4,
+              "resetsAt": "2026-09-14T00:00:00.178Z"
+            },
+            "monthly": {
+              "status": "ok",
+              "percent": 26,
+              "resetsAt": "2026-10-01T12:25:20.178Z"
+            }
+          }
+        }
+        """.data(using: .utf8)!
+
+        let payload = try JSONDecoder().decode(OpenCodeGoUsagePayload.self, from: json)
+        let (usage, _) = OpenCodeGoProvider.mapPayloadToUsage(payload)
+
+        XCTAssertEqual(usage.windows.count, 3)
+
+        let rolling = try XCTUnwrap(usage.windows.first(where: { $0.id == "rolling" }))
+        XCTAssertEqual(rolling.usedPercent, 4.0)
+        XCTAssertEqual(rolling.remainingPercent, 96.0)
+
+        let weekly = try XCTUnwrap(usage.windows.first(where: { $0.id == "weekly" }))
+        XCTAssertEqual(weekly.usedPercent, 4.0)
+        XCTAssertEqual(weekly.remainingPercent, 96.0)
+
+        let monthly = try XCTUnwrap(usage.windows.first(where: { $0.id == "monthly" }))
+        XCTAssertEqual(monthly.usedPercent, 26.0)
+        XCTAssertEqual(monthly.remainingPercent, 74.0)
+    }
 }
