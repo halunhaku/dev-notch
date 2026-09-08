@@ -13,6 +13,22 @@
 - **Phase 5：Claude Code Provider 接入与 Live Activity 桥接（已完成）**
 - **Phase 6：Google Antigravity Provider + Generic AI Activity + Task Pulse（已完成）**
 - **Phase 7：系统全局快捷键 + 菜单栏状态图标 + 原生设置面板 + 自启动（已完成）**
+- **Phase 8：v0.9.0-rc1 发行候选审计、Bundle Helper、Hardened Runtime（进行中）**
+
+## Requirements
+
+- macOS 14 or later
+- Apple Silicon Mac; the notch interface also adapts to supported displays without a physical notch
+
+## Install
+
+1. Download the Dev Notch DMG.
+2. Drag `DevNotch.app` to `/Applications` or `~/Applications`.
+3. Open Dev Notch from Applications.
+
+Move Dev Notch to Applications before enabling Claude/Antigravity integrations or Launch at Login. The app can run from a DMG, but persistent integrations are deliberately blocked there.
+
+The public distribution artifact must be Developer ID signed, notarized, stapled, and Gatekeeper accepted. A file whose name contains `-local` is for local verification only.
 
 ---
 
@@ -88,6 +104,8 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
 | **Anthropic Claude Code** | 官方 CLI v2.1.236 | 上下文占用、活动钩子桥接、Task Pulse | 本机未登录认证（认证验证待补齐）；桥接与安全融合已验证 |
 | **OpenCode Go** | 本地 CLI v1.18.20 | 多窗口模型自适应 (5h/Weekly/Monthly) | 本机 CLI 探测通过；云端订阅待配置 |
 
+“已接入”表示产品代码路径存在；“实测通过”仅表示列出的本机验证已完成。Claude 需要用户登录才能完成 authenticated E2E；Antigravity 没有受支持的外部配额接口。
+
 ---
 
 ## 🔒 安全与隐私承诺
@@ -99,7 +117,7 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
 
 ---
 
-## 🧪 自动化测试套件 (79 个测试全部通过)
+## 🧪 自动化测试套件
 
 内置全面的单元与集成回归测试，包括：
 - `PreferencesStoreTests`：默认值、迁移旧版 Primary 偏好、菜单栏持久化、Provider 启闭持久化、瞬态完成时长配置。

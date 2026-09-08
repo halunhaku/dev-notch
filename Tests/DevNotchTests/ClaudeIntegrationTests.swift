@@ -108,4 +108,39 @@ final class ClaudeIntegrationTests: XCTestCase {
         // Must not crash when checking or updating
         XCTAssertFalse(ClaudeIntegrationManager.isInstalled(settingsURL: tempSettingsURL))
     }
+
+    func testOwnStaleHooksAreRepairedWithoutChangingThirdPartyHooks() throws {
+        let initialJSON = """
+        {
+          "hooks": {
+            "Stop": [
+              {"_dev_notch": true, "hooks": [{"type": "command", "command": "'/old/DevNotch.app/Contents/Helpers/DevNotchClaudeBridge' 'Stop'"}]},
+              {"vendor": "keep", "hooks": [{"type": "command", "command": "/usr/bin/true"}]}
+            ]
+          }
+        }
+        """
+        try initialJSON.data(using: .utf8)!.write(to: tempSettingsURL)
+
+        let newPath = "/Applications/Dev Notch.app/Contents/Helpers/DevNotchClaudeBridge"
+        try ClaudeIntegrationManager.install(bridgeExecutablePath: newPath, settingsURL: tempSettingsURL)
+
+        let root = try JSONSerialization.jsonObject(with: Data(contentsOf: tempSettingsURL)) as! [String: Any]
+        let hooks = root["hooks"] as! [String: Any]
+        let stop = hooks["Stop"] as! [[String: Any]]
+        XCTAssertEqual(stop.count, 2)
+        XCTAssertEqual(stop.first(where: { $0["vendor"] as? String == "keep" })?["vendor"] as? String, "keep")
+        let owned = stop.first(where: { $0["_dev_notch"] as? Bool == true })!
+        let command = ((owned["hooks"] as! [[String: Any]])[0]["command"] as! String)
+        XCTAssertTrue(command.contains(newPath))
+        XCTAssertFalse(command.contains("/old/"))
+    }
+
+    func testHelperPathWithSpacesAndApostropheIsShellQuoted() throws {
+        let path = "/Applications/Dev Notch's Build.app/Contents/Helpers/DevNotchClaudeBridge"
+        try ClaudeIntegrationManager.install(bridgeExecutablePath: path, settingsURL: tempSettingsURL)
+        let root = try JSONSerialization.jsonObject(with: Data(contentsOf: tempSettingsURL)) as! [String: Any]
+        let statusLine = root["statusLine"] as! [String: Any]
+        XCTAssertEqual(statusLine["command"] as? String, "'/Applications/Dev Notch'\\''s Build.app/Contents/Helpers/DevNotchClaudeBridge' 'statusLine'")
+    }
 }

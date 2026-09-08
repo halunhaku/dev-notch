@@ -7,7 +7,7 @@ struct ExpandedNotchView: View {
     var onOpenSettings: (() -> Void)? = nil
 
     private var versionString: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+        BundleVersion.marketingVersion(infoDictionary: Bundle.main.infoDictionary ?? [:]) ?? "Unknown"
     }
 
     var body: some View {

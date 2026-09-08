@@ -5,6 +5,18 @@ struct IntegrationsSettingsView: View {
 
     var body: some View {
         Form {
+            if !AppInstallation.isStable() {
+                Text("Move Dev Notch to Applications first.")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.orange)
+            }
+
+            if let error = manager.integrationErrorMessage {
+                Text(error)
+                    .font(.system(size: 10))
+                    .foregroundColor(.red)
+            }
+
             // Claude Code Integration
             Section(header: Text("Anthropic Claude Code").font(.headline)) {
                 let claudeSnapshot = manager.snapshots[.claude]
@@ -27,6 +39,7 @@ struct IntegrationsSettingsView: View {
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
+                    .disabled(!isInstalled && !AppInstallation.isStable())
                 }
 
                 HStack {
@@ -62,6 +75,7 @@ struct IntegrationsSettingsView: View {
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
+                    .disabled(!isInstalled && !AppInstallation.isStable())
                 }
 
                 HStack {

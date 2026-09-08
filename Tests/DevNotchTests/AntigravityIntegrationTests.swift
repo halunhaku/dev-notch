@@ -75,4 +75,33 @@ final class AntigravityIntegrationTests: XCTestCase {
 
         XCTAssertFalse(AntigravityIntegrationManager.isInstalled(hooksURL: tempHooksURL))
     }
+
+    func testOwnStaleHookIsRepairedAndOtherNamedHookIsUntouched() throws {
+        let initialJSON = """
+        {
+          "dev-notch-antigravity": {"enabled": true, "Stop": [{"type": "command", "command": "'/old/DevNotch.app/Contents/Helpers/DevNotchActivityBridge' antigravity Stop"}]},
+          "third-party": {"Stop": [{"type": "command", "command": "/usr/bin/true"}]}
+        }
+        """
+        try initialJSON.data(using: .utf8)!.write(to: tempHooksURL)
+        let path = "/Applications/Dev Notch.app/Contents/Helpers/DevNotchActivityBridge"
+
+        try AntigravityIntegrationManager.install(bridgeExecutablePath: path, hooksURL: tempHooksURL)
+
+        let root = try JSONSerialization.jsonObject(with: Data(contentsOf: tempHooksURL)) as! [String: Any]
+        XCTAssertNotNil(root["third-party"])
+        let own = root["dev-notch-antigravity"] as! [String: Any]
+        let stop = own["Stop"] as! [[String: Any]]
+        XCTAssertTrue((stop[0]["command"] as! String).contains(path))
+        XCTAssertFalse((stop[0]["command"] as! String).contains("/old/"))
+    }
+
+    func testHelperPathWithSpacesIsShellQuoted() throws {
+        let path = "/Applications/Dev Notch.app/Contents/Helpers/DevNotchActivityBridge"
+        try AntigravityIntegrationManager.install(bridgeExecutablePath: path, hooksURL: tempHooksURL)
+        let root = try JSONSerialization.jsonObject(with: Data(contentsOf: tempHooksURL)) as! [String: Any]
+        let own = root["dev-notch-antigravity"] as! [String: Any]
+        let stop = own["Stop"] as! [[String: Any]]
+        XCTAssertEqual(stop[0]["command"] as? String, "'\(path)' antigravity Stop")
+    }
 }

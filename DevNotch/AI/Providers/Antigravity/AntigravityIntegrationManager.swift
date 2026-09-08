@@ -27,6 +27,7 @@ struct AntigravityIntegrationManager: Sendable {
         bridgeExecutablePath: String,
         hooksURL: URL = defaultHooksURL
     ) throws {
+        let quotedBridgePath = ShellCommand.quote(bridgeExecutablePath)
         var root: [String: Any] = [:]
 
         // 1. Read existing hooks.json if present
@@ -44,7 +45,7 @@ struct AntigravityIntegrationManager: Sendable {
             "PreInvocation": [
                 [
                     "type": "command",
-                    "command": "\"\(bridgeExecutablePath)\" antigravity PreInvocation",
+                    "command": "\(quotedBridgePath) antigravity PreInvocation",
                     "timeout": 5
                 ]
             ],
@@ -54,7 +55,7 @@ struct AntigravityIntegrationManager: Sendable {
                     "hooks": [
                         [
                             "type": "command",
-                            "command": "\"\(bridgeExecutablePath)\" antigravity PreToolUse",
+                            "command": "\(quotedBridgePath) antigravity PreToolUse",
                             "timeout": 5
                         ]
                     ]
@@ -66,7 +67,7 @@ struct AntigravityIntegrationManager: Sendable {
                     "hooks": [
                         [
                             "type": "command",
-                            "command": "\"\(bridgeExecutablePath)\" antigravity PostToolUse",
+                            "command": "\(quotedBridgePath) antigravity PostToolUse",
                             "timeout": 5
                         ]
                     ]
@@ -75,14 +76,14 @@ struct AntigravityIntegrationManager: Sendable {
             "PostInvocation": [
                 [
                     "type": "command",
-                    "command": "\"\(bridgeExecutablePath)\" antigravity PostInvocation",
+                    "command": "\(quotedBridgePath) antigravity PostInvocation",
                     "timeout": 5
                 ]
             ],
             "Stop": [
                 [
                     "type": "command",
-                    "command": "\"\(bridgeExecutablePath)\" antigravity Stop",
+                    "command": "\(quotedBridgePath) antigravity Stop",
                     "timeout": 5
                 ]
             ]

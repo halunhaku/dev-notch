@@ -26,11 +26,16 @@ final class PreferencesStore: ObservableObject {
         didSet {
             do {
                 try launchManager.setEnabled(launchAtLogin)
+                launchAtLoginError = nil
             } catch {
+                launchAtLoginError = error.localizedDescription
+                launchAtLogin = launchManager.isEnabled
                 logger.error("Failed to set launch at login: \(error.localizedDescription)")
             }
         }
     }
+
+    @Published private(set) var launchAtLoginError: String?
 
     @Published var globalHotkeyEnabled: Bool {
         didSet { UserDefaults.standard.set(globalHotkeyEnabled, forKey: Self.keyGlobalHotkeyEnabled) }

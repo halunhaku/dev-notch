@@ -65,6 +65,7 @@ final class AIProviderManager: ObservableObject {
     @Published private(set) var providerIDs: [AIProviderID] = []
     @Published private(set) var preferredPrimaryID: AIProviderID = .codex
     @Published private(set) var isRefreshing: Bool = false
+    @Published private(set) var integrationErrorMessage: String?
 
     private let registry: AIProviderRegistry
     private var refreshTimers: [AIProviderID: AnyCancellable] = [:]
@@ -234,6 +235,7 @@ final class AIProviderManager: ObservableObject {
     /// Toggles Claude Live Activity hooks in `~/.claude/settings.json`.
     func toggleClaudeLiveActivity() {
         guard let claude = registry.provider(for: .claude) as? ClaudeProvider else { return }
+        integrationErrorMessage = nil
         do {
             if claude.isLiveActivityInstalled {
                 try claude.disableLiveActivity()
@@ -244,6 +246,7 @@ final class AIProviderManager: ObservableObject {
                 await self.updateSnapshot(for: .claude)
             }
         } catch {
+            integrationErrorMessage = error.localizedDescription
             logger.error("Failed to toggle Claude Live Activity: \(error.localizedDescription)")
         }
     }
@@ -251,6 +254,7 @@ final class AIProviderManager: ObservableObject {
     /// Toggles Antigravity Live Activity hooks in `~/.gemini/config/hooks.json`.
     func toggleAntigravityLiveActivity() {
         guard let agy = registry.provider(for: .antigravity) as? AntigravityProvider else { return }
+        integrationErrorMessage = nil
         do {
             if agy.isLiveActivityInstalled {
                 try agy.disableLiveActivity()
@@ -261,6 +265,7 @@ final class AIProviderManager: ObservableObject {
                 await self.updateSnapshot(for: .antigravity)
             }
         } catch {
+            integrationErrorMessage = error.localizedDescription
             logger.error("Failed to toggle Antigravity Live Activity: \(error.localizedDescription)")
         }
     }

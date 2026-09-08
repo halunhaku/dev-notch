@@ -40,6 +40,7 @@ struct ClaudeIntegrationManager: Sendable {
         bridgeExecutablePath: String,
         settingsURL: URL = defaultSettingsURL
     ) throws {
+        let quotedBridgePath = ShellCommand.quote(bridgeExecutablePath)
         var root: [String: Any] = [:]
 
         // 1. Read existing settings if present
@@ -72,7 +73,7 @@ struct ClaudeIntegrationManager: Sendable {
                 "hooks": [
                     [
                         "type": "command",
-                        "command": "'\(bridgeExecutablePath)' '\(event)'"
+                        "command": "\(quotedBridgePath) \(ShellCommand.quote(event))"
                     ]
                 ]
             ]
@@ -89,7 +90,7 @@ struct ClaudeIntegrationManager: Sendable {
                 root["statusLine"] = [
                     devNotchTagKey: true,
                     "type": "command",
-                    "command": "'\(bridgeExecutablePath)' 'statusLine'"
+                    "command": "\(quotedBridgePath) 'statusLine'"
                 ]
             } else {
                 logger.info("Existing custom user statusLine detected; preserving it and relying on hooks")
@@ -98,7 +99,7 @@ struct ClaudeIntegrationManager: Sendable {
             root["statusLine"] = [
                 devNotchTagKey: true,
                 "type": "command",
-                "command": "'\(bridgeExecutablePath)' 'statusLine'"
+                "command": "\(quotedBridgePath) 'statusLine'"
             ]
         }
 

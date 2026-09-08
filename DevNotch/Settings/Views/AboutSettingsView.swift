@@ -2,11 +2,11 @@ import SwiftUI
 
 struct AboutSettingsView: View {
     private var versionString: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+        BundleVersion.marketingVersion(infoDictionary: Bundle.main.infoDictionary ?? [:]) ?? "Unknown"
     }
 
     private var buildString: String {
-        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        BundleVersion.buildNumber(infoDictionary: Bundle.main.infoDictionary ?? [:]) ?? "Unknown"
     }
 
     var body: some View {

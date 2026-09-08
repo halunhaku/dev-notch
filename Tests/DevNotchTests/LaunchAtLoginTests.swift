@@ -22,4 +22,13 @@ final class LaunchAtLoginTests: XCTestCase {
             XCTAssertTrue(error.localizedDescription.contains("Permission denied"))
         }
     }
+
+    func testLaunchAtLoginRequiresStableApplicationLocation() {
+        let manager = DefaultLaunchAtLoginManager(
+            bundleURL: URL(fileURLWithPath: "/Volumes/DevNotch/DevNotch.app")
+        )
+        XCTAssertThrowsError(try manager.setEnabled(true)) { error in
+            XCTAssertEqual(error as? ReleaseEnvironmentError, .unstableInstallLocation)
+        }
+    }
 }

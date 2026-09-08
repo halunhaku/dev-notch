@@ -14,6 +14,19 @@ struct GeneralSettingsView: View {
             // Startup Section
             Section(header: Text("Startup").font(.headline)) {
                 Toggle("Launch Dev Notch at login", isOn: $preferences.launchAtLogin)
+                    .disabled(!preferences.launchAtLogin && !AppInstallation.isStable())
+
+                if !AppInstallation.isStable() {
+                    Text("Move Dev Notch to Applications first.")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.orange)
+                }
+
+                if let error = preferences.launchAtLoginError {
+                    Text(error)
+                        .font(.system(size: 10))
+                        .foregroundColor(.red)
+                }
             }
 
             // Interface Section

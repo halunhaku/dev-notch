@@ -152,7 +152,7 @@ final class ClaudeProvider: AIProvider, @unchecked Sendable {
             return
         }
 
-        let (mode, authStatus) = await ClaudeAuthInspector.inspect(executablePath: path)
+        let (mode, _) = await ClaudeAuthInspector.inspect(executablePath: path)
 
         lock.withLock {
             self._authMode = mode
@@ -186,8 +186,13 @@ final class ClaudeProvider: AIProvider, @unchecked Sendable {
     }
 
     /// Enables Dev Notch Live Activity by safely integrating hooks in `~/.claude/settings.json`.
-    func enableLiveActivity(bridgeBinaryPath: String? = nil) throws {
-        let path = bridgeBinaryPath ?? resolveBridgeBinaryPath()
+    func enableLiveActivity(
+        bridgeBinaryPath: String? = nil,
+        appBundleURL: URL = Bundle.main.bundleURL
+    ) throws {
+        try AppInstallation.requireStable(bundleURL: appBundleURL)
+        let path = try bridgeBinaryPath
+            ?? BundledHelperLocator.executablePath(for: .claude, bundleURL: appBundleURL)
         try ClaudeIntegrationManager.install(bridgeExecutablePath: path)
         onStateChanged?()
     }
@@ -196,18 +201,6 @@ final class ClaudeProvider: AIProvider, @unchecked Sendable {
     func disableLiveActivity() throws {
         try ClaudeIntegrationManager.uninstall()
         onStateChanged?()
-    }
-
-    private func resolveBridgeBinaryPath() -> String {
-        // Look inside the main application bundle or Application Support directory
-        let bundleURL = Bundle.main.bundleURL
-        let bridgeInBundle = bundleURL.appendingPathComponent("Contents/MacOS/DevNotchClaudeBridge")
-        if FileManager.default.isExecutableFile(atPath: bridgeInBundle.path) {
-            return bridgeInBundle.path
-        }
-
-        let appSupportBridge = ClaudeActivityBridge.sessionDirectoryURL.appendingPathComponent("DevNotchClaudeBridge")
-        return appSupportBridge.path
     }
 
     private func updateStatus(_ newStatus: AIProviderStatus) {

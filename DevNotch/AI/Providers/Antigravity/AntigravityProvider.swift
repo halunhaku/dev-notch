@@ -169,8 +169,13 @@ final class AntigravityProvider: AIProvider, @unchecked Sendable {
     }
 
     /// Enables Dev Notch Live Activity by safely installing hooks in `~/.gemini/config/hooks.json`.
-    func enableLiveActivity(bridgeBinaryPath: String? = nil) throws {
-        let path = bridgeBinaryPath ?? resolveBridgeBinaryPath()
+    func enableLiveActivity(
+        bridgeBinaryPath: String? = nil,
+        appBundleURL: URL = Bundle.main.bundleURL
+    ) throws {
+        try AppInstallation.requireStable(bundleURL: appBundleURL)
+        let path = try bridgeBinaryPath
+            ?? BundledHelperLocator.executablePath(for: .activity, bundleURL: appBundleURL)
         try AntigravityIntegrationManager.install(bridgeExecutablePath: path)
         onStateChanged?()
     }
@@ -179,17 +184,6 @@ final class AntigravityProvider: AIProvider, @unchecked Sendable {
     func disableLiveActivity() throws {
         try AntigravityIntegrationManager.uninstall()
         onStateChanged?()
-    }
-
-    private func resolveBridgeBinaryPath() -> String {
-        let appSupportDir = AntigravityActivityBridge.activityDirectoryURL.deletingLastPathComponent()
-        let bridgeInAppSupport = appSupportDir.appendingPathComponent("Claude/DevNotchActivityBridge")
-        if FileManager.default.isExecutableFile(atPath: bridgeInAppSupport.path) {
-            return bridgeInAppSupport.path
-        }
-
-        let defaultAppSupport = appSupportDir.appendingPathComponent("Claude/DevNotchClaudeBridge")
-        return defaultAppSupport.path
     }
 
     private func updateStatus(_ newStatus: AIProviderStatus) {
