@@ -4,20 +4,19 @@ Dev Notch is a native macOS Dynamic Island desktop application designed for AI d
 
 ## Highlights
 
-- **Native MacBook Notch Interface**: Three-state interaction (Compact, Expanded, and Floating island mode for external displays).
-- **Codex Quota Monitoring**: Live tracking of 5-hour rolling limit and weekly usage quotas via local official app-server.
-- **DeepSeek Balance Monitoring**: Real-time account balance, top-up balance, and grant balance via official API.
-- **Claude Code Activity Integration**: Official CLI hook bridge capturing working sessions and context token metrics.
-- **Google Antigravity Activity Integration**: Official `agy` hook integration capturing live development activity and session states.
-- **OpenCode Go Integration**: Model window status and local CLI detection.
-- **Generic AI Activity Status**: Normalized activity model supporting multiple concurrent developer agents.
-- **Task Pulse**: Sub-pixel ambient halo along notch contour (Working pulse, Approval steady amber, Completed burst). Full `Reduce Motion` accessibility support.
-- **Zero-Permission Global Hotkey**: Carbon-based `⌃⌥Space` (Control + Option + Space) to toggle notch anywhere without Accessibility or Input Monitoring permissions.
-- **Menu Bar Status Item**: Native NSStatusItem presenting multi-provider snapshot and fast settings access.
-- **Native Settings Panel**: Multi-tab native SwiftUI Settings (General, AI Providers, Integrations, About).
+- **Native MacBook notch interface**: Native MacBook notch dynamic island integration with floating island support for external displays.
+- **Hardware notch-aware layout for MacBook Air / Pro**: Content exclusion zone isolating the physical camera notch, placing status on Left/Right wings and subtitles below notch.
+- **Codex quota monitoring**: Live tracking of 5-hour rolling limit and weekly usage quotas via local official app-server.
+- **DeepSeek balance monitoring**: Real-time account balance, top-up balance, and grant balance via official API.
+- **OpenCode Go integration**: Model window status and local CLI detection.
+- **Claude Code integration**: Official CLI hook bridge capturing working sessions and context token metrics.
+- **Google Antigravity live activity**: Official `agy` hook integration with real-time session tracking.
+- **Working / Done / Ready live state**: Real activity pipeline with 0.9s minimum presentation dwell and customizable completion flash.
+- **Task Pulse**: Sub-pixel ambient status glow with full Reduce Motion accessibility support.
+- **Global hotkey**: Zero-permission Carbon-based `⌃⌥Space` system toggle.
+- **Menu bar**: Native NSStatusItem presenting multi-provider snapshot and fast settings access.
+- **Settings**: Native SwiftUI Settings (General, AI Providers, Integrations, About).
 - **Launch at Login**: Native `ServiceManagement.SMAppService` synchronization with macOS Login Items.
-- **Bundled Helper Architecture**: Pre-compiled, ad-hoc signed Swift CLI helpers embedded in `DevNotch.app/Contents/Helpers/`.
-
 ## Installation
 
 1. Download `DevNotch-1.0.0.dmg`.
@@ -37,18 +36,18 @@ When launching Dev Notch for the first time, macOS Gatekeeper may display a veri
 3. Under **Security**, find the prompt for Dev Notch and click **Open Anyway** (仍要打开).
 4. Enter your Mac user password or use Touch ID, then click **Open**.
 
-This step is typically only required on the very first launch.
+This step is typically only required on the very first launch. We do **not** recommend disabling Gatekeeper globally (`sudo spctl --master-disable`), as that lowers system security.
 
 ## Verification & Integrity
 
 Artifact: `DevNotch-1.0.0.dmg`
+SHA-256 Checksum: `9f06fd5fcd5055b9b52f3a192a7b435322ce96ff6372efaf7e3cf7ad139f647d`
 Checksum file: `DevNotch-1.0.0.dmg.sha256`
 
 To verify the checksum in Terminal:
 ```bash
 shasum -a 256 -c DevNotch-1.0.0.dmg.sha256
 ```
-
 ## Known Limitations
 
 - **Claude subscription quota**: Not exposed through any stable machine-readable interface; provider focuses on session activity metrics.
