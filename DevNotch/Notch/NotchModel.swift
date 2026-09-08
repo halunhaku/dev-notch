@@ -1,0 +1,74 @@
+import SwiftUI
+import Combine
+
+/// Drives the reactive state and transition animations for Dev Notch.
+@MainActor
+final class NotchModel: ObservableObject {
+    @Published var state: NotchState = .compact
+    @Published var isHovered: Bool = false
+
+    private var autoCollapseTimer: AnyCancellable?
+    private var hoverDebounceTimer: AnyCancellable?
+
+    /// Responds to mouse hover state changes on the notch view.
+    func handleHover(_ hovered: Bool) {
+        self.isHovered = hovered
+        hoverDebounceTimer?.cancel()
+
+        if hovered {
+            autoCollapseTimer?.cancel()
+            if state == .compact {
+                withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) {
+                    state = .hovered
+                }
+            }
+        } else {
+            // Mouse exited
+            if state == .hovered {
+                hoverDebounceTimer = Just(())
+                    .delay(for: .milliseconds(160), scheduler: RunLoop.main)
+                    .sink { [weak self] in
+                        guard let self = self, !self.isHovered, self.state == .hovered else { return }
+                        withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) {
+                            self.state = .compact
+                        }
+                    }
+            } else if state == .expanded {
+                startAutoCollapseTimer()
+            }
+        }
+    }
+
+    /// Responds to user click/tap on the notch.
+    func handleTap() {
+        switch state {
+        case .compact, .hovered:
+            autoCollapseTimer?.cancel()
+            hoverDebounceTimer?.cancel()
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.8)) {
+                state = .expanded
+            }
+        case .expanded:
+            collapseToCompact()
+        }
+    }
+
+    /// Explicitly collapses the notch back to compact state.
+    func collapseToCompact() {
+        autoCollapseTimer?.cancel()
+        hoverDebounceTimer?.cancel()
+        withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) {
+            state = .compact
+        }
+    }
+
+    private func startAutoCollapseTimer() {
+        autoCollapseTimer?.cancel()
+        autoCollapseTimer = Just(())
+            .delay(for: .milliseconds(2000), scheduler: RunLoop.main)
+            .sink { [weak self] in
+                guard let self = self, !self.isHovered, self.state == .expanded else { return }
+                self.collapseToCompact()
+            }
+    }
+}

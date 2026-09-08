@@ -1,0 +1,7 @@
+# Codex environment configuration for Dev Notch
+
+[run]
+command = "./script/build_and_run.sh"
+
+[actions]
+run = "./script/build_and_run.sh"
