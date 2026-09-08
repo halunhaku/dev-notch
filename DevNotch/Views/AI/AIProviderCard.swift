@@ -6,6 +6,7 @@ struct AIProviderCard: View {
     let isPrimary: Bool
     var onSetPrimary: () -> Void
     var onRefresh: () -> Void
+    var onToggleLiveActivity: (() -> Void)? = nil
 
     private var statusBadgeColor: Color {
         switch snapshot.status {
@@ -113,7 +114,7 @@ struct AIProviderCard: View {
             switch snapshot.status {
             case .ready:
                 if !snapshot.metrics.isEmpty {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 7) {
                         ForEach(snapshot.metrics) { metric in
                             switch metric {
                             case .usageWindow(let window):
@@ -122,14 +123,54 @@ struct AIProviderCard: View {
                                 AIBalanceView(balance: balance)
                             case .credits(let credits):
                                 AICreditsView(credits: credits)
+                            case .context(let context):
+                                AIContextView(context: context)
+                            case .sessionCost(let cost):
+                                AISessionCostView(cost: cost)
                             }
                         }
                     }
+                } else if snapshot.id == .claude {
+                    Text("Subscription usage not exposed externally")
+                        .font(.system(size: 9))
+                        .foregroundColor(.white.opacity(0.5))
+                        .padding(.vertical, 1)
                 } else {
                     Text("No metric data available")
                         .font(.system(size: 10))
                         .foregroundColor(.white.opacity(0.6))
                         .padding(.vertical, 2)
+                }
+
+                // Claude Live Activity Control Row
+                if snapshot.id == .claude {
+                    HStack {
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(snapshot.isLiveActivityEnabled ? Color.green : Color.white.opacity(0.3))
+                                .frame(width: 5, height: 5)
+
+                            Text(snapshot.isLiveActivityEnabled ? "Live Activity Active" : "Live Activity Off")
+                                .font(.system(size: 9))
+                                .foregroundColor(.white.opacity(0.7))
+                        }
+
+                        Spacer()
+
+                        if let toggleAction = onToggleLiveActivity {
+                            Button(action: toggleAction) {
+                                Text(snapshot.isLiveActivityEnabled ? "Disable" : "Enable")
+                                    .font(.system(size: 9, weight: .medium))
+                                    .foregroundColor(.cyan)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.cyan.opacity(0.12))
+                                    .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.top, 2)
                 }
 
             case .checking:
@@ -213,7 +254,7 @@ struct AIProviderCard: View {
         case .codex: return "Run `codex login` in Terminal to authenticate"
         case .openCodeGo: return "Configure OpenCode Go in ~/.local/share/opencode/auth.json"
         case .deepseek: return "Set DEEPSEEK_API_KEY or configure in OpenCode"
-        case .claude: return "Run `claude login` in Terminal"
+        case .claude: return "Run `claude auth login` in Terminal"
         default: return "Authentication required for this provider"
         }
     }

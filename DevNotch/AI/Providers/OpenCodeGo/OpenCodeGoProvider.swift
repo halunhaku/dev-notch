@@ -13,6 +13,7 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
     private var _status: AIProviderStatus = .checking
     private var _account: AIAccount?
     private var _usage: AIUsage?
+    private var _credits: AICredits?
 
     var onStateChanged: (@Sendable () -> Void)?
 
@@ -26,6 +27,10 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
 
     var usage: AIUsage? {
         lock.withLock { _usage }
+    }
+
+    var credits: AICredits? {
+        lock.withLock { _credits }
     }
 
     func currentStatus() async -> AIProviderStatus {
@@ -67,9 +72,11 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
 
     /// Fetches all active metrics for OpenCode Go.
     func fetchMetrics() async -> [AIProviderMetric] {
-        guard let usage = self.usage else { return [] }
-        var metrics: [AIProviderMetric] = usage.windows.map { .usageWindow($0) }
-        if let credits = usage.credits {
+        var metrics: [AIProviderMetric] = []
+        if let usage = self.usage {
+            metrics.append(contentsOf: usage.windows.map { .usageWindow($0) })
+        }
+        if let credits = self.credits {
             metrics.append(.credits(credits))
         }
         return metrics
@@ -112,15 +119,17 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
             lock.withLock {
                 self._account = AIAccount(email: nil, planType: "Free", accountType: "opencode")
                 self._usage = nil
+                self._credits = nil
             }
             updateStatus(.notAuthenticated)
             return
         }
 
         do {
-            let usageSnapshot = try await requestUsage(apiKey: key)
+            let (usageSnapshot, creditsSnapshot) = try await requestUsage(apiKey: key)
             lock.withLock {
                 self._usage = usageSnapshot
+                self._credits = creditsSnapshot
                 self._account = AIAccount(email: nil, planType: "Go Active", accountType: "opencode")
             }
             updateStatus(.ready)
@@ -155,7 +164,7 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
         return nil
     }
 
-    private func requestUsage(apiKey: String) async throws -> AIUsage {
+    private func requestUsage(apiKey: String) async throws -> (AIUsage, AICredits?) {
         guard let url = URL(string: "https://opencode.ai/zen/go/v1/usage") else {
             throw URLError(.badURL)
         }
@@ -176,7 +185,7 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
         return Self.mapPayloadToUsage(payload)
     }
 
-    static func mapPayloadToUsage(_ payload: OpenCodeGoUsagePayload, now: Date = Date()) -> AIUsage {
+    static func mapPayloadToUsage(_ payload: OpenCodeGoUsagePayload, now: Date = Date()) -> (AIUsage, AICredits?) {
         var windows: [AIUsageWindow] = []
 
         if let rolling = payload.rollingUsage {
@@ -222,12 +231,13 @@ final class OpenCodeGoProvider: AIProvider, @unchecked Sendable {
             AICredits(balance: String(format: "$%.2f", $0), unlimited: false)
         }
 
-        return AIUsage(
+        let usage = AIUsage(
             windows: windows,
-            credits: credits,
             planType: "Go Active",
             updatedAt: now
         )
+
+        return (usage, credits)
     }
 
     private func updateStatus(_ newStatus: AIProviderStatus) {

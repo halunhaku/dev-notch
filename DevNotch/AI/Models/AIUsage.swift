@@ -1,17 +1,9 @@
 import Foundation
 
-/// Provider credit balance representation (if available).
-struct AICredits: Equatable, Sendable {
-    let balance: String?
-    let unlimited: Bool
-}
-
-/// Dynamic representation of AI quota, supporting 0 to N usage windows.
+/// Dynamic representation of AI quota, strictly representing 0 to N usage windows.
 struct AIUsage: Equatable, Sendable {
     /// 0...N rate-limit or quota windows (e.g. 5 Hour, Weekly, Monthly).
     let windows: [AIUsageWindow]
-    /// Credit balance (e.g. pay-as-you-go balance or unlimited indicator).
-    let credits: AICredits?
     /// Plan description.
     let planType: String?
     /// Timestamp of this usage snapshot.
@@ -19,12 +11,10 @@ struct AIUsage: Equatable, Sendable {
 
     init(
         windows: [AIUsageWindow],
-        credits: AICredits? = nil,
         planType: String? = nil,
         updatedAt: Date = Date()
     ) {
         self.windows = windows
-        self.credits = credits
         self.planType = planType
         self.updatedAt = updatedAt
     }

@@ -97,9 +97,8 @@ final class AIUsageWindowTests: XCTestCase {
         XCTAssertEqual(usage2.primaryRemainingInt, 80)
 
         // 3 Windows
-        let usage3 = AIUsage(windows: [w1, w2, w3], credits: AICredits(balance: "$12.50", unlimited: false))
+        let usage3 = AIUsage(windows: [w1, w2, w3])
         XCTAssertEqual(usage3.windows.count, 3)
         XCTAssertEqual(usage3.primaryRemainingInt, 80)
-        XCTAssertEqual(usage3.credits?.balance, "$12.50")
     }
 }

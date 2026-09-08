@@ -143,14 +143,10 @@ final class AIProviderManagerTests: XCTestCase {
         manager.start()
         try? await Task.sleep(nanoseconds: 50_000_000)
 
-        // Preferred is still .codex
         XCTAssertEqual(manager.preferredPrimaryID, .codex)
-        // Active runtime fallback is .openCodeGo because it is ready
         XCTAssertEqual(manager.activePrimaryID, .openCodeGo)
         XCTAssertEqual(manager.primaryCompactMetric.value, "60%")
         XCTAssertEqual(manager.primaryDisplayName, "OpenCode Go")
-
-        // Preferred setting was NOT overwritten
         XCTAssertEqual(manager.preferredPrimaryID, .codex)
     }
 
@@ -173,25 +169,48 @@ final class AIProviderManagerTests: XCTestCase {
         manager.start()
         try? await Task.sleep(nanoseconds: 50_000_000)
 
-        // Default primary is codex
         XCTAssertEqual(manager.preferredPrimaryID, .codex)
 
-        // Set DeepSeek as Primary
         manager.setPrimaryProvider(.deepseek)
         XCTAssertEqual(manager.preferredPrimaryID, .deepseek)
         XCTAssertEqual(manager.activePrimaryID, .deepseek)
         XCTAssertEqual(manager.primaryCompactMetric.value, "¥35.72")
 
-        // Check persistence
         let saved = UserDefaults.standard.string(forKey: "devnotch_preferred_primary_id")
         XCTAssertEqual(saved, "deepseek")
 
-        // Recreate manager to verify persistence
         let newManager = AIProviderManager(registry: registry)
         XCTAssertEqual(newManager.preferredPrimaryID, .deepseek)
     }
 
-    func testDeepSeekOfflineFallbackToCodex() async {
+    func testClaudePrimarySelectionAndFallback() async {
+        let registry = AIProviderRegistry()
+        let codex = MockTestProvider(id: .codex, displayName: "Codex", status: .ready)
+        let claude = MockTestProvider(
+            id: .claude,
+            displayName: "Claude Code",
+            status: .ready,
+            compactMetric: AICompactMetric(label: "Claude", value: "Working", severity: .normal)
+        )
+
+        registry.register(codex)
+        registry.register(claude)
+
+        let manager = AIProviderManager(registry: registry)
+        manager.setPrimaryProvider(.claude)
+        manager.start()
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        XCTAssertEqual(manager.preferredPrimaryID, .claude)
+        XCTAssertEqual(manager.activePrimaryID, .claude)
+        XCTAssertEqual(manager.primaryCompactMetric.value, "Working")
+
+        // Persisted
+        let saved = UserDefaults.standard.string(forKey: "devnotch_preferred_primary_id")
+        XCTAssertEqual(saved, "claude")
+    }
+
+    func testClaudeFailureDoesNotAffectCodexOrDeepSeek() async {
         let registry = AIProviderRegistry()
         let codex = MockTestProvider(
             id: .codex,
@@ -202,25 +221,27 @@ final class AIProviderManagerTests: XCTestCase {
         let deepseek = MockTestProvider(
             id: .deepseek,
             displayName: "DeepSeek",
-            status: .unavailable(reason: "Network error")
+            status: .ready,
+            compactMetric: AICompactMetric(label: "DeepSeek", value: "¥0.73", severity: .normal)
+        )
+        let claude = MockTestProvider(
+            id: .claude,
+            displayName: "Claude Code",
+            status: .unavailable(reason: "CLI missing")
         )
 
         registry.register(codex)
         registry.register(deepseek)
+        registry.register(claude)
 
         let manager = AIProviderManager(registry: registry)
-        manager.setPrimaryProvider(.deepseek)
         manager.start()
         try? await Task.sleep(nanoseconds: 50_000_000)
 
-        // Preferred is deepseek, but it is offline
-        XCTAssertEqual(manager.preferredPrimaryID, .deepseek)
-        // Fallback to ready codex
-        XCTAssertEqual(manager.activePrimaryID, .codex)
-        XCTAssertEqual(manager.primaryCompactMetric.value, "84%")
-
-        // Preference remains unchanged
-        XCTAssertEqual(manager.preferredPrimaryID, .deepseek)
+        // Codex and DeepSeek remain healthy and ready
+        XCTAssertEqual(manager.snapshots[.codex]?.status, .ready)
+        XCTAssertEqual(manager.snapshots[.deepseek]?.status, .ready)
+        XCTAssertEqual(manager.snapshots[.claude]?.status, .unavailable(reason: "CLI missing"))
     }
 
     func testProviderRefreshErrorAndTimeoutIsolation() async {
@@ -246,7 +267,6 @@ final class AIProviderManagerTests: XCTestCase {
         manager.refreshAll()
         try? await Task.sleep(nanoseconds: 50_000_000)
 
-        // Working provider snapshot remains healthy and undisturbed
         XCTAssertEqual(manager.snapshots[.codex]?.status, .ready)
         XCTAssertEqual(manager.snapshots[.codex]?.compactMetric.value, "72%")
     }

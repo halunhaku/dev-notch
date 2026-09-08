@@ -26,7 +26,7 @@ final class OpenCodeParsingTests: XCTestCase {
         let payload = try JSONDecoder().decode(OpenCodeGoUsagePayload.self, from: data)
 
         let baseDate = Date(timeIntervalSince1970: 1788865101)
-        let usage = OpenCodeGoProvider.mapPayloadToUsage(payload, now: baseDate)
+        let (usage, credits) = OpenCodeGoProvider.mapPayloadToUsage(payload, now: baseDate)
 
         XCTAssertEqual(usage.windows.count, 3)
 
@@ -50,7 +50,7 @@ final class OpenCodeParsingTests: XCTestCase {
         XCTAssertEqual(monthly.remainingPercent, 88.0)
 
         // Credit balance
-        XCTAssertEqual(usage.credits?.balance, "$25.50")
+        XCTAssertEqual(credits?.balance, "$25.50")
     }
 
     func testOpenCodeGoPayloadWithUnknownFields() throws {
@@ -69,7 +69,7 @@ final class OpenCodeParsingTests: XCTestCase {
 
         let data = json.data(using: .utf8)!
         let payload = try JSONDecoder().decode(OpenCodeGoUsagePayload.self, from: data)
-        let usage = OpenCodeGoProvider.mapPayloadToUsage(payload)
+        let (usage, _) = OpenCodeGoProvider.mapPayloadToUsage(payload)
 
         XCTAssertEqual(usage.windows.count, 1)
         XCTAssertEqual(usage.windows[0].remainingPercent, 50.0)

@@ -261,7 +261,6 @@ final class CodexProvider: AIProvider, @unchecked Sendable {
 
         return AIUsage(
             windows: windows,
-            credits: nil,
             planType: snapshot.planType,
             updatedAt: Date()
         )

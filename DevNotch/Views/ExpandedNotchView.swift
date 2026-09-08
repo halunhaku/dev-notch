@@ -31,7 +31,7 @@ struct ExpandedNotchView: View {
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
 
-                    Text("v0.3.0")
+                    Text("v0.4.0")
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.white.opacity(0.4))
                         .padding(.horizontal, 6)
@@ -91,7 +91,10 @@ struct ExpandedNotchView: View {
                                 },
                                 onRefresh: {
                                     providerManager.refresh(providerID: id)
-                                }
+                                },
+                                onToggleLiveActivity: id == .claude ? {
+                                    providerManager.toggleClaudeLiveActivity()
+                                } : nil
                             )
                         }
                     }

@@ -13,8 +13,46 @@ struct AIProviderSnapshot: Identifiable, Equatable, Sendable {
     let metrics: [AIProviderMetric]
     let compactMetric: AICompactMetric
     let credentialSource: String?
+    let isLiveActivityEnabled: Bool
     let lastUpdated: Date?
     let errorMessage: String?
+
+    init(
+        id: AIProviderID,
+        displayName: String,
+        status: AIProviderStatus,
+        account: AIAccount?,
+        metrics: [AIProviderMetric],
+        compactMetric: AICompactMetric,
+        credentialSource: String? = nil,
+        isLiveActivityEnabled: Bool = false,
+        lastUpdated: Date? = nil,
+        errorMessage: String? = nil
+    ) {
+        self.id = id
+        self.displayName = displayName
+        self.status = status
+        self.account = account
+        self.metrics = metrics
+        self.compactMetric = compactMetric
+        self.credentialSource = credentialSource
+        self.isLiveActivityEnabled = isLiveActivityEnabled
+        self.lastUpdated = lastUpdated
+        self.errorMessage = errorMessage
+    }
+
+    var primaryRemainingPercent: Double? {
+        for metric in metrics {
+            if case .usageWindow(let w) = metric {
+                return w.remainingPercent
+            }
+        }
+        return nil
+    }
+
+    var primaryRemainingInt: Int? {
+        primaryRemainingPercent.map { Int(round($0)) }
+    }
 }
 
 /// Central manager coordinating multi-provider lifecycle, generic metrics aggregation,
@@ -51,6 +89,7 @@ final class AIProviderManager: ObservableObject {
                     severity: .inactive
                 ),
                 credentialSource: nil,
+                isLiveActivityEnabled: false,
                 lastUpdated: nil,
                 errorMessage: nil
             )
@@ -166,6 +205,23 @@ final class AIProviderManager: ObservableObject {
         }
     }
 
+    /// Toggles Claude Live Activity hooks in `~/.claude/settings.json`.
+    func toggleClaudeLiveActivity() {
+        guard let claude = registry.provider(for: .claude) as? ClaudeProvider else { return }
+        do {
+            if claude.isLiveActivityInstalled {
+                try claude.disableLiveActivity()
+            } else {
+                try claude.enableLiveActivity()
+            }
+            Task {
+                await self.updateSnapshot(for: .claude)
+            }
+        } catch {
+            logger.error("Failed to toggle Claude Live Activity: \(error.localizedDescription)")
+        }
+    }
+
     // MARK: - Internal Synchronization
 
     private func setupBindings() {
@@ -185,6 +241,12 @@ final class AIProviderManager: ObservableObject {
                 }
             } else if let deepSeek = provider as? DeepSeekProvider {
                 deepSeek.onStateChanged = { [weak self] in
+                    Task { @MainActor [weak self] in
+                        await self?.updateSnapshot(for: pid)
+                    }
+                }
+            } else if let claude = provider as? ClaudeProvider {
+                claude.onStateChanged = { [weak self] in
                     Task { @MainActor [weak self] in
                         await self?.updateSnapshot(for: pid)
                     }
@@ -213,6 +275,11 @@ final class AIProviderManager: ObservableObject {
             credSource = ds.credentialSource.map { "via \($0.rawValue)" }
         }
 
+        var liveActivityInstalled = false
+        if let claude = provider as? ClaudeProvider {
+            liveActivityInstalled = claude.isLiveActivityInstalled
+        }
+
         self.snapshots[id] = AIProviderSnapshot(
             id: id,
             displayName: provider.displayName,
@@ -221,6 +288,7 @@ final class AIProviderManager: ObservableObject {
             metrics: metrics,
             compactMetric: compact,
             credentialSource: credSource,
+            isLiveActivityEnabled: liveActivityInstalled,
             lastUpdated: Date(),
             errorMessage: errorMsg
         )
