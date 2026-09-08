@@ -1,20 +1,20 @@
 import SwiftUI
 
-/// Hovered state providing an interactive dynamic island teaser with real AI quota.
+/// Hovered state providing an interactive dynamic island teaser for the active Primary Provider.
 struct HoveredNotchView: View {
     @ObservedObject var model: NotchModel
     @ObservedObject var providerManager: AIProviderManager
 
     private var quotaSubtitle: String {
-        if providerManager.status == .ready, let remaining = providerManager.primaryRemainingInt {
-            return "\(providerManager.activeProviderID.displayName): \(remaining)% remaining"
+        if providerManager.primaryStatus == .ready, let remaining = providerManager.primaryRemainingInt {
+            return "\(providerManager.primaryDisplayName): \(remaining)% remaining"
         } else {
-            return providerManager.statusTitle
+            return "\(providerManager.primaryDisplayName): \(providerManager.primaryStatus.shortDescription)"
         }
     }
 
     private var statusBadgeColor: Color {
-        switch providerManager.status {
+        switch providerManager.primaryStatus {
         case .ready: return Color.green
         case .checking: return Color.cyan
         case .notAuthenticated: return Color.orange
@@ -54,7 +54,7 @@ struct HoveredNotchView: View {
                     .fill(statusBadgeColor)
                     .frame(width: 6, height: 6)
 
-                Text(providerManager.statusTitle)
+                Text(providerManager.primaryStatus.shortDescription)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(statusBadgeColor.opacity(0.9))
 

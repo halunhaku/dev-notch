@@ -10,6 +10,7 @@
 		0421CED0BADD6803D7471648 /* AIProviderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0921B743C704F4E8C60A8E54 /* AIProviderManager.swift */; };
 		05FBF7D51EC1106506D28F06 /* CodexModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17C386A5871435F415E6715 /* CodexModels.swift */; };
 		085C6D8C7D58A0EC2B0F8FDC /* CompactNotchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5411C5BB46F81E2A764FC1C0 /* CompactNotchView.swift */; };
+		1B73921198337A268D5D2F4B /* OpenCodeParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99C861ED7F7F52EE32D7E804 /* OpenCodeParsingTests.swift */; };
 		27D363D05E3E1A126638CE24 /* AIProviderStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA40E163B857FAE1A8B1E8D0 /* AIProviderStatus.swift */; };
 		2A9A4B8381583E5FE6FB5CE1 /* CodexProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2218DE016ED9CC1D5D11411 /* CodexProvider.swift */; };
 		31B8AD38D1DC6A97766BB982 /* CodexAppServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 592A71573DF76BD0CA62797C /* CodexAppServer.swift */; };
@@ -19,7 +20,9 @@
 		476BC60D770095EFDD52B5EF /* ExpandedNotchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20DD1C3C6D4CECC6F3260DF /* ExpandedNotchView.swift */; };
 		5CFE95A38774E4044CE8C5FE /* AIProviderID.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49334A35A05FDD8CFA30053 /* AIProviderID.swift */; };
 		6E17F317BF8780244DD67E47 /* AIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4A2B020BAAB211D1ADBB3C /* AIProvider.swift */; };
+		7344B4CD681E6D6A04F84ED1 /* AIProviderManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BDC6BCE07FABE162A33456E /* AIProviderManagerTests.swift */; };
 		7A3F7A5DAEEB7A2F14A93163 /* AIUsageWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC90B2022C4B74C9FE3D8D7 /* AIUsageWindow.swift */; };
+		7CB94DB3A3CEF0BB2216222A /* OpenCodeGoProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC7D27674CFDE134FC020360 /* OpenCodeGoProvider.swift */; };
 		7DB029B9BA3A2A5D4F2760A8 /* AICompactStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B261D4CE454D39A7DC7A38D /* AICompactStatusView.swift */; };
 		7E69865FA2D15B7628F12CA4 /* CodexParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 815841549041A15A50709C7F /* CodexParsingTests.swift */; };
 		80A0406D45E34AA4EEE42523 /* ScreenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CF85D4EE5E374DA48A3023 /* ScreenManager.swift */; };
@@ -27,6 +30,7 @@
 		899666FEB08CA31F5C3D67C2 /* AIProviderCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33680E807604ECFACDCC4B45 /* AIProviderCard.swift */; };
 		8B9106552A4044AF321EBE30 /* NotchGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FAF3F53F074E10E9466D444 /* NotchGeometry.swift */; };
 		94DDF6F8EB9BAC2BDA867B54 /* AIAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2CC75D6D8FDA1AB9EE2AC95 /* AIAccount.swift */; };
+		991EE535E62C48F9280A31B4 /* OpenCodeGoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = E968540D39F136AF9782CF36 /* OpenCodeGoModels.swift */; };
 		9F2D87C2CA984B5622378601 /* AIProviderStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C76B3412C5FE86A0068C9F76 /* AIProviderStatusTests.swift */; };
 		A08902720C6F228119CF5A87 /* AIUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D787EF2E82A96C913FEA66E0 /* AIUsage.swift */; };
 		ACD690978B40CA319A5AC909 /* AIUsageWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98DDFAEF6F495E3C4C6B5DD /* AIUsageWindowTests.swift */; };
@@ -34,6 +38,8 @@
 		C9040F97754A0B9C5ADCBB7D /* NotchWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7967A7BFEE7F86B9E0EBF6C3 /* NotchWindowController.swift */; };
 		D0FEB775906A74CC11DE893A /* DevNotchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C2A8E7BA24448035BF90B6B /* DevNotchApp.swift */; };
 		D855887A4D0E514144D5286D /* CodexExecutableLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C7823A8C3B80F4A1C1F20C /* CodexExecutableLocator.swift */; };
+		DE9A144FDC197391A95EBB67 /* AIProviderRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D45F0748FDAF0DC1059E1E /* AIProviderRegistry.swift */; };
+		E34E69F499D2A2520C35AD6F /* OpenCodeExecutableLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ED94D6157B8CBB0CA76A462 /* OpenCodeExecutableLocator.swift */; };
 		FF922928420EFBED193430BD /* NotchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7A14BFF0D54E1FC7B8BB91C /* NotchView.swift */; };
 /* End PBXBuildFile section */
 
@@ -49,10 +55,13 @@
 
 /* Begin PBXFileReference section */
 		0921B743C704F4E8C60A8E54 /* AIProviderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderManager.swift; sourceTree = "<group>"; };
+		0BDC6BCE07FABE162A33456E /* AIProviderManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderManagerTests.swift; sourceTree = "<group>"; };
 		0C2A8E7BA24448035BF90B6B /* DevNotchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevNotchApp.swift; sourceTree = "<group>"; };
 		170BD6157CEDB3B6FA91F47C /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		226921B48E15C0E46B5EEE23 /* NotchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchModel.swift; sourceTree = "<group>"; };
+		26D45F0748FDAF0DC1059E1E /* AIProviderRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderRegistry.swift; sourceTree = "<group>"; };
 		2B261D4CE454D39A7DC7A38D /* AICompactStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICompactStatusView.swift; sourceTree = "<group>"; };
+		2ED94D6157B8CBB0CA76A462 /* OpenCodeExecutableLocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenCodeExecutableLocator.swift; sourceTree = "<group>"; };
 		30C7823A8C3B80F4A1C1F20C /* CodexExecutableLocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexExecutableLocator.swift; sourceTree = "<group>"; };
 		33680E807604ECFACDCC4B45 /* AIProviderCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderCard.swift; sourceTree = "<group>"; };
 		38509021E16BDB18F6FBE17A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -67,6 +76,7 @@
 		7B14DA67FA739102462EE1E5 /* AIUsageBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIUsageBar.swift; sourceTree = "<group>"; };
 		815841549041A15A50709C7F /* CodexParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexParsingTests.swift; sourceTree = "<group>"; };
 		8375154B84A100212CEC229E /* HoveredNotchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoveredNotchView.swift; sourceTree = "<group>"; };
+		99C861ED7F7F52EE32D7E804 /* OpenCodeParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenCodeParsingTests.swift; sourceTree = "<group>"; };
 		9A920EA084076C2CE77C8863 /* DevNotch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DevNotch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A17C386A5871435F415E6715 /* CodexModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexModels.swift; sourceTree = "<group>"; };
 		A20DD1C3C6D4CECC6F3260DF /* ExpandedNotchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandedNotchView.swift; sourceTree = "<group>"; };
@@ -74,12 +84,14 @@
 		AFBF99E62A0D18065EB34CF3 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		B49334A35A05FDD8CFA30053 /* AIProviderID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderID.swift; sourceTree = "<group>"; };
 		C76B3412C5FE86A0068C9F76 /* AIProviderStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderStatusTests.swift; sourceTree = "<group>"; };
+		CC7D27674CFDE134FC020360 /* OpenCodeGoProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenCodeGoProvider.swift; sourceTree = "<group>"; };
 		D3CF85D4EE5E374DA48A3023 /* ScreenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenManager.swift; sourceTree = "<group>"; };
 		D6015C72D6969677CF0BAD18 /* DevNotchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DevNotchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D787EF2E82A96C913FEA66E0 /* AIUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIUsage.swift; sourceTree = "<group>"; };
 		DA40E163B857FAE1A8B1E8D0 /* AIProviderStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderStatus.swift; sourceTree = "<group>"; };
 		DD07E63E673D311A88287B05 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		E8C1CA5802081C6C4BBA324D /* NotchState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchState.swift; sourceTree = "<group>"; };
+		E968540D39F136AF9782CF36 /* OpenCodeGoModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenCodeGoModels.swift; sourceTree = "<group>"; };
 		E98DDFAEF6F495E3C4C6B5DD /* AIUsageWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIUsageWindowTests.swift; sourceTree = "<group>"; };
 		F2CC75D6D8FDA1AB9EE2AC95 /* AIAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAccount.swift; sourceTree = "<group>"; };
 		F632DCCA098E27062054EBDF /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -113,6 +125,7 @@
 				38509021E16BDB18F6FBE17A /* .gitkeep */,
 				3E4A2B020BAAB211D1ADBB3C /* AIProvider.swift */,
 				971009D213155A75A805062E /* Codex */,
+				34A6F923AF8E7E36E943F57C /* OpenCodeGo */,
 			);
 			path = Providers;
 			sourceTree = "<group>";
@@ -129,11 +142,22 @@
 			path = Notch;
 			sourceTree = "<group>";
 		};
+		34A6F923AF8E7E36E943F57C /* OpenCodeGo */ = {
+			isa = PBXGroup;
+			children = (
+				2ED94D6157B8CBB0CA76A462 /* OpenCodeExecutableLocator.swift */,
+				E968540D39F136AF9782CF36 /* OpenCodeGoModels.swift */,
+				CC7D27674CFDE134FC020360 /* OpenCodeGoProvider.swift */,
+			);
+			path = OpenCodeGo;
+			sourceTree = "<group>";
+		};
 		41925314038FFB3E0A28A3F6 /* Services */ = {
 			isa = PBXGroup;
 			children = (
 				F76EE94C536A35743800598E /* .gitkeep */,
 				0921B743C704F4E8C60A8E54 /* AIProviderManager.swift */,
+				26D45F0748FDAF0DC1059E1E /* AIProviderRegistry.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -254,9 +278,11 @@
 		FF745B488E9223FAF1346F52 /* DevNotchTests */ = {
 			isa = PBXGroup;
 			children = (
+				0BDC6BCE07FABE162A33456E /* AIProviderManagerTests.swift */,
 				C76B3412C5FE86A0068C9F76 /* AIProviderStatusTests.swift */,
 				E98DDFAEF6F495E3C4C6B5DD /* AIUsageWindowTests.swift */,
 				815841549041A15A50709C7F /* CodexParsingTests.swift */,
+				99C861ED7F7F52EE32D7E804 /* OpenCodeParsingTests.swift */,
 			);
 			name = DevNotchTests;
 			path = Tests/DevNotchTests;
@@ -348,6 +374,7 @@
 				899666FEB08CA31F5C3D67C2 /* AIProviderCard.swift in Sources */,
 				5CFE95A38774E4044CE8C5FE /* AIProviderID.swift in Sources */,
 				0421CED0BADD6803D7471648 /* AIProviderManager.swift in Sources */,
+				DE9A144FDC197391A95EBB67 /* AIProviderRegistry.swift in Sources */,
 				27D363D05E3E1A126638CE24 /* AIProviderStatus.swift in Sources */,
 				A08902720C6F228119CF5A87 /* AIUsage.swift in Sources */,
 				81B40E7C706EE08851B661E8 /* AIUsageBar.swift in Sources */,
@@ -366,6 +393,9 @@
 				3F6078D4C7D5F5149D64CAF9 /* NotchState.swift in Sources */,
 				FF922928420EFBED193430BD /* NotchView.swift in Sources */,
 				C9040F97754A0B9C5ADCBB7D /* NotchWindowController.swift in Sources */,
+				E34E69F499D2A2520C35AD6F /* OpenCodeExecutableLocator.swift in Sources */,
+				991EE535E62C48F9280A31B4 /* OpenCodeGoModels.swift in Sources */,
+				7CB94DB3A3CEF0BB2216222A /* OpenCodeGoProvider.swift in Sources */,
 				80A0406D45E34AA4EEE42523 /* ScreenManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -374,9 +404,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7344B4CD681E6D6A04F84ED1 /* AIProviderManagerTests.swift in Sources */,
 				9F2D87C2CA984B5622378601 /* AIProviderStatusTests.swift in Sources */,
 				ACD690978B40CA319A5AC909 /* AIUsageWindowTests.swift in Sources */,
 				7E69865FA2D15B7628F12CA4 /* CodexParsingTests.swift in Sources */,
+				1B73921198337A268D5D2F4B /* OpenCodeParsingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

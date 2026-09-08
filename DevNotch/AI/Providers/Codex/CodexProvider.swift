@@ -193,25 +193,35 @@ final class CodexProvider: AIProvider, @unchecked Sendable {
     }
 
     private func mapSnapshotToUsage(_ snapshot: CodexRateLimitSnapshot) -> AIUsage {
-        let primaryWindow: AIUsageWindow? = snapshot.primary.map {
-            AIUsageWindow(
-                usedPercent: $0.usedPercent,
-                windowDurationMins: $0.windowDurationMins,
-                resetsAt: $0.resetsAt.map { Date(timeIntervalSince1970: $0) }
+        var windows: [AIUsageWindow] = []
+
+        if let primary = snapshot.primary {
+            windows.append(
+                AIUsageWindow(
+                    id: "5h",
+                    label: "5 Hour",
+                    durationMinutes: primary.windowDurationMins,
+                    usedPercent: primary.usedPercent,
+                    resetsAt: primary.resetsAt.map { Date(timeIntervalSince1970: $0) }
+                )
             )
         }
 
-        let secondaryWindow: AIUsageWindow? = snapshot.secondary.map {
-            AIUsageWindow(
-                usedPercent: $0.usedPercent,
-                windowDurationMins: $0.windowDurationMins,
-                resetsAt: $0.resetsAt.map { Date(timeIntervalSince1970: $0) }
+        if let secondary = snapshot.secondary {
+            windows.append(
+                AIUsageWindow(
+                    id: "weekly",
+                    label: "Weekly",
+                    durationMinutes: secondary.windowDurationMins,
+                    usedPercent: secondary.usedPercent,
+                    resetsAt: secondary.resetsAt.map { Date(timeIntervalSince1970: $0) }
+                )
             )
         }
 
         return AIUsage(
-            primary: primaryWindow,
-            secondary: secondaryWindow,
+            windows: windows,
+            credits: nil,
             planType: snapshot.planType,
             updatedAt: Date()
         )

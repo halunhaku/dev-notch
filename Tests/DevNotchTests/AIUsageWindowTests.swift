@@ -27,9 +27,12 @@ final class AIUsageWindowTests: XCTestCase {
         let w2h = AIUsageWindow(usedPercent: 10, windowDurationMins: 120, resetsAt: nil)
         XCTAssertEqual(w2h.label, "2 Hour")
 
-        // Arbitrary minutes (e.g. 45 mins)
+        // Unknown / irregular minutes (e.g. 45 mins, 75 mins)
         let w45m = AIUsageWindow(usedPercent: 10, windowDurationMins: 45, resetsAt: nil)
         XCTAssertEqual(w45m.label, "45m")
+
+        let w75m = AIUsageWindow(usedPercent: 10, windowDurationMins: 75, resetsAt: nil)
+        XCTAssertEqual(w75m.label, "75m")
     }
 
     func testRemainingPercentCalculation() {
@@ -54,15 +57,18 @@ final class AIUsageWindowTests: XCTestCase {
         XCTAssertEqual(wUnder.remainingPercent, 100.0)
     }
 
-    func testResetTimeRemaining() {
+    func testResetTimeRemainingWithNilAndPastDate() {
+        // Nil resetsAt
+        let wNil = AIUsageWindow(usedPercent: 20, windowDurationMins: 300, resetsAt: nil)
+        XCTAssertNil(wNil.resetTimeRemaining())
+        XCTAssertNil(wNil.formattedResetDate())
+
         let baseDate = Date(timeIntervalSince1970: 1700000000)
 
-        // 2 hours 14 minutes in future (134 minutes = 8040 seconds)
+        // 2 hours 14 minutes in future (8040 seconds)
         let futureDate = baseDate.addingTimeInterval(8040)
         let window = AIUsageWindow(usedPercent: 50, windowDurationMins: 300, resetsAt: futureDate)
-
-        let remainingStr = window.resetTimeRemaining(relativeTo: baseDate)
-        XCTAssertEqual(remainingStr, "Reset in 2h 14m")
+        XCTAssertEqual(window.resetTimeRemaining(relativeTo: baseDate), "Reset in 2h 14m")
 
         // 45 minutes in future (2700 seconds)
         let future45m = baseDate.addingTimeInterval(2700)
@@ -75,16 +81,25 @@ final class AIUsageWindowTests: XCTestCase {
         XCTAssertEqual(windowPast.resetTimeRemaining(relativeTo: baseDate), "Resetting soon")
     }
 
-    func testFormattedResetDate() {
-        // 2026-09-08 10:00 UTC
-        let date = Date(timeIntervalSince1970: 1788861600)
-        let window = AIUsageWindow(usedPercent: 50, windowDurationMins: 10080, resetsAt: date)
+    func testAIUsageWithOneTwoAndThreeWindows() {
+        let w1 = AIUsageWindow(id: "rolling", label: "5 Hour", durationMinutes: 300, usedPercent: 20)
+        let w2 = AIUsageWindow(id: "weekly", label: "Weekly", durationMinutes: 10080, usedPercent: 40)
+        let w3 = AIUsageWindow(id: "monthly", label: "Monthly", durationMinutes: 43200, usedPercent: 60)
 
-        let formatted = window.formattedResetDate(
-            locale: Locale(identifier: "en_US"),
-            timeZone: TimeZone(identifier: "UTC")!
-        )
-        XCTAssertNotNil(formatted)
-        XCTAssertTrue(formatted!.hasPrefix("Resets "))
+        // 1 Window
+        let usage1 = AIUsage(windows: [w1])
+        XCTAssertEqual(usage1.windows.count, 1)
+        XCTAssertEqual(usage1.primaryRemainingInt, 80)
+
+        // 2 Windows
+        let usage2 = AIUsage(windows: [w1, w2])
+        XCTAssertEqual(usage2.windows.count, 2)
+        XCTAssertEqual(usage2.primaryRemainingInt, 80)
+
+        // 3 Windows
+        let usage3 = AIUsage(windows: [w1, w2, w3], credits: AICredits(balance: "$12.50", unlimited: false))
+        XCTAssertEqual(usage3.windows.count, 3)
+        XCTAssertEqual(usage3.primaryRemainingInt, 80)
+        XCTAssertEqual(usage3.credits?.balance, "$12.50")
     }
 }

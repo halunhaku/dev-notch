@@ -1,11 +1,14 @@
 import SwiftUI
 
-/// Detailed status and usage card for an active AI Provider in the expanded notch.
+/// Detailed status and usage card for an individual AI Provider snapshot.
 struct AIProviderCard: View {
-    @ObservedObject var manager: AIProviderManager
+    let snapshot: AIProviderSnapshot
+    let isPrimary: Bool
+    var onSetPrimary: () -> Void
+    var onRefresh: () -> Void
 
     private var statusBadgeColor: Color {
-        switch manager.status {
+        switch snapshot.status {
         case .ready: return Color.green
         case .checking: return Color.cyan
         case .notAuthenticated: return Color.orange
@@ -14,35 +17,67 @@ struct AIProviderCard: View {
     }
 
     private var planTitle: String {
-        manager.account?.displayPlanName ?? "Standard"
+        snapshot.account?.displayPlanName ?? "Standard"
+    }
+
+    private var providerIconName: String {
+        switch snapshot.id {
+        case .codex: return "chevron.left.forwardslash.chevron.right"
+        case .openCodeGo: return "terminal.fill"
+        case .claude: return "sparkles"
+        case .antigravity: return "atom"
+        case .deepseek: return "brain"
+        case .grok: return "bolt.fill"
+        }
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            // Header: Provider Identity & Status Badge
-            HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 9) {
+            // Header: Provider Identity, Primary Toggle, Status Pill
+            HStack(spacing: 7) {
                 // Provider Glyph
                 ZStack {
                     RoundedRectangle(cornerRadius: 6)
                         .fill(Color.white.opacity(0.12))
                         .frame(width: 22, height: 22)
 
-                    Image(systemName: "chevron.left.forwardslash.chevron.right")
+                    Image(systemName: providerIconName)
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.cyan)
                 }
 
-                Text(manager.activeProviderID.displayName)
+                Text(snapshot.displayName)
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.white)
 
                 Text(planTitle)
                     .font(.system(size: 9, weight: .medium))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.white.opacity(0.55))
                     .padding(.horizontal, 5)
                     .padding(.vertical, 2)
                     .background(Color.white.opacity(0.08))
                     .clipShape(Capsule())
+
+                // Primary Star / Pin Button
+                Button(action: onSetPrimary) {
+                    HStack(spacing: 2) {
+                        Image(systemName: isPrimary ? "star.fill" : "star")
+                            .font(.system(size: 9))
+                            .foregroundColor(isPrimary ? .yellow : .white.opacity(0.35))
+
+                        if isPrimary {
+                            Text("Primary")
+                                .font(.system(size: 8, weight: .semibold))
+                                .foregroundColor(.yellow.opacity(0.9))
+                        }
+                    }
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 2)
+                    .background(isPrimary ? Color.yellow.opacity(0.12) : Color.clear)
+                    .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .help(isPrimary ? "Current primary notch provider" : "Click to set as primary provider")
 
                 Spacer()
 
@@ -52,7 +87,7 @@ struct AIProviderCard: View {
                         .fill(statusBadgeColor)
                         .frame(width: 5, height: 5)
 
-                    Text(manager.statusTitle)
+                    Text(snapshot.status.shortDescription)
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(statusBadgeColor.opacity(0.9))
                 }
@@ -62,105 +97,118 @@ struct AIProviderCard: View {
                 .clipShape(Capsule())
             }
 
-            // Body: Content based on provider status
-            switch manager.status {
+            // Body: 0...N Dynamic Quota Windows
+            switch snapshot.status {
             case .ready:
-                if let usage = manager.usage {
-                    VStack(spacing: 10) {
-                        if let primary = usage.primary {
-                            AIUsageBar(window: primary)
+                if let usage = snapshot.usage, !usage.windows.isEmpty {
+                    VStack(spacing: 8) {
+                        ForEach(usage.windows) { window in
+                            AIUsageBar(window: window)
                         }
 
-                        if let secondary = usage.secondary {
-                            AIUsageBar(window: secondary)
+                        // Optional Credit Balance
+                        if let credits = usage.credits, let balance = credits.balance {
+                            HStack {
+                                Text("Credit Balance")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.white.opacity(0.6))
+                                Spacer()
+                                Text(balance)
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.9))
+                            }
+                            .padding(.top, 2)
                         }
                     }
                 } else {
-                    Text("Fetching quota details…")
+                    Text("Usage details unavailable")
                         .font(.system(size: 10))
                         .foregroundColor(.white.opacity(0.6))
+                        .padding(.vertical, 2)
                 }
 
             case .checking:
                 HStack(spacing: 8) {
                     ProgressView()
-                        .scaleEffect(0.6)
-                    Text("Connecting to Codex app-server…")
-                        .font(.system(size: 11))
-                        .foregroundColor(.white.opacity(0.7))
+                        .scaleEffect(0.55)
+                    Text("Checking provider connectivity…")
+                        .font(.system(size: 10))
+                        .foregroundColor(.white.opacity(0.65))
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, 6)
+                .padding(.vertical, 4)
 
             case .notAuthenticated:
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Authentication Required")
-                        .font(.system(size: 11, weight: .semibold))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Sign in required")
+                        .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(.orange)
 
-                    Text("Please log in to Codex via terminal: codex login")
-                        .font(.system(size: 10))
-                        .foregroundColor(.white.opacity(0.65))
+                    Text(authHelpHint(for: snapshot.id))
+                        .font(.system(size: 9))
+                        .foregroundColor(.white.opacity(0.6))
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, 3)
 
             case .notInstalled:
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Codex CLI Not Found")
-                        .font(.system(size: 11, weight: .semibold))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("CLI not found")
+                        .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(.red.opacity(0.9))
 
-                    Text("Ensure `codex` is installed in PATH or Homebrew")
-                        .font(.system(size: 10))
-                        .foregroundColor(.white.opacity(0.65))
+                    Text("Ensure executable is installed in PATH")
+                        .font(.system(size: 9))
+                        .foregroundColor(.white.opacity(0.6))
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, 3)
 
             case .unavailable(let reason), .error(let reason):
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Connection Issue")
-                        .font(.system(size: 11, weight: .semibold))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Unavailable")
+                        .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(.red.opacity(0.9))
 
                     Text(reason)
-                        .font(.system(size: 10))
-                        .foregroundColor(.white.opacity(0.65))
+                        .font(.system(size: 9))
+                        .foregroundColor(.white.opacity(0.6))
                         .lineLimit(2)
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, 3)
             }
 
             // Footer: Timestamp & Refresh
             HStack {
-                if let lastUpdated = manager.lastUpdated {
+                if let lastUpdated = snapshot.lastUpdated {
                     Text("Updated \(lastUpdated.formatted(date: .omitted, time: .shortened))")
-                        .font(.system(size: 9))
+                        .font(.system(size: 8))
                         .foregroundColor(.white.opacity(0.35))
                 }
 
                 Spacer()
 
-                Button(action: {
-                    manager.refresh()
-                }) {
+                Button(action: onRefresh) {
                     HStack(spacing: 3) {
                         Image(systemName: "arrow.triangle.2.circlepath")
                             .font(.system(size: 8))
-                            .rotationEffect(.degrees(manager.isRefreshing ? 360 : 0))
-                            .animation(manager.isRefreshing ? .linear(duration: 0.8).repeatForever(autoreverses: false) : .default, value: manager.isRefreshing)
-
                         Text("Refresh")
-                            .font(.system(size: 9))
+                            .font(.system(size: 8))
                     }
                     .foregroundColor(.white.opacity(0.45))
                 }
                 .buttonStyle(.plain)
-                .disabled(manager.isRefreshing)
             }
             .padding(.top, 2)
         }
-        .padding(12)
+        .padding(11)
         .background(Color.white.opacity(0.06))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 11))
+    }
+
+    private func authHelpHint(for id: AIProviderID) -> String {
+        switch id {
+        case .codex: return "Run `codex login` in Terminal to authenticate"
+        case .openCodeGo: return "Configure OpenCode Go in ~/.local/share/opencode/auth.json"
+        case .claude: return "Run `claude login` in Terminal"
+        default: return "Authentication required for this provider"
+        }
     }
 }

@@ -47,7 +47,7 @@ struct NotchGeometry {
         case .hovered:
             return CGSize(width: max(280, base.width + 90), height: max(56, base.height + 24))
         case .expanded:
-            return CGSize(width: 420, height: 215)
+            return CGSize(width: 420, height: 320)
         }
     }
 

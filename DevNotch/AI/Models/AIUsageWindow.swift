@@ -1,22 +1,72 @@
 import Foundation
 
-/// Represents a single rate-limit window (e.g. 5 Hour or Weekly quota).
-struct AIUsageWindow: Equatable, Sendable {
+/// Represents a single rate-limit or quota window (e.g. 5 Hour, Weekly, Monthly, or custom duration).
+struct AIUsageWindow: Identifiable, Equatable, Sendable {
+    /// Unique identifier for this window within the provider (e.g. "5h", "weekly", "monthly", "rolling").
+    let id: String
+    /// Human-readable label for the window (e.g. "5 Hour", "Weekly", "Monthly").
+    let label: String
+    /// Duration of the quota window in minutes (e.g. 300 for 5h, 10080 for Weekly, 43200 for Monthly).
+    let durationMinutes: Int
     /// Percentage of quota consumed (0.0 to 100.0).
     let usedPercent: Double
-    /// Duration of the quota window in minutes (e.g. 300 for 5h, 10080 for Weekly).
-    let windowDurationMins: Int
-    /// Date when this window resets.
+    /// Date when this quota window resets.
     let resetsAt: Date?
+
+    init(
+        id: String? = nil,
+        label: String? = nil,
+        durationMinutes: Int,
+        usedPercent: Double,
+        resetsAt: Date? = nil
+    ) {
+        self.durationMinutes = durationMinutes
+        self.id = id ?? Self.defaultId(for: durationMinutes)
+        self.label = label ?? Self.defaultLabel(for: durationMinutes)
+        self.usedPercent = max(0.0, min(100.0, usedPercent))
+        self.resetsAt = resetsAt
+    }
+
+    /// Convenience initializer mapping from older windowDurationMins property.
+    init(
+        usedPercent: Double,
+        windowDurationMins: Int,
+        resetsAt: Date? = nil
+    ) {
+        self.init(
+            id: nil,
+            label: nil,
+            durationMinutes: windowDurationMins,
+            usedPercent: usedPercent,
+            resetsAt: resetsAt
+        )
+    }
+
+    /// Backward compatibility accessor.
+    var windowDurationMins: Int {
+        durationMinutes
+    }
 
     /// Percentage of quota remaining (0.0 to 100.0).
     var remainingPercent: Double {
         max(0.0, min(100.0, 100.0 - usedPercent))
     }
 
-    /// User-friendly label for the quota window duration.
-    var label: String {
-        switch windowDurationMins {
+    /// Default ID based on duration.
+    static func defaultId(for durationMinutes: Int) -> String {
+        switch durationMinutes {
+        case 60: return "1h"
+        case 300: return "5h"
+        case 1440: return "daily"
+        case 10080: return "weekly"
+        case 43200: return "monthly"
+        default: return "\(durationMinutes)m"
+        }
+    }
+
+    /// Default human-readable label based on duration.
+    static func defaultLabel(for durationMinutes: Int) -> String {
+        switch durationMinutes {
         case 60:
             return "1 Hour"
         case 300:
@@ -25,15 +75,17 @@ struct AIUsageWindow: Equatable, Sendable {
             return "Daily"
         case 10080:
             return "Weekly"
+        case 43200:
+            return "Monthly"
         default:
-            if windowDurationMins >= 1440 && windowDurationMins % 1440 == 0 {
-                let days = windowDurationMins / 1440
+            if durationMinutes >= 1440 && durationMinutes % 1440 == 0 {
+                let days = durationMinutes / 1440
                 return "\(days) Day"
-            } else if windowDurationMins >= 60 && windowDurationMins % 60 == 0 {
-                let hours = windowDurationMins / 60
+            } else if durationMinutes >= 60 && durationMinutes % 60 == 0 {
+                let hours = durationMinutes / 60
                 return "\(hours) Hour"
             } else {
-                return "\(windowDurationMins)m"
+                return "\(durationMinutes)m"
             }
         }
     }

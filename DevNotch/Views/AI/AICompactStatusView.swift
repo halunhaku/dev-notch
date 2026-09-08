@@ -1,11 +1,11 @@
 import SwiftUI
 
-/// Ultra-compact status view designed specifically for the MacBook physical notch.
+/// Ultra-compact status view for the MacBook physical notch, showing the active Primary Provider.
 struct AICompactStatusView: View {
     @ObservedObject var manager: AIProviderManager
 
     private var statusColor: Color {
-        switch manager.status {
+        switch manager.primaryStatus {
         case .ready: return Color.green
         case .checking: return Color.cyan
         case .notAuthenticated: return Color.orange
@@ -13,31 +13,44 @@ struct AICompactStatusView: View {
         }
     }
 
+    private var isLowQuota: Bool {
+        if let remaining = manager.primaryRemainingInt, remaining < 20 {
+            return true
+        }
+        return false
+    }
+
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 7) {
             // Left Indicator Dot
             Circle()
                 .fill(statusColor)
-                .frame(width: 6, height: 6)
+                .frame(width: 5, height: 5)
                 .opacity(0.9)
 
             Spacer()
 
-            // Right Info: Remaining Quota or Developer Glyph
-            if manager.status == .ready, let remaining = manager.primaryRemainingInt {
-                HStack(spacing: 4) {
-                    Image(systemName: "chevron.left.forwardslash.chevron.right")
-                        .font(.system(size: 8, weight: .bold))
-                        .foregroundColor(.cyan.opacity(0.9))
+            // Right Info: Primary Provider Name & Remaining Quota
+            if manager.primaryStatus == .ready, let remaining = manager.primaryRemainingInt {
+                HStack(spacing: 3) {
+                    Text(manager.primaryDisplayName)
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.85))
 
                     Text("\(remaining)%")
-                        .font(.system(size: 10, weight: .bold, design: .monospaced))
-                        .foregroundColor(.white)
+                        .font(.system(size: 9, weight: .bold, design: .monospaced))
+                        .foregroundColor(isLowQuota ? .orange : .white)
                 }
             } else {
-                Image(systemName: "chevron.left.forwardslash.chevron.right")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundColor(.white.opacity(0.5))
+                HStack(spacing: 3) {
+                    Text(manager.primaryDisplayName)
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundColor(.white.opacity(0.6))
+
+                    Image(systemName: "chevron.left.forwardslash.chevron.right")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundColor(.white.opacity(0.4))
+                }
             }
         }
         .padding(.horizontal, 14)

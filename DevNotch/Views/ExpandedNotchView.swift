@@ -1,13 +1,13 @@
 import SwiftUI
 
-/// Expanded state displaying the core dashboard for Dev Notch and live AI Provider status.
+/// Expanded state displaying the multi-provider dashboard in Dev Notch.
 struct ExpandedNotchView: View {
     @ObservedObject var model: NotchModel
     @ObservedObject var providerManager: AIProviderManager
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            // Header: App Brand & Collapse Button
+        VStack(alignment: .leading, spacing: 8) {
+            // Header: App Logo & Collapse Button
             HStack {
                 // App Logo & Title
                 HStack(spacing: 8) {
@@ -31,7 +31,7 @@ struct ExpandedNotchView: View {
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
 
-                    Text("v0.2.0")
+                    Text("v0.3.0")
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.white.opacity(0.4))
                         .padding(.horizontal, 6)
@@ -61,38 +61,59 @@ struct ExpandedNotchView: View {
                 .fill(Color.white.opacity(0.1))
                 .frame(height: 1)
 
-            // Section: AI Status Center with real Provider Card
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.cyan)
+            // Section: AI Status Center Header
+            HStack {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.cyan)
 
-                    Text("AI Status Center")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.85))
+                Text("AI Status Center")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.85))
 
-                    Spacer()
-                }
+                Spacer()
 
-                // Live AI Provider Card
-                AIProviderCard(manager: providerManager)
+                Text("\(providerManager.providerIDs.count) Providers")
+                    .font(.system(size: 9))
+                    .foregroundColor(.white.opacity(0.4))
             }
+
+            // Scrollable Multi-Provider Cards Container
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 8) {
+                    ForEach(providerManager.providerIDs, id: \.self) { id in
+                        if let snapshot = providerManager.snapshots[id] {
+                            AIProviderCard(
+                                snapshot: snapshot,
+                                isPrimary: id == providerManager.preferredPrimaryID,
+                                onSetPrimary: {
+                                    providerManager.setPrimaryProvider(id)
+                                },
+                                onRefresh: {
+                                    providerManager.refresh(providerID: id)
+                                }
+                            )
+                        }
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+            .frame(maxHeight: 220)
 
             Spacer(minLength: 0)
 
-            // Bottom hint
+            // Bottom Hint
             HStack {
                 Spacer()
-                Text("Click outside to collapse")
+                Text("Click ★ to set Primary • Tap outside to collapse")
                     .font(.system(size: 9, weight: .regular))
                     .foregroundColor(.white.opacity(0.35))
                 Spacer()
             }
         }
-        .padding(.horizontal, 18)
+        .padding(.horizontal, 16)
         .padding(.top, 10)
-        .padding(.bottom, 10)
+        .padding(.bottom, 8)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

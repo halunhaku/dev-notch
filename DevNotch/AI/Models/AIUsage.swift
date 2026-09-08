@@ -1,34 +1,45 @@
 import Foundation
 
-/// Unified representation of AI usage and rate limits.
+/// Provider credit balance representation (if available).
+struct AICredits: Equatable, Sendable {
+    let balance: String?
+    let unlimited: Bool
+}
+
+/// Dynamic representation of AI quota, supporting 0 to N usage windows.
 struct AIUsage: Equatable, Sendable {
-    /// Primary fast rate limit window (e.g. 5 Hour limit).
-    let primary: AIUsageWindow?
-    /// Secondary slow rate limit window (e.g. Weekly limit).
-    let secondary: AIUsageWindow?
-    /// Account plan type associated with these rate limits.
+    /// 0...N rate-limit or quota windows (e.g. 5 Hour, Weekly, Monthly).
+    let windows: [AIUsageWindow]
+    /// Credit balance (e.g. pay-as-you-go balance or unlimited indicator).
+    let credits: AICredits?
+    /// Plan description.
     let planType: String?
-    /// Timestamp when this snapshot was fetched or updated.
+    /// Timestamp of this usage snapshot.
     let updatedAt: Date
 
     init(
-        primary: AIUsageWindow?,
-        secondary: AIUsageWindow? = nil,
+        windows: [AIUsageWindow],
+        credits: AICredits? = nil,
         planType: String? = nil,
         updatedAt: Date = Date()
     ) {
-        self.primary = primary
-        self.secondary = secondary
+        self.windows = windows
+        self.credits = credits
         self.planType = planType
         self.updatedAt = updatedAt
     }
 
-    /// Primary remaining percentage for quick display in compact and hovered notch states.
-    var primaryRemainingPercent: Double? {
-        primary?.remainingPercent ?? secondary?.remainingPercent
+    /// Primary display window (defaults to first available window).
+    var primaryWindow: AIUsageWindow? {
+        windows.first
     }
 
-    /// Rounded integer percentage for concise UI badges (0...100).
+    /// Primary remaining percentage for compact/hovered notch indicators.
+    var primaryRemainingPercent: Double? {
+        primaryWindow?.remainingPercent
+    }
+
+    /// Primary remaining percentage as an integer (0...100).
     var primaryRemainingInt: Int? {
         primaryRemainingPercent.map { Int(round($0)) }
     }
