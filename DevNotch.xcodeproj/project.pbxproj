@@ -54,6 +54,7 @@
 		60BC916CEBA402D150F4E4FA /* AntigravityProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44F58DCA82287C45E8966C8 /* AntigravityProvider.swift */; };
 		6115DE2E34DBF4938098B793 /* ShortcutRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD9FE0076F45A89338A8801 /* ShortcutRecorderView.swift */; };
 		6192B42440377243491A3F5D /* AIBalance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 383352E2D0A39A4BDE952649 /* AIBalance.swift */; };
+		6835F814D97C36B170826C27 /* SettingsOpener.swift in Sources */ = {isa = PBXBuildFile; fileRef = F27E5729068708F7B9D5DEF3 /* SettingsOpener.swift */; };
 		6844AF4C7356A80792030921 /* AntigravityActivityBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4EA7CBED2DB96974B6A923 /* AntigravityActivityBridge.swift */; };
 		6E17F317BF8780244DD67E47 /* AIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4A2B020BAAB211D1ADBB3C /* AIProvider.swift */; };
 		6E6216F6D5B9F8BE9AE210B8 /* AntigravityExecutableLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60F333C4F243AE467B2AF59 /* AntigravityExecutableLocator.swift */; };
@@ -254,6 +255,7 @@
 		E8C85691F703ECA8AEB25633 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		E968540D39F136AF9782CF36 /* OpenCodeGoModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenCodeGoModels.swift; sourceTree = "<group>"; };
 		E98DDFAEF6F495E3C4C6B5DD /* AIUsageWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIUsageWindowTests.swift; sourceTree = "<group>"; };
+		F27E5729068708F7B9D5DEF3 /* SettingsOpener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsOpener.swift; sourceTree = "<group>"; };
 		F2CC75D6D8FDA1AB9EE2AC95 /* AIAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAccount.swift; sourceTree = "<group>"; };
 		F632DCCA098E27062054EBDF /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		F76EE94C536A35743800598E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -529,6 +531,7 @@
 			children = (
 				F632DCCA098E27062054EBDF /* .gitkeep */,
 				7B5E8CB81379A4106B8E0D9D /* ReleaseEnvironment.swift */,
+				F27E5729068708F7B9D5DEF3 /* SettingsOpener.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -772,6 +775,7 @@
 				F0C241BBB770C466872EB667 /* ProvidersSettingsView.swift in Sources */,
 				2466A940C9C711C39D5D9FDA /* ReleaseEnvironment.swift in Sources */,
 				80A0406D45E34AA4EEE42523 /* ScreenManager.swift in Sources */,
+				6835F814D97C36B170826C27 /* SettingsOpener.swift in Sources */,
 				380DD96B464D057412F169DE /* SettingsView.swift in Sources */,
 				6115DE2E34DBF4938098B793 /* ShortcutRecorderView.swift in Sources */,
 				2086B83588B8BE3705FA63D0 /* StatusItemController.swift in Sources */,

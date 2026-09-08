@@ -48,6 +48,11 @@ final class AntigravityProvider: AIProvider, @unchecked Sendable {
         AntigravityIntegrationManager.isInstalled()
     }
 
+    /// True when hooks are installed but reference an outdated helper path (own entries only).
+    var liveActivityNeedsRepair: Bool {
+        AntigravityIntegrationManager.needsRepair(expectedBridgePath: BundledHelperLocator.url(for: .activity).path)
+    }
+
     func currentStatus() async -> AIProviderStatus {
         return status
     }

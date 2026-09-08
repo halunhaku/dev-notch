@@ -21,6 +21,7 @@ struct IntegrationsSettingsView: View {
             Section(header: Text("Anthropic Claude Code").font(.headline)) {
                 let claudeSnapshot = manager.snapshots[.claude]
                 let isInstalled = claudeSnapshot?.isLiveActivityEnabled ?? false
+                let needsRepair = claudeSnapshot?.isLiveActivityStale ?? false
 
                 HStack {
                     VStack(alignment: .leading, spacing: 3) {
@@ -34,7 +35,7 @@ struct IntegrationsSettingsView: View {
 
                     Spacer()
 
-                    Button(isInstalled ? "Disable" : "Enable") {
+                    Button(needsRepair ? "Repair" : (isInstalled ? "Disable" : "Enable")) {
                         manager.toggleClaudeLiveActivity()
                     }
                     .buttonStyle(.bordered)
@@ -47,9 +48,11 @@ struct IntegrationsSettingsView: View {
                         .font(.system(size: 10))
                         .foregroundColor(.secondary)
 
-                    Text(isInstalled ? "Active (_dev_notch hooks installed)" : "Not Enabled")
+                    Text(needsRepair
+                        ? "Active (helper path outdated)"
+                        : (isInstalled ? "Active (_dev_notch hooks installed)" : "Not Enabled"))
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(isInstalled ? .green : .secondary)
+                        .foregroundColor(needsRepair ? .orange : (isInstalled ? .green : .secondary))
                 }
             }
 
@@ -57,6 +60,7 @@ struct IntegrationsSettingsView: View {
             Section(header: Text("Google Antigravity").font(.headline)) {
                 let agySnapshot = manager.snapshots[.antigravity]
                 let isInstalled = agySnapshot?.isLiveActivityEnabled ?? false
+                let needsRepair = agySnapshot?.isLiveActivityStale ?? false
 
                 HStack {
                     VStack(alignment: .leading, spacing: 3) {
@@ -70,7 +74,7 @@ struct IntegrationsSettingsView: View {
 
                     Spacer()
 
-                    Button(isInstalled ? "Disable" : "Enable") {
+                    Button(needsRepair ? "Repair" : (isInstalled ? "Disable" : "Enable")) {
                         manager.toggleAntigravityLiveActivity()
                     }
                     .buttonStyle(.bordered)
@@ -83,9 +87,11 @@ struct IntegrationsSettingsView: View {
                         .font(.system(size: 10))
                         .foregroundColor(.secondary)
 
-                    Text(isInstalled ? "Active (dev-notch-antigravity hooks installed)" : "Not Enabled")
+                    Text(needsRepair
+                        ? "Active (helper path outdated)"
+                        : (isInstalled ? "Active (dev-notch-antigravity hooks installed)" : "Not Enabled"))
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(isInstalled ? .green : .secondary)
+                        .foregroundColor(needsRepair ? .orange : (isInstalled ? .green : .secondary))
                 }
             }
         }

@@ -99,4 +99,20 @@ final class ReleaseReadinessTests: XCTestCase {
             return url
         }
     }
+
+    func testHookCommandParserExtractsPathsWithSpaces() {
+        XCTAssertEqual(
+            HookCommandParser.executablePath(in: "'/Applications/Dev Notch.app/Contents/Helpers/B' 'Stop'"),
+            "/Applications/Dev Notch.app/Contents/Helpers/B"
+        )
+        XCTAssertEqual(
+            HookCommandParser.executablePath(in: "\"/Users/halunhaku/Library/Application Support/X\" antigravity Stop"),
+            "/Users/halunhaku/Library/Application Support/X"
+        )
+        XCTAssertEqual(
+            HookCommandParser.executablePath(in: "/usr/bin/true"),
+            "/usr/bin/true"
+        )
+        XCTAssertNil(HookCommandParser.executablePath(in: ""))
+    }
 }

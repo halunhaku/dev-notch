@@ -104,4 +104,49 @@ final class AntigravityIntegrationTests: XCTestCase {
         let stop = own["Stop"] as! [[String: Any]]
         XCTAssertEqual(stop[0]["command"] as? String, "'\(path)' antigravity Stop")
     }
+
+    func testNeedsRepairDetectsStaleHelperPath() throws {
+        try AntigravityIntegrationManager.install(
+            bridgeExecutablePath: "/tmp/space dir/DevNotchActivityBridge",
+            hooksURL: tempHooksURL
+        )
+
+        XCTAssertTrue(
+            AntigravityIntegrationManager.needsRepair(
+                expectedBridgePath: "/Applications/DevNotch.app/Contents/Helpers/DevNotchActivityBridge",
+                hooksURL: tempHooksURL
+            )
+        )
+        XCTAssertFalse(
+            AntigravityIntegrationManager.needsRepair(
+                expectedBridgePath: "/tmp/space dir/DevNotchActivityBridge",
+                hooksURL: tempHooksURL
+            )
+        )
+
+        // Repair via install() rewrites only own entries to the new path.
+        try AntigravityIntegrationManager.install(
+            bridgeExecutablePath: "/Applications/DevNotch.app/Contents/Helpers/DevNotchActivityBridge",
+            hooksURL: tempHooksURL
+        )
+        XCTAssertFalse(
+            AntigravityIntegrationManager.needsRepair(
+                expectedBridgePath: "/Applications/DevNotch.app/Contents/Helpers/DevNotchActivityBridge",
+                hooksURL: tempHooksURL
+            )
+        )
+        XCTAssertEqual(
+            AntigravityIntegrationManager.installedBridgePaths(hooksURL: tempHooksURL),
+            Array(repeating: "/Applications/DevNotch.app/Contents/Helpers/DevNotchActivityBridge", count: 5)
+        )
+    }
+
+    func testNeedsRepairFalseWhenNotInstalled() {
+        XCTAssertFalse(
+            AntigravityIntegrationManager.needsRepair(
+                expectedBridgePath: "/Applications/DevNotch.app/Contents/Helpers/DevNotchActivityBridge",
+                hooksURL: tempHooksURL
+            )
+        )
+    }
 }

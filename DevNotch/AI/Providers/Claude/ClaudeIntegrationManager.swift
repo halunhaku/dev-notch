@@ -35,6 +35,51 @@ struct ClaudeIntegrationManager: Sendable {
         return false
     }
 
+    /// Paths embedded in every Dev Notch-owned hook command (hooks + statusLine).
+    static func installedBridgePaths(settingsURL: URL = defaultSettingsURL) -> [String] {
+        guard FileManager.default.fileExists(atPath: settingsURL.path),
+              let data = try? Data(contentsOf: settingsURL),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return []
+        }
+
+        var paths: [String] = []
+
+        if let hooks = json["hooks"] as? [String: Any] {
+            for (_, val) in hooks {
+                if let arr = val as? [[String: Any]] {
+                    for item in arr where (item[devNotchTagKey] as? Bool) == true {
+                        if let inner = item["hooks"] as? [[String: Any]] {
+                            for hook in inner {
+                                if let command = hook["command"] as? String,
+                                   let path = HookCommandParser.executablePath(in: command) {
+                                    paths.append(path)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if let statusLine = json["statusLine"] as? [String: Any],
+           (statusLine[devNotchTagKey] as? Bool) == true,
+           let command = statusLine["command"] as? String {
+            if let path = HookCommandParser.executablePath(in: command) {
+                paths.append(path)
+            }
+        }
+
+        return paths
+    }
+
+    /// True when Dev Notch hooks exist but reference a helper path other than the expected one.
+    static func needsRepair(expectedBridgePath: String, settingsURL: URL = defaultSettingsURL) -> Bool {
+        guard isInstalled(settingsURL: settingsURL) else { return false }
+        let paths = installedBridgePaths(settingsURL: settingsURL)
+        return paths.isEmpty || paths.contains { $0 != expectedBridgePath }
+    }
+
     /// Safely merges Dev Notch hooks into `settings.json`, preserving all unknown keys and user hooks.
     static func install(
         bridgeExecutablePath: String,

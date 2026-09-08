@@ -88,6 +88,25 @@ enum ShellCommand {
     }
 }
 
+/// Extracts the executable path from a hook command produced by `ShellCommand.quote`.
+enum HookCommandParser {
+    static func executablePath(in command: String) -> String? {
+        let trimmed = command.drop(while: { $0 == " " || $0 == "\t" })
+        guard let first = trimmed.first else { return nil }
+        if first == "'" || first == "\"" {
+            let body = trimmed.dropFirst()
+            guard let end = body.firstIndex(of: first) else { return nil }
+            let path = String(body[..<end])
+            return path.isEmpty ? nil : path
+        }
+        guard let space = trimmed.firstIndex(of: " ") else {
+            return trimmed.isEmpty ? nil : String(trimmed)
+        }
+        let path = String(trimmed[..<space])
+        return path.isEmpty ? nil : path
+    }
+}
+
 private extension URL {
     func isDescendant(of directory: URL) -> Bool {
         let directoryComponents = directory.standardizedFileURL.pathComponents

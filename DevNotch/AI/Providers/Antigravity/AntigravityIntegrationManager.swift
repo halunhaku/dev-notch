@@ -22,6 +22,45 @@ struct AntigravityIntegrationManager: Sendable {
         return json[hookIdentifier] != nil
     }
 
+    /// Paths embedded in every command under the Dev Notch-owned `dev-notch-antigravity` entry.
+    static func installedBridgePaths(hooksURL: URL = defaultHooksURL) -> [String] {
+        guard FileManager.default.fileExists(atPath: hooksURL.path),
+              let data = try? Data(contentsOf: hooksURL),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return []
+        }
+
+        var paths: [String] = []
+
+        func walk(_ node: Any) {
+            if let dict = node as? [String: Any] {
+                if let command = dict["command"] as? String,
+                   let path = HookCommandParser.executablePath(in: command) {
+                    paths.append(path)
+                }
+                for value in dict.values {
+                    walk(value)
+                }
+            } else if let array = node as? [Any] {
+                for value in array {
+                    walk(value)
+                }
+            }
+        }
+
+        if let own = json[hookIdentifier] {
+            walk(own)
+        }
+        return paths
+    }
+
+    /// True when Dev Notch hooks exist but reference a helper path other than the expected one.
+    static func needsRepair(expectedBridgePath: String, hooksURL: URL = defaultHooksURL) -> Bool {
+        guard isInstalled(hooksURL: hooksURL) else { return false }
+        let paths = installedBridgePaths(hooksURL: hooksURL)
+        return paths.isEmpty || paths.contains { $0 != expectedBridgePath }
+    }
+
     /// Installs Dev Notch hooks into `hooks.json`, preserving all other named hooks.
     static func install(
         bridgeExecutablePath: String,

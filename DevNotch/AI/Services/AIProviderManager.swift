@@ -14,6 +14,7 @@ struct AIProviderSnapshot: Identifiable, Equatable, Sendable {
     let compactMetric: AICompactMetric
     let credentialSource: String?
     let isLiveActivityEnabled: Bool
+    let isLiveActivityStale: Bool
     let lastUpdated: Date?
     let errorMessage: String?
 
@@ -26,6 +27,7 @@ struct AIProviderSnapshot: Identifiable, Equatable, Sendable {
         compactMetric: AICompactMetric,
         credentialSource: String? = nil,
         isLiveActivityEnabled: Bool = false,
+        isLiveActivityStale: Bool = false,
         lastUpdated: Date? = nil,
         errorMessage: String? = nil
     ) {
@@ -37,6 +39,7 @@ struct AIProviderSnapshot: Identifiable, Equatable, Sendable {
         self.compactMetric = compactMetric
         self.credentialSource = credentialSource
         self.isLiveActivityEnabled = isLiveActivityEnabled
+        self.isLiveActivityStale = isLiveActivityStale
         self.lastUpdated = lastUpdated
         self.errorMessage = errorMessage
     }
@@ -238,7 +241,12 @@ final class AIProviderManager: ObservableObject {
         integrationErrorMessage = nil
         do {
             if claude.isLiveActivityInstalled {
-                try claude.disableLiveActivity()
+                if claude.liveActivityNeedsRepair {
+                    // Own entries point at an outdated helper path; rewrite path only.
+                    try claude.enableLiveActivity()
+                } else {
+                    try claude.disableLiveActivity()
+                }
             } else {
                 try claude.enableLiveActivity()
             }
@@ -257,7 +265,12 @@ final class AIProviderManager: ObservableObject {
         integrationErrorMessage = nil
         do {
             if agy.isLiveActivityInstalled {
-                try agy.disableLiveActivity()
+                if agy.liveActivityNeedsRepair {
+                    // Own entries point at an outdated helper path; rewrite path only.
+                    try agy.enableLiveActivity()
+                } else {
+                    try agy.disableLiveActivity()
+                }
             } else {
                 try agy.enableLiveActivity()
             }
@@ -330,10 +343,13 @@ final class AIProviderManager: ObservableObject {
         }
 
         var liveActivityInstalled = false
+        var liveActivityStale = false
         if let claude = provider as? ClaudeProvider {
             liveActivityInstalled = claude.isLiveActivityInstalled
+            liveActivityStale = claude.liveActivityNeedsRepair
         } else if let agy = provider as? AntigravityProvider {
             liveActivityInstalled = agy.isLiveActivityInstalled
+            liveActivityStale = agy.liveActivityNeedsRepair
         }
 
         self.snapshots[id] = AIProviderSnapshot(
@@ -345,6 +361,7 @@ final class AIProviderManager: ObservableObject {
             compactMetric: compact,
             credentialSource: credSource,
             isLiveActivityEnabled: liveActivityInstalled,
+            isLiveActivityStale: liveActivityStale,
             lastUpdated: Date(),
             errorMessage: errorMsg
         )

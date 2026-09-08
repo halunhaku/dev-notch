@@ -98,13 +98,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     /// Opens the native macOS Settings window and activates Dev Notch to the foreground.
+    /// Uses SettingsOpener: the legacy `showSettingsWindow:` selector is blocked on macOS 26.
     func openSettingsWindow() {
-        NSApp.activate(ignoringOtherApps: true)
-        if #available(macOS 14.0, *) {
-            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-        } else {
-            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
-        }
+        SettingsOpener.openSettings()
     }
 
     func applicationWillTerminate(_ notification: Notification) {

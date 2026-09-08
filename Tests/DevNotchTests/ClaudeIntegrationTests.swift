@@ -143,4 +143,52 @@ final class ClaudeIntegrationTests: XCTestCase {
         let statusLine = root["statusLine"] as! [String: Any]
         XCTAssertEqual(statusLine["command"] as? String, "'/Applications/Dev Notch'\\''s Build.app/Contents/Helpers/DevNotchClaudeBridge' 'statusLine'")
     }
+
+    func testNeedsRepairDetectsStaleHelperPath() throws {
+        try ClaudeIntegrationManager.install(
+            bridgeExecutablePath: "/tmp/space dir/DevNotchClaudeBridge",
+            settingsURL: tempSettingsURL
+        )
+
+        XCTAssertTrue(
+            ClaudeIntegrationManager.needsRepair(
+                expectedBridgePath: "/Applications/DevNotch.app/Contents/Helpers/DevNotchClaudeBridge",
+                settingsURL: tempSettingsURL
+            )
+        )
+        XCTAssertFalse(
+            ClaudeIntegrationManager.needsRepair(
+                expectedBridgePath: "/tmp/space dir/DevNotchClaudeBridge",
+                settingsURL: tempSettingsURL
+            )
+        )
+
+        try ClaudeIntegrationManager.install(
+            bridgeExecutablePath: "/Applications/DevNotch.app/Contents/Helpers/DevNotchClaudeBridge",
+            settingsURL: tempSettingsURL
+        )
+        XCTAssertFalse(
+            ClaudeIntegrationManager.needsRepair(
+                expectedBridgePath: "/Applications/DevNotch.app/Contents/Helpers/DevNotchClaudeBridge",
+                settingsURL: tempSettingsURL
+            )
+        )
+        // 6 hooks + statusLine all point at the repaired path.
+        XCTAssertEqual(
+            ClaudeIntegrationManager.installedBridgePaths(settingsURL: tempSettingsURL),
+            Array(
+                repeating: "/Applications/DevNotch.app/Contents/Helpers/DevNotchClaudeBridge",
+                count: 7
+            )
+        )
+    }
+
+    func testNeedsRepairFalseWhenNotInstalled() {
+        XCTAssertFalse(
+            ClaudeIntegrationManager.needsRepair(
+                expectedBridgePath: "/Applications/DevNotch.app/Contents/Helpers/DevNotchClaudeBridge",
+                settingsURL: tempSettingsURL
+            )
+        )
+    }
 }

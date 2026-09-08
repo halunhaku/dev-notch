@@ -45,6 +45,11 @@ final class ClaudeProvider: AIProvider, @unchecked Sendable {
         ClaudeIntegrationManager.isInstalled()
     }
 
+    /// True when hooks are installed but reference an outdated helper path (own entries only).
+    var liveActivityNeedsRepair: Bool {
+        ClaudeIntegrationManager.needsRepair(expectedBridgePath: BundledHelperLocator.url(for: .claude).path)
+    }
+
     func currentStatus() async -> AIProviderStatus {
         return status
     }
