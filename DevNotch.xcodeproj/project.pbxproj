@@ -95,6 +95,7 @@
 		C33DB1B93C5317AD400579F2 /* ClaudeParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08B41EB12476C46E6C981FA3 /* ClaudeParsingTests.swift */; };
 		C42FBA6261873223805D16B5 /* GenericMetricsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 341A56656903F1116C849F23 /* GenericMetricsTests.swift */; };
 		C6014D1DB258D721FF765171 /* TaskPulseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 253459F1C4FE41536F4C5054 /* TaskPulseTests.swift */; };
+		C6057E99CAE03E770B1B07BF /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 11D98B246B3FE0C23A313B25 /* AppIcon.icns */; };
 		C9040F97754A0B9C5ADCBB7D /* NotchWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7967A7BFEE7F86B9E0EBF6C3 /* NotchWindowController.swift */; };
 		D0FEB775906A74CC11DE893A /* DevNotchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C2A8E7BA24448035BF90B6B /* DevNotchApp.swift */; };
 		D855887A4D0E514144D5286D /* CodexExecutableLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C7823A8C3B80F4A1C1F20C /* CodexExecutableLocator.swift */; };
@@ -166,6 +167,7 @@
 		0BDC6BCE07FABE162A33456E /* AIProviderManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderManagerTests.swift; sourceTree = "<group>"; };
 		0C2A8E7BA24448035BF90B6B /* DevNotchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevNotchApp.swift; sourceTree = "<group>"; };
 		0F2C1A213873CAFF05400297 /* PreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesStore.swift; sourceTree = "<group>"; };
+		11D98B246B3FE0C23A313B25 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		1255ECF80335C36D3D0FE18C /* AIContextMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIContextMetric.swift; sourceTree = "<group>"; };
 		13E57D83817966CE06E31142 /* KeyboardShortcutDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardShortcutDefinition.swift; sourceTree = "<group>"; };
 		14D863F0448DDA851F30F172 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
@@ -283,6 +285,14 @@
 				15C219C76B5C9DA5D85925B7 /* Views */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		02F64FDC0DF00A27F7C4410A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				11D98B246B3FE0C23A313B25 /* AppIcon.icns */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		05FBB3A350BE0DCC85685F0B /* AI */ = {
@@ -551,6 +561,7 @@
 				BF5015D1FF65550F0F2019AA /* App */,
 				9790D7527F7B119F0B42749E /* Music */,
 				235CF2E4F888FFB917D8BC48 /* Notch */,
+				02F64FDC0DF00A27F7C4410A /* Resources */,
 				01DF75A825A794606856E504 /* Settings */,
 				73908F554FA6B2C4F09D102D /* Shelf */,
 				EBB1851C5AEE408B3D5E8F19 /* Support */,
@@ -616,6 +627,7 @@
 			buildConfigurationList = 91354DB61A31D6DAC93FB99A /* Build configuration list for PBXNativeTarget "DevNotch" */;
 			buildPhases = (
 				1FFC2BB03688B0E8CD72F74E /* Sources */,
+				F5CD11AE6FCCFF93CFAA2D26 /* Resources */,
 				843E4814D3041D39BCF5D48C /* Embed Dependencies */,
 			);
 			buildRules = (
@@ -710,6 +722,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F5CD11AE6FCCFF93CFAA2D26 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C6057E99CAE03E770B1B07BF /* AppIcon.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1FFC2BB03688B0E8CD72F74E /* Sources */ = {

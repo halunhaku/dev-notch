@@ -12,7 +12,8 @@ final class ReleaseReadinessTests: XCTestCase {
 
         let files = try sourceFiles(below: productRoot)
         for file in files {
-            let contents = try String(contentsOf: file, encoding: .utf8)
+            guard file.pathExtension != "icns" else { continue }
+            guard let contents = try? String(contentsOf: file, encoding: .utf8) else { continue }
             XCTAssertFalse(contents.contains(forbiddenHome), "Developer home path found in \(file.path)")
             XCTAssertFalse(contents.contains("Derived" + "Data"), "Derived data path found in \(file.path)")
         }

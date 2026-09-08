@@ -14,21 +14,29 @@ struct AboutSettingsView: View {
             Spacer()
 
             // App Icon Graphic
-            ZStack {
-                RoundedRectangle(cornerRadius: 18)
-                    .fill(
-                        LinearGradient(
-                            colors: [Color.cyan.opacity(0.85), Color.blue],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+            if let icon = NSApp.applicationIconImage {
+                Image(nsImage: icon)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: 64, height: 64)
-                    .shadow(color: Color.blue.opacity(0.3), radius: 10, y: 5)
+                    .shadow(color: Color.black.opacity(0.25), radius: 8, y: 4)
+            } else {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.cyan.opacity(0.85), Color.blue],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 64, height: 64)
+                        .shadow(color: Color.blue.opacity(0.3), radius: 10, y: 5)
 
-                Image(systemName: "chevron.left.forwardslash.chevron.right")
-                    .font(.system(size: 26, weight: .bold))
-                    .foregroundColor(.white)
+                    Image(systemName: "chevron.left.forwardslash.chevron.right")
+                        .font(.system(size: 26, weight: .bold))
+                        .foregroundColor(.white)
+                }
             }
 
             // Title & Version
