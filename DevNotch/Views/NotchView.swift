@@ -5,6 +5,7 @@ import SwiftUI
 struct NotchView: View {
     @ObservedObject var model: NotchModel
     @ObservedObject var screenManager: ScreenManager
+    @ObservedObject var providerManager: AIProviderManager
 
     private var activeScreen: NSScreen {
         screenManager.currentScreen ?? NSScreen.main ?? NSScreen.screens[0]
@@ -50,14 +51,26 @@ struct NotchView: View {
                 Group {
                     switch model.state {
                     case .compact:
-                        CompactNotchView(model: model, screenManager: screenManager)
-                            .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                        CompactNotchView(
+                            model: model,
+                            screenManager: screenManager,
+                            providerManager: providerManager
+                        )
+                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
+
                     case .hovered:
-                        HoveredNotchView(model: model)
-                            .transition(.opacity.combined(with: .scale(scale: 0.98)))
+                        HoveredNotchView(
+                            model: model,
+                            providerManager: providerManager
+                        )
+                        .transition(.opacity.combined(with: .scale(scale: 0.98)))
+
                     case .expanded:
-                        ExpandedNotchView(model: model)
-                            .transition(.opacity.combined(with: .scale(scale: 0.98)))
+                        ExpandedNotchView(
+                            model: model,
+                            providerManager: providerManager
+                        )
+                        .transition(.opacity.combined(with: .scale(scale: 0.98)))
                     }
                 }
             }

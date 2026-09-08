@@ -1,8 +1,26 @@
 import SwiftUI
 
-/// Hovered state providing an interactive dynamic island teaser.
+/// Hovered state providing an interactive dynamic island teaser with real AI quota.
 struct HoveredNotchView: View {
     @ObservedObject var model: NotchModel
+    @ObservedObject var providerManager: AIProviderManager
+
+    private var quotaSubtitle: String {
+        if providerManager.status == .ready, let remaining = providerManager.primaryRemainingInt {
+            return "\(providerManager.activeProviderID.displayName): \(remaining)% remaining"
+        } else {
+            return providerManager.statusTitle
+        }
+    }
+
+    private var statusBadgeColor: Color {
+        switch providerManager.status {
+        case .ready: return Color.green
+        case .checking: return Color.cyan
+        case .notAuthenticated: return Color.orange
+        case .notInstalled, .unavailable, .error: return Color.red
+        }
+    }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -17,15 +35,15 @@ struct HoveredNotchView: View {
                     .foregroundColor(Color.cyan)
             }
 
-            // Title & Action Hint
+            // Title & Quota Subtitle
             VStack(alignment: .leading, spacing: 2) {
                 Text("Dev Notch")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.white)
 
-                Text("Click to open")
+                Text(quotaSubtitle)
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.white.opacity(0.7))
             }
 
             Spacer()
@@ -33,12 +51,12 @@ struct HoveredNotchView: View {
             // Status Indicator & Chevron
             HStack(spacing: 5) {
                 Circle()
-                    .fill(Color.green)
+                    .fill(statusBadgeColor)
                     .frame(width: 6, height: 6)
 
-                Text("Ready")
+                Text(providerManager.statusTitle)
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.green.opacity(0.9))
+                    .foregroundColor(statusBadgeColor.opacity(0.9))
 
                 Image(systemName: "chevron.down")
                     .font(.system(size: 10, weight: .bold))

@@ -7,36 +7,81 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0421CED0BADD6803D7471648 /* AIProviderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0921B743C704F4E8C60A8E54 /* AIProviderManager.swift */; };
+		05FBF7D51EC1106506D28F06 /* CodexModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17C386A5871435F415E6715 /* CodexModels.swift */; };
 		085C6D8C7D58A0EC2B0F8FDC /* CompactNotchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5411C5BB46F81E2A764FC1C0 /* CompactNotchView.swift */; };
+		27D363D05E3E1A126638CE24 /* AIProviderStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA40E163B857FAE1A8B1E8D0 /* AIProviderStatus.swift */; };
+		2A9A4B8381583E5FE6FB5CE1 /* CodexProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2218DE016ED9CC1D5D11411 /* CodexProvider.swift */; };
+		31B8AD38D1DC6A97766BB982 /* CodexAppServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 592A71573DF76BD0CA62797C /* CodexAppServer.swift */; };
 		3569FB018D9503D5E1A96F5F /* HoveredNotchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8375154B84A100212CEC229E /* HoveredNotchView.swift */; };
 		35BA2D206B0A396EF871DC81 /* NotchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226921B48E15C0E46B5EEE23 /* NotchModel.swift */; };
 		3F6078D4C7D5F5149D64CAF9 /* NotchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C1CA5802081C6C4BBA324D /* NotchState.swift */; };
 		476BC60D770095EFDD52B5EF /* ExpandedNotchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20DD1C3C6D4CECC6F3260DF /* ExpandedNotchView.swift */; };
+		5CFE95A38774E4044CE8C5FE /* AIProviderID.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49334A35A05FDD8CFA30053 /* AIProviderID.swift */; };
+		6E17F317BF8780244DD67E47 /* AIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4A2B020BAAB211D1ADBB3C /* AIProvider.swift */; };
+		7A3F7A5DAEEB7A2F14A93163 /* AIUsageWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC90B2022C4B74C9FE3D8D7 /* AIUsageWindow.swift */; };
+		7DB029B9BA3A2A5D4F2760A8 /* AICompactStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B261D4CE454D39A7DC7A38D /* AICompactStatusView.swift */; };
+		7E69865FA2D15B7628F12CA4 /* CodexParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 815841549041A15A50709C7F /* CodexParsingTests.swift */; };
 		80A0406D45E34AA4EEE42523 /* ScreenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CF85D4EE5E374DA48A3023 /* ScreenManager.swift */; };
+		81B40E7C706EE08851B661E8 /* AIUsageBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B14DA67FA739102462EE1E5 /* AIUsageBar.swift */; };
+		899666FEB08CA31F5C3D67C2 /* AIProviderCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33680E807604ECFACDCC4B45 /* AIProviderCard.swift */; };
 		8B9106552A4044AF321EBE30 /* NotchGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FAF3F53F074E10E9466D444 /* NotchGeometry.swift */; };
+		94DDF6F8EB9BAC2BDA867B54 /* AIAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2CC75D6D8FDA1AB9EE2AC95 /* AIAccount.swift */; };
+		9F2D87C2CA984B5622378601 /* AIProviderStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C76B3412C5FE86A0068C9F76 /* AIProviderStatusTests.swift */; };
+		A08902720C6F228119CF5A87 /* AIUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D787EF2E82A96C913FEA66E0 /* AIUsage.swift */; };
+		ACD690978B40CA319A5AC909 /* AIUsageWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98DDFAEF6F495E3C4C6B5DD /* AIUsageWindowTests.swift */; };
 		B81AD5C347F78C2916E27903 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8E8160BCB1A69E1FE1CA19C /* AppDelegate.swift */; };
 		C9040F97754A0B9C5ADCBB7D /* NotchWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7967A7BFEE7F86B9E0EBF6C3 /* NotchWindowController.swift */; };
 		D0FEB775906A74CC11DE893A /* DevNotchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C2A8E7BA24448035BF90B6B /* DevNotchApp.swift */; };
+		D855887A4D0E514144D5286D /* CodexExecutableLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C7823A8C3B80F4A1C1F20C /* CodexExecutableLocator.swift */; };
 		FF922928420EFBED193430BD /* NotchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7A14BFF0D54E1FC7B8BB91C /* NotchView.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		33BFDBF2C7885BE54705503D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9D9BE8B8AEDF04DB2B8895CB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AD3D6E5CDDD688B901D87863;
+			remoteInfo = DevNotch;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		0921B743C704F4E8C60A8E54 /* AIProviderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderManager.swift; sourceTree = "<group>"; };
 		0C2A8E7BA24448035BF90B6B /* DevNotchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevNotchApp.swift; sourceTree = "<group>"; };
 		170BD6157CEDB3B6FA91F47C /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		226921B48E15C0E46B5EEE23 /* NotchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchModel.swift; sourceTree = "<group>"; };
+		2B261D4CE454D39A7DC7A38D /* AICompactStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICompactStatusView.swift; sourceTree = "<group>"; };
+		30C7823A8C3B80F4A1C1F20C /* CodexExecutableLocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexExecutableLocator.swift; sourceTree = "<group>"; };
+		33680E807604ECFACDCC4B45 /* AIProviderCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderCard.swift; sourceTree = "<group>"; };
 		38509021E16BDB18F6FBE17A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		3DC90B2022C4B74C9FE3D8D7 /* AIUsageWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIUsageWindow.swift; sourceTree = "<group>"; };
+		3E4A2B020BAAB211D1ADBB3C /* AIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProvider.swift; sourceTree = "<group>"; };
 		5411C5BB46F81E2A764FC1C0 /* CompactNotchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactNotchView.swift; sourceTree = "<group>"; };
+		592A71573DF76BD0CA62797C /* CodexAppServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexAppServer.swift; sourceTree = "<group>"; };
 		64A645FB806E1DB1BA24B8D4 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		6E9AE897B99318F47C3D59D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6FAF3F53F074E10E9466D444 /* NotchGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchGeometry.swift; sourceTree = "<group>"; };
 		7967A7BFEE7F86B9E0EBF6C3 /* NotchWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchWindowController.swift; sourceTree = "<group>"; };
+		7B14DA67FA739102462EE1E5 /* AIUsageBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIUsageBar.swift; sourceTree = "<group>"; };
+		815841549041A15A50709C7F /* CodexParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexParsingTests.swift; sourceTree = "<group>"; };
 		8375154B84A100212CEC229E /* HoveredNotchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoveredNotchView.swift; sourceTree = "<group>"; };
 		9A920EA084076C2CE77C8863 /* DevNotch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DevNotch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A17C386A5871435F415E6715 /* CodexModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexModels.swift; sourceTree = "<group>"; };
 		A20DD1C3C6D4CECC6F3260DF /* ExpandedNotchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandedNotchView.swift; sourceTree = "<group>"; };
+		A2218DE016ED9CC1D5D11411 /* CodexProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexProvider.swift; sourceTree = "<group>"; };
 		AFBF99E62A0D18065EB34CF3 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		B49334A35A05FDD8CFA30053 /* AIProviderID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderID.swift; sourceTree = "<group>"; };
+		C76B3412C5FE86A0068C9F76 /* AIProviderStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderStatusTests.swift; sourceTree = "<group>"; };
 		D3CF85D4EE5E374DA48A3023 /* ScreenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenManager.swift; sourceTree = "<group>"; };
+		D6015C72D6969677CF0BAD18 /* DevNotchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DevNotchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D787EF2E82A96C913FEA66E0 /* AIUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIUsage.swift; sourceTree = "<group>"; };
+		DA40E163B857FAE1A8B1E8D0 /* AIProviderStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderStatus.swift; sourceTree = "<group>"; };
 		DD07E63E673D311A88287B05 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		E8C1CA5802081C6C4BBA324D /* NotchState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchState.swift; sourceTree = "<group>"; };
+		E98DDFAEF6F495E3C4C6B5DD /* AIUsageWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIUsageWindowTests.swift; sourceTree = "<group>"; };
+		F2CC75D6D8FDA1AB9EE2AC95 /* AIAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAccount.swift; sourceTree = "<group>"; };
 		F632DCCA098E27062054EBDF /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		F76EE94C536A35743800598E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		F7A14BFF0D54E1FC7B8BB91C /* NotchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchView.swift; sourceTree = "<group>"; };
@@ -66,6 +111,8 @@
 			isa = PBXGroup;
 			children = (
 				38509021E16BDB18F6FBE17A /* .gitkeep */,
+				3E4A2B020BAAB211D1ADBB3C /* AIProvider.swift */,
+				971009D213155A75A805062E /* Codex */,
 			);
 			path = Providers;
 			sourceTree = "<group>";
@@ -86,8 +133,19 @@
 			isa = PBXGroup;
 			children = (
 				F76EE94C536A35743800598E /* .gitkeep */,
+				0921B743C704F4E8C60A8E54 /* AIProviderManager.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		51190ECD27AF33DAD9AE6085 /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				2B261D4CE454D39A7DC7A38D /* AICompactStatusView.swift */,
+				33680E807604ECFACDCC4B45 /* AIProviderCard.swift */,
+				7B14DA67FA739102462EE1E5 /* AIUsageBar.swift */,
+			);
+			path = AI;
 			sourceTree = "<group>";
 		};
 		73908F554FA6B2C4F09D102D /* Shelf */ = {
@@ -102,8 +160,20 @@
 			isa = PBXGroup;
 			children = (
 				9A920EA084076C2CE77C8863 /* DevNotch.app */,
+				D6015C72D6969677CF0BAD18 /* DevNotchTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		971009D213155A75A805062E /* Codex */ = {
+			isa = PBXGroup;
+			children = (
+				592A71573DF76BD0CA62797C /* CodexAppServer.swift */,
+				30C7823A8C3B80F4A1C1F20C /* CodexExecutableLocator.swift */,
+				A17C386A5871435F415E6715 /* CodexModels.swift */,
+				A2218DE016ED9CC1D5D11411 /* CodexProvider.swift */,
+			);
+			path = Codex;
 			sourceTree = "<group>";
 		};
 		9790D7527F7B119F0B42749E /* Music */ = {
@@ -128,6 +198,11 @@
 			isa = PBXGroup;
 			children = (
 				DD07E63E673D311A88287B05 /* .gitkeep */,
+				F2CC75D6D8FDA1AB9EE2AC95 /* AIAccount.swift */,
+				B49334A35A05FDD8CFA30053 /* AIProviderID.swift */,
+				DA40E163B857FAE1A8B1E8D0 /* AIProviderStatus.swift */,
+				D787EF2E82A96C913FEA66E0 /* AIUsage.swift */,
+				3DC90B2022C4B74C9FE3D8D7 /* AIUsageWindow.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -139,6 +214,7 @@
 				A20DD1C3C6D4CECC6F3260DF /* ExpandedNotchView.swift */,
 				8375154B84A100212CEC229E /* HoveredNotchView.swift */,
 				F7A14BFF0D54E1FC7B8BB91C /* NotchView.swift */,
+				51190ECD27AF33DAD9AE6085 /* AI */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -147,6 +223,7 @@
 			isa = PBXGroup;
 			children = (
 				F2E504A7B8D207E66B0EBC91 /* DevNotch */,
+				FF745B488E9223FAF1346F52 /* DevNotchTests */,
 				7E06F8339DE17B0512E8F61F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -174,6 +251,17 @@
 			path = DevNotch;
 			sourceTree = "<group>";
 		};
+		FF745B488E9223FAF1346F52 /* DevNotchTests */ = {
+			isa = PBXGroup;
+			children = (
+				C76B3412C5FE86A0068C9F76 /* AIProviderStatusTests.swift */,
+				E98DDFAEF6F495E3C4C6B5DD /* AIUsageWindowTests.swift */,
+				815841549041A15A50709C7F /* CodexParsingTests.swift */,
+			);
+			name = DevNotchTests;
+			path = Tests/DevNotchTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -194,6 +282,24 @@
 			productReference = 9A920EA084076C2CE77C8863 /* DevNotch.app */;
 			productType = "com.apple.product-type.application";
 		};
+		B4EE996BA023FAF906FA2D8F /* DevNotchTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B11D4E543E5DC716D97ACEF4 /* Build configuration list for PBXNativeTarget "DevNotchTests" */;
+			buildPhases = (
+				FBF6DA636A0189201570BEF0 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5111805BC452BA2474BFA8BB /* PBXTargetDependency */,
+			);
+			name = DevNotchTests;
+			packageProductDependencies = (
+			);
+			productName = DevNotchTests;
+			productReference = D6015C72D6969677CF0BAD18 /* DevNotchTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -204,6 +310,9 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					AD3D6E5CDDD688B901D87863 = {
+						ProvisioningStyle = Automatic;
+					};
+					B4EE996BA023FAF906FA2D8F = {
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -223,6 +332,7 @@
 			projectRoot = "";
 			targets = (
 				AD3D6E5CDDD688B901D87863 /* DevNotch */,
+				B4EE996BA023FAF906FA2D8F /* DevNotchTests */,
 			);
 		};
 /* End PBXProject section */
@@ -232,7 +342,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94DDF6F8EB9BAC2BDA867B54 /* AIAccount.swift in Sources */,
+				7DB029B9BA3A2A5D4F2760A8 /* AICompactStatusView.swift in Sources */,
+				6E17F317BF8780244DD67E47 /* AIProvider.swift in Sources */,
+				899666FEB08CA31F5C3D67C2 /* AIProviderCard.swift in Sources */,
+				5CFE95A38774E4044CE8C5FE /* AIProviderID.swift in Sources */,
+				0421CED0BADD6803D7471648 /* AIProviderManager.swift in Sources */,
+				27D363D05E3E1A126638CE24 /* AIProviderStatus.swift in Sources */,
+				A08902720C6F228119CF5A87 /* AIUsage.swift in Sources */,
+				81B40E7C706EE08851B661E8 /* AIUsageBar.swift in Sources */,
+				7A3F7A5DAEEB7A2F14A93163 /* AIUsageWindow.swift in Sources */,
 				B81AD5C347F78C2916E27903 /* AppDelegate.swift in Sources */,
+				31B8AD38D1DC6A97766BB982 /* CodexAppServer.swift in Sources */,
+				D855887A4D0E514144D5286D /* CodexExecutableLocator.swift in Sources */,
+				05FBF7D51EC1106506D28F06 /* CodexModels.swift in Sources */,
+				2A9A4B8381583E5FE6FB5CE1 /* CodexProvider.swift in Sources */,
 				085C6D8C7D58A0EC2B0F8FDC /* CompactNotchView.swift in Sources */,
 				D0FEB775906A74CC11DE893A /* DevNotchApp.swift in Sources */,
 				476BC60D770095EFDD52B5EF /* ExpandedNotchView.swift in Sources */,
@@ -246,7 +370,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FBF6DA636A0189201570BEF0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9F2D87C2CA984B5622378601 /* AIProviderStatusTests.swift in Sources */,
+				ACD690978B40CA319A5AC909 /* AIUsageWindowTests.swift in Sources */,
+				7E69865FA2D15B7628F12CA4 /* CodexParsingTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5111805BC452BA2474BFA8BB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AD3D6E5CDDD688B901D87863 /* DevNotch */;
+			targetProxy = 33BFDBF2C7885BE54705503D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		089D545BB4BC22A39E9B1BCA /* Release */ = {
@@ -390,6 +532,28 @@
 			};
 			name = Debug;
 		};
+		E03C93BE2F61D4A7070C85D6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.halunhaku.DevNotchTests;
+				PRODUCT_NAME = DevNotchTests;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DevNotch.app/Contents/MacOS/DevNotch";
+			};
+			name = Debug;
+		};
 		E9B6EFE5977D30D97790DA24 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -410,6 +574,28 @@
 			};
 			name = Debug;
 		};
+		F8487378F89923A6EDB3432D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.halunhaku.DevNotchTests;
+				PRODUCT_NAME = DevNotchTests;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DevNotch.app/Contents/MacOS/DevNotch";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -427,6 +613,15 @@
 			buildConfigurations = (
 				E9B6EFE5977D30D97790DA24 /* Debug */,
 				6D9219CA635AEAE20CFAD6FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B11D4E543E5DC716D97ACEF4 /* Build configuration list for PBXNativeTarget "DevNotchTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E03C93BE2F61D4A7070C85D6 /* Debug */,
+				F8487378F89923A6EDB3432D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

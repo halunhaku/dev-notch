@@ -26,3 +26,19 @@ targets:
         CODE_SIGN_IDENTITY: "-"
         COMBINE_HIDPI_IMAGES: YES
         SWIFT_STRICT_CONCURRENCY: complete
+  DevNotchTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Tests/DevNotchTests
+    dependencies:
+      - target: DevNotch
+    settings:
+      base:
+        PRODUCT_NAME: DevNotchTests
+        PRODUCT_BUNDLE_IDENTIFIER: com.halunhaku.DevNotchTests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "-"
+        SWIFT_STRICT_CONCURRENCY: complete

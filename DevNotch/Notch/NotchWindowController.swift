@@ -45,13 +45,19 @@ final class NotchContainerView: NSView {
 final class NotchWindowController: NSWindowController {
     let model: NotchModel
     let screenManager: ScreenManager
+    let providerManager: AIProviderManager
 
     private var cancellables = Set<AnyCancellable>()
     private var globalClickMonitor: Any?
 
-    init(model: NotchModel = NotchModel(), screenManager: ScreenManager = ScreenManager()) {
+    init(
+        model: NotchModel = NotchModel(),
+        screenManager: ScreenManager = ScreenManager(),
+        providerManager: AIProviderManager = AIProviderManager()
+    ) {
         self.model = model
         self.screenManager = screenManager
+        self.providerManager = providerManager
 
         let initialScreen = screenManager.currentScreen ?? NSScreen.main ?? NSScreen.screens[0]
         let initialFrame = NotchGeometry.windowFrame(for: .compact, on: initialScreen)
@@ -71,7 +77,11 @@ final class NotchWindowController: NSWindowController {
         let container = NotchContainerView(frame: NSRect(origin: .zero, size: panel.frame.size))
         container.autoresizingMask = [.width, .height]
 
-        let rootView = NotchView(model: model, screenManager: screenManager)
+        let rootView = NotchView(
+            model: model,
+            screenManager: screenManager,
+            providerManager: providerManager
+        )
         let hostingView = NSHostingView(rootView: rootView)
 
         if #available(macOS 13.0, *) {
@@ -152,8 +162,10 @@ final class NotchWindowController: NSWindowController {
     }
 
     deinit {
-        if let monitor = globalClickMonitor {
-            NSEvent.removeMonitor(monitor)
+        MainActor.assumeIsolated {
+            if let monitor = self.globalClickMonitor {
+                NSEvent.removeMonitor(monitor)
+            }
         }
     }
 }
