@@ -16,11 +16,11 @@ final class AntigravityProvider: AIProvider, @unchecked Sendable {
 
     private var _status: AIProviderStatus = .checking
     private var _account: AIAccount?
+    private var _usage: AIUsage?
     private var _installState: AntigravityInstallState = .notInstalled
     private var _authInfo: AntigravityAuthInfo = AntigravityAuthInfo()
 
     var onStateChanged: (@Sendable () -> Void)?
-
     init(appLocator: AntigravityAppLocating = DefaultAntigravityAppLocator()) {
         self.appLocator = appLocator
         activityBridge.onActivityChanged = { [weak self] in
@@ -31,11 +31,13 @@ final class AntigravityProvider: AIProvider, @unchecked Sendable {
     var status: AIProviderStatus {
         lock.withLock { _status }
     }
-
     var account: AIAccount? {
         lock.withLock { _account }
     }
 
+    var usage: AIUsage? {
+        lock.withLock { _usage }
+    }
     var installState: AntigravityInstallState {
         lock.withLock { _installState }
     }
@@ -75,9 +77,16 @@ final class AntigravityProvider: AIProvider, @unchecked Sendable {
         return account
     }
 
-    /// Fetches all active metrics for Antigravity.
+    func fetchUsage() async throws -> AIUsage? {
+        return usage
+    }
+
+    /// Fetches all active metrics for Antigravity (Usage quotas & Context Window).
     func fetchMetrics() async -> [AIProviderMetric] {
         var metrics: [AIProviderMetric] = []
+        if let usage = self.usage {
+            metrics.append(contentsOf: usage.windows.map { .usageWindow($0) })
+        }
         if let context = activityBridge.contextMetric {
             metrics.append(.context(context))
         }
@@ -106,8 +115,15 @@ final class AntigravityProvider: AIProvider, @unchecked Sendable {
         if activityBridge.presentationState == .working {
             return AICompactMetric(label: "Antigravity", value: "Working", secondaryValue: nil, severity: .normal)
         }
+        // 3. Quota Summary Window (5h or Weekly limit)
+        if let usage = self.usage, let window = usage.primaryWindow {
+            let pct = Int(round(window.remainingPercent))
+            let label = window.durationMinutes <= 300 ? "5h" : "Wk"
+            let severity: AICompactMetricSeverity = pct < 20 ? .warning : .normal
+            return AICompactMetric(label: "Antigravity", value: "\(label) \(pct)%", secondaryValue: nil, severity: severity)
+        }
 
-        // 3. Idle with Context
+        // 4. Idle with Context
         if let context = activityBridge.contextMetric {
             let ctx = Int(round(context.usedPercent))
             let severity: AICompactMetricSeverity = ctx > 80 ? .warning : .normal
@@ -116,7 +132,6 @@ final class AntigravityProvider: AIProvider, @unchecked Sendable {
 
         return AICompactMetric(label: "Antigravity", value: "Ready", secondaryValue: nil, severity: .normal)
     }
-
     /// Refreshes install detection and authentication status.
     func refreshSnapshot() async {
         // 1. Detect CLI
@@ -165,6 +180,12 @@ final class AntigravityProvider: AIProvider, @unchecked Sendable {
                 self._account = AIAccount(email: nil, planType: "Free", accountType: "antigravity")
                 self._status = .notAuthenticated
             }
+        }
+
+        // 4. Probe live Antigravity LanguageServerService quotas (5-hour and weekly limit)
+        let liveQuota = await AntigravityQuotaProbe.fetchQuotaSummary()
+        lock.withLock {
+            self._usage = liveQuota
         }
 
         // Also check if any existing bridge session data is on disk

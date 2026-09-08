@@ -98,8 +98,10 @@
 		C9040F97754A0B9C5ADCBB7D /* NotchWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7967A7BFEE7F86B9E0EBF6C3 /* NotchWindowController.swift */; };
 		D0FEB775906A74CC11DE893A /* DevNotchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C2A8E7BA24448035BF90B6B /* DevNotchApp.swift */; };
 		D855887A4D0E514144D5286D /* CodexExecutableLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C7823A8C3B80F4A1C1F20C /* CodexExecutableLocator.swift */; };
+		DA51202CF531587554D38D5D /* AntigravityQuotaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C51AF9065EA98E1736CA103E /* AntigravityQuotaTests.swift */; };
 		DD02241B3EA283909BF524B4 /* AntigravityActivityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33E66433CD5EC4A10179F725 /* AntigravityActivityTests.swift */; };
 		DE9A144FDC197391A95EBB67 /* AIProviderRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D45F0748FDAF0DC1059E1E /* AIProviderRegistry.swift */; };
+		E059A891D31AA9C952FC9658 /* AntigravityQuotaProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 731590F4EAF3E693E3B1FCFA /* AntigravityQuotaProbe.swift */; };
 		E2E49C8250B0667F846AFC41 /* AntigravityAuthInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C7FCCD029F574023E2B285 /* AntigravityAuthInspector.swift */; };
 		E34E69F499D2A2520C35AD6F /* OpenCodeExecutableLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ED94D6157B8CBB0CA76A462 /* OpenCodeExecutableLocator.swift */; };
 		E82D7ADDD97D528674C8A0C4 /* AICredits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B3E1229D22234E1671689C /* AICredits.swift */; };
@@ -202,6 +204,7 @@
 		6E9AE897B99318F47C3D59D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6FAF3F53F074E10E9466D444 /* NotchGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchGeometry.swift; sourceTree = "<group>"; };
 		6FFBC0FE92E41FED50716053 /* AntigravityDiscoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AntigravityDiscoveryTests.swift; sourceTree = "<group>"; };
+		731590F4EAF3E693E3B1FCFA /* AntigravityQuotaProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AntigravityQuotaProbe.swift; sourceTree = "<group>"; };
 		76B3E1229D22234E1671689C /* AICredits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICredits.swift; sourceTree = "<group>"; };
 		7967A7BFEE7F86B9E0EBF6C3 /* NotchWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchWindowController.swift; sourceTree = "<group>"; };
 		7B14DA67FA739102462EE1E5 /* AIUsageBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIUsageBar.swift; sourceTree = "<group>"; };
@@ -240,6 +243,7 @@
 		B7F28F93CD71B7D3C9EC607D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		B94DC471E37A3C000171257E /* AntigravityModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AntigravityModels.swift; sourceTree = "<group>"; };
 		B9A6FA451E3498AAF759D39B /* DeepSeekParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepSeekParsingTests.swift; sourceTree = "<group>"; };
+		C51AF9065EA98E1736CA103E /* AntigravityQuotaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AntigravityQuotaTests.swift; sourceTree = "<group>"; };
 		C6F6B257C8E1E72BF3DD5315 /* GlobalHotKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotKeyManager.swift; sourceTree = "<group>"; };
 		C76B3412C5FE86A0068C9F76 /* AIProviderStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderStatusTests.swift; sourceTree = "<group>"; };
 		CBCBCFCBA39467B8E746C5E8 /* AIProviderMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderMetric.swift; sourceTree = "<group>"; };
@@ -443,6 +447,7 @@
 				8BD3B65A3AF43C96B30569AB /* AntigravityIntegrationManager.swift */,
 				B94DC471E37A3C000171257E /* AntigravityModels.swift */,
 				B44F58DCA82287C45E8966C8 /* AntigravityProvider.swift */,
+				731590F4EAF3E693E3B1FCFA /* AntigravityQuotaProbe.swift */,
 			);
 			path = Antigravity;
 			sourceTree = "<group>";
@@ -563,6 +568,7 @@
 				33E66433CD5EC4A10179F725 /* AntigravityActivityTests.swift */,
 				6FFBC0FE92E41FED50716053 /* AntigravityDiscoveryTests.swift */,
 				443DB20221C032A55DC22083 /* AntigravityIntegrationTests.swift */,
+				C51AF9065EA98E1736CA103E /* AntigravityQuotaTests.swift */,
 				8A1B83416308300F7EE8EAA5 /* ClaudeActivityTests.swift */,
 				04CC255B5C31F946597197C1 /* ClaudeIntegrationTests.swift */,
 				08B41EB12476C46E6C981FA3 /* ClaudeParsingTests.swift */,
@@ -742,6 +748,7 @@
 				33C66DB0F5A1DA475BDA48DC /* AntigravityIntegrationManager.swift in Sources */,
 				233C7BB1E41FB6EF7303E2CB /* AntigravityModels.swift in Sources */,
 				60BC916CEBA402D150F4E4FA /* AntigravityProvider.swift in Sources */,
+				E059A891D31AA9C952FC9658 /* AntigravityQuotaProbe.swift in Sources */,
 				B81AD5C347F78C2916E27903 /* AppDelegate.swift in Sources */,
 				4288BA49ABEF5F06F3E4051A /* ClaudeActivityBridge.swift in Sources */,
 				06C998600E59D98875DCECC0 /* ClaudeAuthInspector.swift in Sources */,
@@ -816,6 +823,7 @@
 				DD02241B3EA283909BF524B4 /* AntigravityActivityTests.swift in Sources */,
 				3B0068A928759F120950E034 /* AntigravityDiscoveryTests.swift in Sources */,
 				74B47664AAB79A192DFFFE41 /* AntigravityIntegrationTests.swift in Sources */,
+				DA51202CF531587554D38D5D /* AntigravityQuotaTests.swift in Sources */,
 				4C6C7166470E9B4C433C6491 /* ClaudeActivityTests.swift in Sources */,
 				3163A1BE8BC4D0A467933636 /* ClaudeIntegrationTests.swift in Sources */,
 				C33DB1B93C5317AD400579F2 /* ClaudeParsingTests.swift in Sources */,

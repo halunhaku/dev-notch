@@ -26,7 +26,7 @@ final class NotchModel: ObservableObject {
             // Mouse exited
             if state == .hovered {
                 hoverDebounceTimer = Just(())
-                    .delay(for: .milliseconds(160), scheduler: RunLoop.main)
+                    .delay(for: .milliseconds(350), scheduler: RunLoop.main)
                     .sink { [weak self] in
                         guard let self = self, !self.isHovered, self.state == .hovered else { return }
                         withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) {

@@ -140,10 +140,24 @@ struct NotchGeometry {
 
     /// Calculates the full NSWindow frame in screen coordinates.
     /// The window is anchored at the top of the screen (`screen.frame.maxY`).
+    /// Uses identical horizontal origin and width for .compact and .hovered to prevent
+    /// horizontal frame jumping and eliminate hover hysteresis/flickering.
     static func windowFrame(for state: NotchState, on screen: NSScreen) -> CGRect {
-        let size = visualSize(for: state, on: screen)
-        let windowWidth = size.width + horizontalPadding * 2
-        let windowHeight = size.height + bottomPadding
+        let windowWidth: CGFloat
+        let windowHeight: CGFloat
+
+        switch state {
+        case .compact, .hovered:
+            let hoveredSize = visualSize(for: .hovered, on: screen)
+            windowWidth = hoveredSize.width + horizontalPadding * 2
+            let visualHeight = visualSize(for: state, on: screen).height
+            windowHeight = visualHeight + bottomPadding
+        case .expanded:
+            let expandedSize = visualSize(for: .expanded, on: screen)
+            windowWidth = expandedSize.width + horizontalPadding * 2
+            windowHeight = expandedSize.height + bottomPadding
+        }
+
         let x = screen.frame.midX - windowWidth / 2
         let y = screen.frame.maxY - windowHeight
         return CGRect(x: x, y: y, width: windowWidth, height: windowHeight)
@@ -152,8 +166,9 @@ struct NotchGeometry {
     /// Returns the rect of the visible black notch in window-local coordinates.
     /// In window coordinates, (0, 0) is the bottom-left corner of the window.
     static func visualRectInWindow(for state: NotchState, on screen: NSScreen) -> CGRect {
+        let windowRect = windowFrame(for: state, on: screen)
         let size = visualSize(for: state, on: screen)
-        let x = horizontalPadding
+        let x = (windowRect.width - size.width) / 2
         let y = bottomPadding
         return CGRect(x: x, y: y, width: size.width, height: size.height)
     }
