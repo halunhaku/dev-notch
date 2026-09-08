@@ -21,9 +21,19 @@ enum SettingsOpener {
         "com.apple.SwiftUI.Settings"
     ]
 
+    /// Title of the hidden SwiftUI context window; never a real Settings window.
+    private static let hiddenContextWindowTitle = "DevNotchHiddenContext"
+
     private static var closeObserver: NSObjectProtocol?
 
     static func openSettings() {
+        // Reuse an existing Settings window instead of stacking duplicates.
+        if let existing = findSettingsWindow(), existing.isVisible {
+            NSApp.activate(ignoringOtherApps: true)
+            existing.makeKeyAndOrderFront(nil)
+            return
+        }
+
         NSApp.setActivationPolicy(.regular)
         Task { @MainActor in
             // Give the Dock icon switch a runloop to take effect.
@@ -47,14 +57,16 @@ enum SettingsOpener {
                 return
             }
 
+            // Native Settings windows are fixed-size; keep minimize available.
+            settingsWindow.styleMask.insert(.miniaturizable)
             settingsWindow.makeKeyAndOrderFront(nil)
             settingsWindow.orderFrontRegardless()
             installCloseObserver(for: settingsWindow)
         }
     }
-
     static func findSettingsWindow() -> NSWindow? {
         NSApp.windows.first { window in
+            guard window.title != hiddenContextWindowTitle else { return false }
             if let identifier = window.identifier?.rawValue,
                settingsWindowIdentifiers.contains(identifier) {
                 return true

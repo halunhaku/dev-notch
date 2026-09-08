@@ -7,8 +7,7 @@ struct DevNotchApp: App {
 
     var body: some Scene {
         // Must be declared before the Settings scene: the hidden window provides the
-        // SwiftUI render-tree context that `openSettings` requires on macOS 26.
-        Window("DevNotchSettingsContext", id: "HiddenSettingsContext") {
+        Window("DevNotchHiddenContext", id: "HiddenSettingsContext") {
             HiddenSettingsContextView()
         }
         .windowResizability(.contentSize)
