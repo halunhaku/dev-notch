@@ -24,6 +24,12 @@ final class PreferencesStore: ObservableObject {
         return dur > 0 ? dur : 3.0
     }
 
+    /// Nonisolated static method to check if a provider is enabled by user.
+    nonisolated static func isProviderEnabled(id: AIProviderID) -> Bool {
+        let savedMap = UserDefaults.standard.dictionary(forKey: keyProviderEnabled) as? [String: Bool] ?? [:]
+        return savedMap[id.rawValue] ?? true
+    }
+
     @Published var showMenuBarItem: Bool {
         didSet { UserDefaults.standard.set(showMenuBarItem, forKey: Self.keyShowMenuBarItem) }
     }

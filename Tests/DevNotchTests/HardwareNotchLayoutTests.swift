@@ -134,4 +134,25 @@ final class HardwareNotchLayoutTests: XCTestCase {
         let centerPoint = CGPoint(x: visualRect.midX, y: visualRect.midY)
         XCTAssertTrue(visualRect.contains(centerPoint))
     }
+
+    func testCompactIdleVisualSizeMatchesHardwareNotchExactWidth() {
+        let screen = NSScreen.main ?? NSScreen.screens[0]
+        let model = NotchGeometry.hardwareNotchModel(on: screen)
+        let compactSize = NotchGeometry.visualSize(for: .compact, on: screen)
+        if model.hasHardwareNotch {
+            XCTAssertEqual(compactSize.width, model.hardwareNotchWidth, "Compact idle width must equal hardware notch width to avoid blocking menu bar icons")
+            XCTAssertEqual(compactSize.height, model.hardwareNotchHeight)
+        } else {
+            XCTAssertEqual(compactSize.width, 180)
+            XCTAssertEqual(compactSize.height, 32)
+        }
+    }
+
+    @MainActor
+    func testDisabledProviderFilteringInManager() {
+        let registry = AIProviderRegistry.makeDefaultRegistry()
+        let manager = AIProviderManager(registry: registry)
+        XCTAssertEqual(manager.providerIDs.count, 5)
+        XCTAssertEqual(manager.enabledProviderIDs.count, 5)
+    }
 }

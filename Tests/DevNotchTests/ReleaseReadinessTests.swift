@@ -190,7 +190,7 @@ final class ReleaseReadinessTests: XCTestCase {
 
         let checklistURL = projectRoot.appendingPathComponent("RELEASE_CHECKLIST.md")
         let checklistText = try String(contentsOf: checklistURL, encoding: .utf8)
-        XCTAssertTrue(checklistText.contains("NOT APPLICABLE — GitHub unsigned distribution"))
+        XCTAssertTrue(checklistText.contains("N/A — GitHub Direct Distribution"))
         XCTAssertTrue(checklistText.contains("DevNotch-1.0.0.dmg"))
     }
 }

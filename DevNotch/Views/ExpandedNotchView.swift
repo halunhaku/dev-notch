@@ -176,7 +176,7 @@ struct ExpandedNotchView: View {
 
                 Spacer()
 
-                Text("\(providerManager.providerIDs.count) Providers")
+                Text("\(providerManager.enabledProviderIDs.count) Active")
                     .font(.system(size: 9))
                     .foregroundColor(.white.opacity(0.4))
             }
@@ -184,7 +184,7 @@ struct ExpandedNotchView: View {
             // Scrollable Multi-Provider Cards Container
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 8) {
-                    ForEach(providerManager.providerIDs, id: \.self) { id in
+                    ForEach(providerManager.enabledProviderIDs, id: \.self) { id in
                         if let snapshot = providerManager.snapshots[id] {
                             AIProviderCard(
                                 snapshot: snapshot,

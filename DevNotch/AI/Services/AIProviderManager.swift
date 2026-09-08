@@ -106,21 +106,34 @@ final class AIProviderManager: ObservableObject {
 
     /// Active primary provider used for Compact and Hovered notch states.
     /// Follows priority: Preferred Ready -> Any First Ready -> Preferred (Non-ready).
+    /// Provider IDs currently enabled by the user in Settings.
+    var enabledProviderIDs: [AIProviderID] {
+        providerIDs.filter { PreferencesStore.isProviderEnabled(id: $0) }
+    }
+
     var activePrimaryID: AIProviderID {
-        // 1. Preferred provider is ready
-        if let preferredSnapshot = snapshots[preferredPrimaryID], preferredSnapshot.status.isReady {
+        let enabled = enabledProviderIDs
+        guard !enabled.isEmpty else { return preferredPrimaryID }
+
+        // 1. Preferred provider is enabled and ready
+        if enabled.contains(preferredPrimaryID),
+           let preferredSnapshot = snapshots[preferredPrimaryID],
+           preferredSnapshot.status.isReady {
             return preferredPrimaryID
         }
 
-        // 2. Runtime fallback: first available ready provider
-        for id in providerIDs {
+        // 2. Runtime fallback: first available ready enabled provider
+        for id in enabled {
             if let snapshot = snapshots[id], snapshot.status.isReady {
                 return id
             }
         }
 
-        // 3. Fallback: preferred provider even if checking/offline
-        return preferredPrimaryID
+        // 3. Fallback: preferred provider if enabled, otherwise first enabled provider
+        if enabled.contains(preferredPrimaryID) {
+            return preferredPrimaryID
+        }
+        return enabled.first ?? preferredPrimaryID
     }
 
     /// Snapshot for the active primary provider.

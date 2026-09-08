@@ -96,9 +96,9 @@ struct NotchGeometry {
         if model.hasHardwareNotch {
             switch state {
             case .compact:
-                // Left wing (88pt) + physical notch + right wing (88pt)
+                // Flush with the physical camera notch so it occupies zero menu bar space and blocks no icons
                 return CGSize(
-                    width: model.hardwareNotchWidth + 176,
+                    width: model.hardwareNotchWidth,
                     height: max(32, model.hardwareNotchHeight)
                 )
             case .hovered:
