@@ -1,0 +1,14 @@
+Dev Notch Installation
+
+Requirements:
+- macOS 14 or later
+- Apple Silicon Mac (or virtual notch on supported external displays)
+
+1. Drag Dev Notch into Applications.
+2. Open Dev Notch from Applications.
+
+If macOS blocks the first launch:
+System Settings -> Privacy & Security -> Open Anyway.
+
+Dev Notch is distributed directly through GitHub without an Apple Developer ID.
+Manual authorization is typically only needed on the first launch.

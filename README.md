@@ -13,23 +13,49 @@
 - **Phase 5：Claude Code Provider 接入与 Live Activity 桥接（已完成）**
 - **Phase 6：Google Antigravity Provider + Generic AI Activity + Task Pulse（已完成）**
 - **Phase 7：系统全局快捷键 + 菜单栏状态图标 + 原生设置面板 + 自启动（已完成）**
-- **Phase 8：v0.9.0-rc1 发行候选审计、Bundle Helper、Hardened Runtime（进行中）**
+- **Phase 8：v0.9.0-rc1 发行候选审计、Bundle Helper、Hardened Runtime（已完成）**
+- **Phase 9：v1.0.0 GitHub Direct Distribution 正式发行（已就绪）**
 
 ## Requirements
 
 - macOS 14 or later
 - Apple Silicon Mac; the notch interface also adapts to supported displays without a physical notch
 
-## Install
+## Installing Dev Notch
 
-1. Download the Dev Notch DMG.
-2. Drag `DevNotch.app` to `/Applications` or `~/Applications`.
-3. Open Dev Notch from Applications.
+1. Download `DevNotch-1.0.0.dmg` from GitHub Releases.
+2. Open the DMG.
+3. Drag `Dev Notch` (`DevNotch.app`) into `/Applications` (or `~/Applications`).
+4. Open Dev Notch from Applications.
 
-Move Dev Notch to Applications before enabling Claude/Antigravity integrations or Launch at Login. The app can run from a DMG, but persistent integrations are deliberately blocked there.
+### macOS Security Notice
 
-The public distribution artifact must be Developer ID signed, notarized, stapled, and Gatekeeper accepted. A file whose name contains `-local` is for local verification only.
+Dev Notch is currently distributed directly through GitHub and is not signed with an Apple Developer ID or notarized by Apple.
 
+When opening Dev Notch for the first time, macOS may display a notice stating that the developer cannot be verified. This is expected for direct GitHub distributions without Apple Developer Program membership.
+
+To allow Dev Notch to run (recommended standard macOS flow):
+1. Attempt to open Dev Notch. If macOS displays a verification alert, click **Done** (or **Cancel**).
+2. Open **System Settings** -> **Privacy & Security**.
+3. Scroll down to the **Security** section where you will see: *"DevNotch was blocked from use because it is not from an identified developer"*.
+4. Click **Open Anyway** (仍要打开) and confirm with your macOS user password / Touch ID.
+5. Click **Open** when prompted.
+
+This authorization is normally required only once for the first launch.
+
+> **Security note**: We do **not** recommend disabling Gatekeeper globally (`sudo spctl --master-disable`), as doing so reduces your Mac's overall system security. Use the standard macOS System Settings authorization flow above.
+
+### Advanced Terminal Troubleshooting (Optional)
+
+For power users familiar with Terminal, if macOS quarantine prevents launching after copying to `/Applications`:
+```bash
+xattr -d com.apple.quarantine /Applications/DevNotch.app
+```
+*(Note: System Settings -> Privacy & Security -> Open Anyway remains the recommended primary method for all users.)*
+
+### Integration Prerequisites
+
+Dev Notch must be moved to `/Applications` or `~/Applications` before enabling Claude Integration, Google Antigravity Integration, or Launch at Login. While Dev Notch can run directly inside a DMG or Downloads folder for temporary inspection, persistent CLI hook integrations and background services intentionally require a stable Applications directory path to avoid pointing hooks to ephemeral volumes.
 ---
 
 ## 🛠 技术栈

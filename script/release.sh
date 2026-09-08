@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly MODE="${1:-}"
+readonly MODE="${1:-github}"
 readonly PRODUCT_NAME="DevNotch"
-readonly VERSION="0.9.0-rc1"
+readonly VERSION="1.0.0"
 readonly PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly BUILD_ROOT="$PROJECT_ROOT/build/release"
 readonly ARCHIVE_PATH="$BUILD_ROOT/DevNotch.xcarchive"
@@ -13,13 +13,14 @@ readonly EXPORTED_APP="$EXPORT_ROOT/DevNotch.app"
 readonly EXPORT_OPTIONS="$BUILD_ROOT/ExportOptions.plist"
 readonly STAGING_ROOT="$BUILD_ROOT/dmg-root"
 readonly DIST_ROOT="$PROJECT_ROOT/dist"
+readonly GITHUB_DMG="$DIST_ROOT/DevNotch-${VERSION}.dmg"
 readonly LOCAL_DMG="$DIST_ROOT/DevNotch-${VERSION}-local.dmg"
 readonly PUBLIC_DMG="$DIST_ROOT/DevNotch-${VERSION}.dmg"
 export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"
 readonly DEVELOPER_DIR
 
 usage() {
-    echo "Usage: ./script/release.sh local|developer-id" >&2
+    echo "Usage: ./script/release.sh [github|local|developer-id]" >&2
     exit 64
 }
 
@@ -57,8 +58,21 @@ verify_code() {
 
     for item in "$claude_helper" "$activity_helper" "$app"; do
         [[ -e "$item" ]] || { echo "ERROR: Missing nested code: $item" >&2; exit 1; }
+        [[ -x "$item" || -d "$item" ]] || { echo "ERROR: Code artifact is not executable: $item" >&2; exit 1; }
         codesign --verify --strict --verbose=2 "$item"
-        codesign -dvvv --entitlements :- "$item" 2>&1
+        local cs_info
+        cs_info="$(codesign -dvvv "$item" 2>&1)"
+        if ! echo "$cs_info" | grep -q "flags=.*runtime"; then
+            echo "ERROR: Hardened runtime flag missing on $item" >&2
+            exit 1
+        fi
+    done
+
+    for bin in "$claude_helper" "$activity_helper" "$app/Contents/MacOS/DevNotch"; do
+        if otool -L "$bin" | grep '^[[:space:]]' | grep -E "DerivedData|/Users/"; then
+            echo "ERROR: Unexpected linked library path in $bin" >&2
+            exit 1
+        fi
     done
 }
 
@@ -80,6 +94,19 @@ create_dmg() {
     reset_directory "$STAGING_ROOT"
     /usr/bin/ditto "$app" "$STAGING_ROOT/DevNotch.app"
     ln -s /Applications "$STAGING_ROOT/Applications"
+    if [[ -f "$PROJECT_ROOT/INSTALL.txt" ]]; then
+        cp "$PROJECT_ROOT/INSTALL.txt" "$STAGING_ROOT/INSTALL.txt"
+    else
+        cat >"$STAGING_ROOT/INSTALL.txt" <<'EOF'
+Dev Notch Installation
+
+1. Drag Dev Notch into Applications.
+2. Open Dev Notch from Applications.
+
+If macOS blocks the first launch:
+System Settings -> Privacy & Security -> Open Anyway.
+EOF
+    fi
     rm -f "$output"
     hdiutil create -volname "Dev Notch ${VERSION}" -srcfolder "$STAGING_ROOT" -ov -format UDZO "$output"
 }
@@ -106,7 +133,7 @@ notarize_and_staple() {
     xcrun stapler validate "$staple_target"
 }
 
-[[ "$MODE" == "local" || "$MODE" == "developer-id" ]] || usage
+[[ "$MODE" == "github" || "$MODE" == "local" || "$MODE" == "developer-id" ]] || usage
 require_command xcodebuild
 require_command xcrun
 require_command codesign
@@ -120,9 +147,18 @@ reset_directory "$BUILD_ROOT"
 if command -v xcodegen >/dev/null 2>&1; then
     xcodegen generate --quiet
 fi
+if [[ "${SKIP_TESTS:-0}" != "1" ]]; then
+    echo "==> Tests"
+    xcodebuild \
+        -project DevNotch.xcodeproj \
+        -scheme DevNotch \
+        -destination 'platform=macOS' \
+        test
+fi
+
 
 echo "==> Archive (Release)"
-if [[ "$MODE" == "local" ]]; then
+if [[ "$MODE" == "github" || "$MODE" == "local" ]]; then
     xcodebuild archive \
         -project DevNotch.xcodeproj \
         -scheme DevNotch \
@@ -166,7 +202,7 @@ fi
 
 [[ -d "$ARCHIVED_APP" ]] || { echo "ERROR: Archive did not contain DevNotch.app" >&2; exit 1; }
 reset_directory "$EXPORT_ROOT"
-if [[ "$MODE" == "local" ]]; then
+if [[ "$MODE" == "github" || "$MODE" == "local" ]]; then
     /usr/bin/ditto "$ARCHIVED_APP" "$EXPORTED_APP"
     sign_local_runtime "$EXPORTED_APP"
 else
@@ -184,14 +220,28 @@ fi
 echo "==> Verify"
 verify_code "$EXPORTED_APP"
 
+if [[ "$MODE" == "github" ]]; then
+    echo "==> Package"
+    create_dmg "$EXPORTED_APP" "$GITHUB_DMG"
+    echo "==> Checksum"
+    shasum -a 256 "$GITHUB_DMG" >"$GITHUB_DMG.sha256"
+    (cd "$DIST_ROOT" && shasum -c "$(basename "$GITHUB_DMG.sha256")")
+    echo "==> GitHub Direct Distribution release ready"
+    echo "DMG: $GITHUB_DMG"
+    echo "SHA-256: $GITHUB_DMG.sha256"
+    echo "Note: Dev Notch is distributed directly via GitHub without an Apple Developer ID."
+    echo "Users may need to allow launch on first run: System Settings -> Privacy & Security -> Open Anyway."
+    exit 0
+fi
+
 if [[ "$MODE" == "local" ]]; then
     echo "==> Package"
     create_dmg "$EXPORTED_APP" "$LOCAL_DMG"
     echo "==> Checksum"
     shasum -a 256 "$LOCAL_DMG" >"$LOCAL_DMG.sha256"
+    (cd "$DIST_ROOT" && shasum -c "$(basename "$LOCAL_DMG.sha256")")
     echo "WARNING:"
     echo "This build is not Developer ID signed/notarized."
-    echo "Do not distribute publicly as the production release."
     echo "Local artifact: $LOCAL_DMG"
     exit 0
 fi

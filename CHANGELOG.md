@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.0.0
+
+Official v1.0.0 release for GitHub Direct Distribution.
+
+### Highlights
+
+- **GitHub Direct Distribution**: Formally established release workflow distributing self-contained, ad-hoc signed and Hardened Runtime verified macOS DMG package via GitHub Releases.
+- **Native Notch Experience**: MacBook physical notch and external display floating island modes.
+- **Multi-Provider AI Quota & Activity**: OpenAI Codex, DeepSeek, Anthropic Claude Code, Google Antigravity, and OpenCode Go integrations.
+- **Task Pulse**: Sub-pixel ambient status glow with full Reduce Motion accessibility support.
+- **Zero-Permission Global Hotkey**: Carbon-based `⌃⌥Space` system toggle.
+- **Native Settings & Menu Bar**: Native SwiftUI Settings and macOS menu bar status item.
+- **Bundled Helper Executables**: Dedicated bridge executables (`DevNotchClaudeBridge` and `DevNotchActivityBridge`) embedded in the app bundle.
+- **Security & Installation Documentation**: Added clear installation instructions and macOS Gatekeeper `Open Anyway` guidance.
+
+### Known limitations
+
+- Claude subscription quota is not exposed through a stable machine-readable interface.
+- Google Antigravity subscription quota is not exposed through a stable machine-readable interface.
+- Claude authenticated Activity E2E requires a signed-in Claude CLI account on the host machine.
+
 ## 0.9.0-rc1
 
 Release candidate for the first public Dev Notch release.

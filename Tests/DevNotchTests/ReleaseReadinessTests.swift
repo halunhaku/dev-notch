@@ -115,4 +115,82 @@ final class ReleaseReadinessTests: XCTestCase {
         )
         XCTAssertNil(HookCommandParser.executablePath(in: ""))
     }
+
+    func testGitHubReleaseModeAndArtifactNaming() throws {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let scriptURL = projectRoot.appendingPathComponent("script/release.sh")
+        let script = try String(contentsOf: scriptURL, encoding: .utf8)
+
+        XCTAssertTrue(script.contains("MODE=\"${1:-github}\""), "Default release mode should be github")
+        XCTAssertTrue(script.contains("VERSION=\"1.0.0\""), "Release version should be 1.0.0")
+        XCTAssertTrue(script.contains("GITHUB_DMG=\"$DIST_ROOT/DevNotch-${VERSION}.dmg\""), "GitHub DMG naming should be DevNotch-1.0.0.dmg")
+        XCTAssertTrue(script.contains("shasum -a 256 \"$GITHUB_DMG\" >\"$GITHUB_DMG.sha256\""), "Checksum should match artifact naming")
+    }
+
+    func testReleaseScriptDoesNotRequireDeveloperIDOrNotaryInGitHubMode() throws {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let scriptURL = projectRoot.appendingPathComponent("script/release.sh")
+        let script = try String(contentsOf: scriptURL, encoding: .utf8)
+
+        XCTAssertTrue(script.contains("if [[ \"$MODE\" == \"github\" ]]; then"), "Script must branch specifically for github mode")
+        XCTAssertTrue(script.contains("create_dmg \"$EXPORTED_APP\" \"$GITHUB_DMG\""), "GitHub mode must create GitHub DMG directly")
+        XCTAssertTrue(script.contains("if [[ \"$MODE\" == \"github\" || \"$MODE\" == \"local\" ]]; then"), "Archive and export should support github mode without Developer ID")
+    }
+
+    func testReadmeContainsSecurityOpeningInstructions() throws {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let readmeURL = projectRoot.appendingPathComponent("README.md")
+        let readme = try String(contentsOf: readmeURL, encoding: .utf8)
+
+        XCTAssertTrue(readme.contains("DevNotch-1.0.0.dmg"), "README must reference DevNotch-1.0.0.dmg")
+        XCTAssertTrue(readme.contains("System Settings"), "README must explain System Settings flow")
+        XCTAssertTrue(readme.contains("Privacy & Security"), "README must explain Privacy & Security")
+        XCTAssertTrue(readme.contains("Open Anyway"), "README must explain Open Anyway")
+        XCTAssertFalse(readme.contains("The public distribution artifact must be Developer ID signed"), "README should not claim public artifact must be Developer ID signed")
+    }
+
+    func testHelperSigningConsistencyConfiguration() throws {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let projectYmlURL = projectRoot.appendingPathComponent("project.yml")
+        let projectYml = try String(contentsOf: projectYmlURL, encoding: .utf8)
+
+        XCTAssertTrue(projectYml.contains("MARKETING_VERSION: \"1.0.0\""))
+        XCTAssertTrue(projectYml.contains("DevNotchClaudeBridge:"))
+        XCTAssertTrue(projectYml.contains("DevNotchActivityBridge:"))
+        XCTAssertTrue(projectYml.contains("ENABLE_HARDENED_RUNTIME: YES"))
+    }
+
+    func testInstallTextAndReleaseArtifactsDocs() throws {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+
+        let installURL = projectRoot.appendingPathComponent("INSTALL.txt")
+        let installText = try String(contentsOf: installURL, encoding: .utf8)
+        XCTAssertTrue(installText.contains("Open Anyway"))
+        XCTAssertTrue(installText.contains("Privacy & Security"))
+
+        let notesURL = projectRoot.appendingPathComponent("GITHUB_RELEASE_NOTES.md")
+        let notesText = try String(contentsOf: notesURL, encoding: .utf8)
+        XCTAssertTrue(notesText.contains("Dev Notch 1.0.0"))
+        XCTAssertTrue(notesText.contains("Open Anyway"))
+
+        let checklistURL = projectRoot.appendingPathComponent("RELEASE_CHECKLIST.md")
+        let checklistText = try String(contentsOf: checklistURL, encoding: .utf8)
+        XCTAssertTrue(checklistText.contains("NOT APPLICABLE — GitHub unsigned distribution"))
+        XCTAssertTrue(checklistText.contains("DevNotch-1.0.0.dmg"))
+    }
 }
