@@ -17,6 +17,7 @@
 		0B1939D1EBDE5A3A1910A3A7 /* AntigravityAppLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08AB8FF38583513772FCA50B /* AntigravityAppLocator.swift */; };
 		0B76088696060904C2F68C24 /* ReleaseReadinessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A7E173E2A64E6D6094FF4C /* ReleaseReadinessTests.swift */; };
 		0B7B8C48B837C75BD3D971A5 /* GrokCreditsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D55E3A92B46720081F1D8FC /* GrokCreditsClient.swift */; };
+		11B68C664F8D082234D26D34 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 00312258FF3B631FDFB9C68C /* Localizable.xcstrings */; };
 		1361BB6E630F27E2303A59CB /* DeepSeekClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6765A6ED859D39168362DF45 /* DeepSeekClient.swift */; };
 		1B73921198337A268D5D2F4B /* OpenCodeParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99C861ED7F7F52EE32D7E804 /* OpenCodeParsingTests.swift */; };
 		1E6BA4DC3370229FA590DD7C /* AISessionCostMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65477F0362F65C7928D111D5 /* AISessionCostMetric.swift */; };
@@ -124,6 +125,7 @@
 		E34E69F499D2A2520C35AD6F /* OpenCodeExecutableLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ED94D6157B8CBB0CA76A462 /* OpenCodeExecutableLocator.swift */; };
 		E82D7ADDD97D528674C8A0C4 /* AICredits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B3E1229D22234E1671689C /* AICredits.swift */; };
 		EAE36DD76B7648A13D67FFDF /* ClaudeProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDC4F35C76B3EFC39790A53A /* ClaudeProvider.swift */; };
+		EAF0927670A25204225C2D29 /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BAEC4A3ABDC5910B80A3AB4 /* AppLanguage.swift */; };
 		EBC054D158D6819D4FE0B2A8 /* NowPlayingHelperClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6012FED4E682AEC663AFD967 /* NowPlayingHelperClient.swift */; };
 		ECD197306F1F2730599C22F7 /* ActivityPayloadSanitizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED625AD4F64E5E2D1B980C3 /* ActivityPayloadSanitizer.swift */; };
 		EF2A4C2890003E9B71E43B03 /* ActivityIPCWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF3D0276F9DB04DB2E6AD07 /* ActivityIPCWriter.swift */; };
@@ -183,6 +185,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		00312258FF3B631FDFB9C68C /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		00D48B357DFD95C990AA7372 /* AICompactMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICompactMetric.swift; sourceTree = "<group>"; };
 		03A02D2342DFC3B0E733793C /* DeepSeekCredentialTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepSeekCredentialTests.swift; sourceTree = "<group>"; };
 		04CC255B5C31F946597197C1 /* ClaudeIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeIntegrationTests.swift; sourceTree = "<group>"; };
@@ -267,6 +270,7 @@
 		953597BD8D997528D70099C9 /* AISessionCostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISessionCostView.swift; sourceTree = "<group>"; };
 		99C861ED7F7F52EE32D7E804 /* OpenCodeParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenCodeParsingTests.swift; sourceTree = "<group>"; };
 		9A920EA084076C2CE77C8863 /* DevNotch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DevNotch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BAEC4A3ABDC5910B80A3AB4 /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguage.swift; sourceTree = "<group>"; };
 		9D07A1FC5021CFF7F9E2BE2C /* MusicAppleScriptClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicAppleScriptClient.swift; sourceTree = "<group>"; };
 		9EB8F4C85326958209064CA2 /* DevNotchClaudeBridge */ = {isa = PBXFileReference; includeInIndex = 0; path = DevNotchClaudeBridge; sourceTree = BUILT_PRODUCTS_DIR; };
 		A04C2BD71DF4A768B0C89EFA /* ProvidersSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvidersSettingsView.swift; sourceTree = "<group>"; };
@@ -337,6 +341,7 @@
 			isa = PBXGroup;
 			children = (
 				11D98B246B3FE0C23A313B25 /* AppIcon.icns */,
+				00312258FF3B631FDFB9C68C /* Localizable.xcstrings */,
 				A7C6F3E514134F0E3D03C0DD /* MenuBarIcon.svg */,
 				72CE66DBA94BF1B34FAFE6FF /* NowPlayingProbe.swift */,
 			);
@@ -648,6 +653,7 @@
 			isa = PBXGroup;
 			children = (
 				F632DCCA098E27062054EBDF /* .gitkeep */,
+				9BAEC4A3ABDC5910B80A3AB4 /* AppLanguage.swift */,
 				7B5E8CB81379A4106B8E0D9D /* ReleaseEnvironment.swift */,
 				F27E5729068708F7B9D5DEF3 /* SettingsOpener.swift */,
 			);
@@ -833,6 +839,7 @@
 			knownRegions = (
 				Base,
 				en,
+				"zh-Hans",
 			);
 			mainGroup = E6834C5E26568765CAC96BEE;
 			minimizedProjectReferenceProxies = 1;
@@ -856,6 +863,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C6057E99CAE03E770B1B07BF /* AppIcon.icns in Resources */,
+				11B68C664F8D082234D26D34 /* Localizable.xcstrings in Resources */,
 				58281CB1BB962064E1CE446B /* MenuBarIcon.svg in Resources */,
 				6CD4536311BA6710A698864D /* NowPlayingProbe.swift in Resources */,
 			);
@@ -910,6 +918,7 @@
 				60BC916CEBA402D150F4E4FA /* AntigravityProvider.swift in Sources */,
 				E059A891D31AA9C952FC9658 /* AntigravityQuotaProbe.swift in Sources */,
 				B81AD5C347F78C2916E27903 /* AppDelegate.swift in Sources */,
+				EAF0927670A25204225C2D29 /* AppLanguage.swift in Sources */,
 				4288BA49ABEF5F06F3E4051A /* ClaudeActivityBridge.swift in Sources */,
 				06C998600E59D98875DCECC0 /* ClaudeAuthInspector.swift in Sources */,
 				060F438945EB1996EBD1A367 /* ClaudeExecutableLocator.swift in Sources */,
@@ -1079,7 +1088,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1093,7 +1102,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = DevNotch;
@@ -1216,7 +1225,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -1236,7 +1245,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

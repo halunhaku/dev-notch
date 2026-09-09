@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.1
+
+### Highlights
+
+- **In-app language**: Settings → General → Language. Follow System, English, or 简体中文; applies immediately to Settings, the island, and the menu bar.
+
+### Notes
+
+- Brand names (Dev Notch, Codex, Claude, Grok, …) stay untranslated.
+
+
 ## 1.1.0
 
 ### Highlights

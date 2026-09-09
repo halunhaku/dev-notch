@@ -3,6 +3,8 @@ import SwiftUI
 struct ProvidersSettingsView: View {
     @ObservedObject var preferences: PreferencesStore
     @ObservedObject var manager: AIProviderManager
+    @Environment(\.locale) private var locale
+
     @State private var openCodeInputKey: String = ""
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -64,9 +66,11 @@ struct ProvidersSettingsView: View {
 
                             // Set as Primary Action
                             if isEnabled && !isPrimary {
-                                Button("Set Primary") {
+                                Button {
                                     preferences.preferredPrimaryProviderID = id
                                     manager.setPrimaryProvider(id)
+                                } label: {
+                                    Text("Set Primary")
                                 }
                                 .buttonStyle(.bordered)
                                 .controlSize(.small)
@@ -101,19 +105,23 @@ struct ProvidersSettingsView: View {
                                         .controlSize(.small)
                                         .frame(maxWidth: 240)
 
-                                    Button("Save") {
+                                    Button {
                                         preferences.setOpenCodeApiKey(openCodeInputKey)
                                         manager.refresh(providerID: .openCodeGo)
+                                    } label: {
+                                        Text("Save")
                                     }
                                     .buttonStyle(.borderedProminent)
                                     .controlSize(.small)
                                     .disabled(openCodeInputKey.isEmpty)
 
                                     if !preferences.openCodeApiKey.isEmpty {
-                                        Button("Clear") {
+                                        Button {
                                             openCodeInputKey = ""
                                             preferences.setOpenCodeApiKey("")
                                             manager.refresh(providerID: .openCodeGo)
+                                        } label: {
+                                            Text("Clear")
                                         }
                                         .buttonStyle(.bordered)
                                         .controlSize(.small)
@@ -165,12 +173,12 @@ struct ProvidersSettingsView: View {
     }
 
     private func statusDescription(for id: AIProviderID, snapshot: AIProviderSnapshot?, isEnabled: Bool) -> String {
-        guard isEnabled else { return "Disabled by user" }
-        guard let snapshot = snapshot else { return "Checking…" }
+        guard isEnabled else { return L10n.key("Disabled by user", locale: locale) }
+        guard let snapshot = snapshot else { return L10n.key("Checking…", locale: locale) }
         if snapshot.status == .ready {
-            return "Ready • \(snapshot.compactMetric.value)"
+            return "\(L10n.key("Ready", locale: locale)) • \(snapshot.compactMetric.value)"
         } else {
-            return snapshot.status.shortDescription
+            return L10n.key(snapshot.status.shortDescription, locale: locale)
         }
     }
 

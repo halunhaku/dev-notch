@@ -20,6 +20,7 @@ final class PreferencesStore: ObservableObject {
     private static let keyProviderOrder = "devnotch_provider_order"
     private static let keyOpenCodeApiKey = "devnotch_opencode_api_key"
     private static let keySystemInsightsEnabled = "devnotch_system_insights_enabled"
+    private static let keyAppLanguage = "devnotch_app_language"
 
     /// Static accessor for bridge helpers to query user's completed duration preference.
     nonisolated static var sharedCompletedDisplayDuration: Double {
@@ -46,6 +47,12 @@ final class PreferencesStore: ObservableObject {
     @Published var systemInsightsEnabled: Bool {
         didSet { UserDefaults.standard.set(systemInsightsEnabled, forKey: Self.keySystemInsightsEnabled) }
     }
+
+    @Published var appLanguage: AppLanguage {
+        didSet { UserDefaults.standard.set(appLanguage.rawValue, forKey: Self.keyAppLanguage) }
+    }
+
+    var resolvedLocale: Locale { appLanguage.resolvedLocale() }
 
     @Published var openCodeApiKey: String {
         didSet { UserDefaults.standard.set(openCodeApiKey, forKey: Self.keyOpenCodeApiKey) }
@@ -117,6 +124,13 @@ final class PreferencesStore: ObservableObject {
         } else {
             self.systemInsightsEnabled = true
         }
+        if let raw = defaults.string(forKey: Self.keyAppLanguage),
+           let parsed = AppLanguage(rawValue: raw) {
+            self.appLanguage = parsed
+        } else {
+            self.appLanguage = .system
+        }
+
 
 
         // Sync launchAtLogin with system status

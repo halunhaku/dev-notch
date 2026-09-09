@@ -28,6 +28,8 @@ struct SettingsView: View {
                     Label("About", systemImage: "info.circle")
                 }
         }
+        .environment(\.locale, preferences.resolvedLocale)
+        .id(preferences.appLanguage)
         .frame(width: 520, height: 420)
     }
 }

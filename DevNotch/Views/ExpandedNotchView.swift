@@ -297,7 +297,7 @@ struct ExpandedNotchView: View {
 }
 
 private extension NotchContentMode {
-    var title: String {
+    var title: LocalizedStringKey {
         switch self {
         case .ai: "AI"
         case .system: "System"

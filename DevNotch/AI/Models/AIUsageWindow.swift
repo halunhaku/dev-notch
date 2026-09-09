@@ -91,11 +91,11 @@ struct AIUsageWindow: Identifiable, Equatable, Sendable {
     }
 
     /// Human-readable relative time until quota reset.
-    func resetTimeRemaining(relativeTo now: Date = Date()) -> String? {
+    func resetTimeRemaining(relativeTo now: Date = Date(), locale: Locale = Locale(identifier: "en")) -> String? {
         guard let resetsAt = resetsAt else { return nil }
         let diff = resetsAt.timeIntervalSince(now)
         if diff <= 0 {
-            return "Resetting soon"
+            return L10n.key("Resetting soon", locale: locale)
         }
         let totalMinutes = Int(ceil(diff / 60.0))
         let hours = totalMinutes / 60
@@ -104,21 +104,21 @@ struct AIUsageWindow: Identifiable, Equatable, Sendable {
         if hours > 24 {
             let days = hours / 24
             let remainingHours = hours % 24
-            return "Reset in \(days)d \(remainingHours)h"
+            return L10n.format("Reset in %dd %dh", locale: locale, days, remainingHours)
         } else if hours > 0 {
-            return "Reset in \(hours)h \(minutes)m"
+            return L10n.format("Reset in %dh %dm", locale: locale, hours, minutes)
         } else {
-            return "Reset in \(minutes)m"
+            return L10n.format("Reset in %dm", locale: locale, minutes)
         }
     }
 
-    /// Formatted absolute reset date using system locale and timezone.
-    func formattedResetDate(locale: Locale = .current, timeZone: TimeZone = .current) -> String? {
+    /// Formatted absolute reset date using the given locale and timezone.
+    func formattedResetDate(locale: Locale = Locale(identifier: "en"), timeZone: TimeZone = .current) -> String? {
         guard let resetsAt = resetsAt else { return nil }
         let formatter = DateFormatter()
         formatter.locale = locale
         formatter.timeZone = timeZone
         formatter.dateFormat = "EEE HH:mm"
-        return "Resets \(formatter.string(from: resetsAt))"
+        return L10n.format("Resets %@", locale: locale, formatter.string(from: resetsAt))
     }
 }

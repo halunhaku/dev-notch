@@ -16,7 +16,6 @@
 
 ![展开 · System](docs/screenshots/system.png)
 
----
 
 ## 📌 当前开发阶段
 
@@ -31,6 +30,7 @@
 - **Phase 9：v1.0.0 GitHub Direct Distribution 正式发行（已完成）**
 - **Phase 10：System Insights 公共指标与 AI / System 内容路由（已完成）**
 - **Phase 11：Grok 配额、Now Playing、刘海点透与 Provider 拖拽排序（已完成）**
+- **Phase 12：应用内语言（跟随系统 / English / 简体中文）（已完成）**
 
 ## Requirements
 
@@ -39,7 +39,7 @@
 
 ## Installing Dev Notch
 
-1. Download `DevNotch-1.1.0.dmg` from GitHub Releases.
+1. Download `DevNotch-1.1.1.dmg` from GitHub Releases.
 2. Open the DMG.
 3. Drag `Dev Notch` (`DevNotch.app`) into `/Applications` (or `~/Applications`).
 4. Open Dev Notch from Applications.

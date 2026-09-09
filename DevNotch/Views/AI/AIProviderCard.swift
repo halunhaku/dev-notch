@@ -200,7 +200,7 @@ struct AIProviderCard: View {
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(.orange)
 
-                    Text(authHelpHint(for: snapshot.id))
+                    Text(LocalizedStringKey(authHelpHint(for: snapshot.id)))
                         .font(.system(size: 9))
                         .foregroundColor(.white.opacity(0.6))
 

@@ -3,6 +3,8 @@ import SwiftUI
 /// Elegant progress bar for an AI quota window (e.g. 5 Hour or Weekly quota).
 struct AIUsageBar: View {
     let window: AIUsageWindow
+    @Environment(\.locale) private var locale
+
 
     private var fillGradient: LinearGradient {
         let remaining = window.remainingPercent
@@ -28,11 +30,10 @@ struct AIUsageBar: View {
     }
 
     private var resetText: String {
-        // If window is long (e.g. Weekly/7d), show formatted reset day; else relative countdown
         if window.windowDurationMins >= 1440 {
-            return window.formattedResetDate() ?? (window.resetTimeRemaining() ?? "")
+            return window.formattedResetDate(locale: locale) ?? (window.resetTimeRemaining(locale: locale) ?? "")
         } else {
-            return window.resetTimeRemaining() ?? ""
+            return window.resetTimeRemaining(locale: locale) ?? ""
         }
     }
 
@@ -40,7 +41,7 @@ struct AIUsageBar: View {
         VStack(alignment: .leading, spacing: 5) {
             // Header Row: Window Title & Remaining %
             HStack {
-                Text(window.label)
+                Text(LocalizedStringKey(window.label))
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(.white.opacity(0.9))
 
@@ -78,7 +79,7 @@ struct AIUsageBar: View {
                         .font(.system(size: 9))
                         .foregroundColor(.white.opacity(0.45))
 
-                    Text(resetText)
+                    Text(verbatim: resetText)
                         .font(.system(size: 9, weight: .regular))
                         .foregroundColor(.white.opacity(0.55))
 

@@ -35,8 +35,10 @@ struct IntegrationsSettingsView: View {
 
                     Spacer()
 
-                    Button(needsRepair ? "Repair" : (isInstalled ? "Disable" : "Enable")) {
+                    Button {
                         manager.toggleClaudeLiveActivity()
+                    } label: {
+                        Text(needsRepair ? "Repair" : (isInstalled ? "Disable" : "Enable"))
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
@@ -74,8 +76,10 @@ struct IntegrationsSettingsView: View {
 
                     Spacer()
 
-                    Button(needsRepair ? "Repair" : (isInstalled ? "Disable" : "Enable")) {
+                    Button {
                         manager.toggleAntigravityLiveActivity()
+                    } label: {
+                        Text(needsRepair ? "Repair" : (isInstalled ? "Disable" : "Enable"))
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)

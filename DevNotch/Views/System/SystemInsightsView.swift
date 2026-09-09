@@ -3,6 +3,8 @@ import SwiftUI
 struct SystemInsightsView: View {
     @ObservedObject var store: SystemMetricsStore
     var isVisible: Bool = true
+    @Environment(\.locale) private var locale
+
     private let columns = [
         GridItem(.flexible(), spacing: 8),
         GridItem(.flexible(), spacing: 8)
@@ -61,9 +63,11 @@ struct SystemInsightsView: View {
 
     private var cpuCard: some View {
         SystemMetricCard(
-            title: "CPU",
+            title: LocalizedStringKey("CPU"),
             value: Self.percent(store.snapshot.cpuUsage),
-            detail: store.snapshot.cpuUsage == nil ? "Calculating delta" : "Total utilization",
+            detail: store.snapshot.cpuUsage == nil
+                ? L10n.key("Calculating delta", locale: locale)
+                : L10n.key("Total utilization", locale: locale),
             systemImage: "cpu",
             tint: .cyan,
             primaryHistory: store.history.cpu,
@@ -77,9 +81,14 @@ struct SystemInsightsView: View {
 
     private var memoryCard: some View {
         SystemMetricCard(
-            title: "Memory",
+            title: LocalizedStringKey("Memory"),
             value: Self.percent(store.snapshot.memoryUsage),
-            detail: "\(Self.memory(store.snapshot.memoryUsedBytes)) used · \(store.snapshot.memoryPressure.label)",
+            detail: L10n.format(
+                "%@ used · %@",
+                locale: locale,
+                Self.memory(store.snapshot.memoryUsedBytes),
+                L10n.key(store.snapshot.memoryPressure.label, locale: locale)
+            ),
             systemImage: "memorychip",
             tint: memoryTint,
             primaryHistory: store.history.memory,
@@ -93,7 +102,7 @@ struct SystemInsightsView: View {
 
     private var networkCard: some View {
         SystemMetricCard(
-            title: "Network",
+            title: LocalizedStringKey("Network"),
             value: "↓ \(Self.rate(store.snapshot.downloadBytesPerSecond))",
             detail: "↑ \(Self.rate(store.snapshot.uploadBytesPerSecond))",
             systemImage: "arrow.up.arrow.down",
@@ -114,7 +123,7 @@ struct SystemInsightsView: View {
                     .font(.system(size: 9, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.52))
                 Spacer()
-                Text(store.snapshot.thermalLevel.label)
+                Text(LocalizedStringKey(store.snapshot.thermalLevel.label))
                     .font(.system(size: 8.5, weight: .semibold))
                     .foregroundStyle(thermalTint)
             }
@@ -179,9 +188,9 @@ struct SystemInsightsView: View {
     }
 
     private var powerDetail: String {
-        guard let battery = store.snapshot.battery else { return "Thermal state" }
-        if battery.isCharging { return "Charging" }
-        return battery.isOnACPower ? "AC power" : "On battery"
+        guard let battery = store.snapshot.battery else { return L10n.key("Thermal state", locale: locale) }
+        if battery.isCharging { return L10n.key("Charging", locale: locale) }
+        return battery.isOnACPower ? L10n.key("AC power", locale: locale) : L10n.key("On battery", locale: locale)
     }
 
     private static func percent(_ value: Double?) -> String {
@@ -206,7 +215,7 @@ struct SystemInsightsView: View {
 }
 
 private struct SystemMetricCard: View {
-    let title: String
+    let title: LocalizedStringKey
     let value: String
     let detail: String
     let systemImage: String

@@ -110,6 +110,7 @@ struct NotchView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea()
+        .environment(\.locale, preferences.resolvedLocale)
         .animation(.spring(response: 0.34, dampingFraction: 0.8), value: model.state)
     }
 }

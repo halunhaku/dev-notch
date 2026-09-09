@@ -40,6 +40,12 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             }
             .store(in: &cancellables)
 
+        preferences.$appLanguage
+            .sink { [weak self] _ in
+                self?.updateMenu()
+            }
+            .store(in: &cancellables)
+
         // Observe provider snapshot updates to keep menu updated
         manager.$snapshots
             .sink { [weak self] _ in
@@ -116,7 +122,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         }
 
         if !addedAny {
-            let emptyItem = NSMenuItem(title: "No active providers", action: nil, keyEquivalent: "")
+            let emptyItem = NSMenuItem(title: t("No active providers"), action: nil, keyEquivalent: "")
             emptyItem.isEnabled = false
             menu.addItem(emptyItem)
         }
@@ -124,11 +130,11 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         menu.addItem(.separator())
 
         // 3. Actions
-        let openNotch = NSMenuItem(title: "Open Dev Notch", action: #selector(openNotchAction), keyEquivalent: "o")
+        let openNotch = NSMenuItem(title: t("Open Dev Notch"), action: #selector(openNotchAction), keyEquivalent: "o")
         openNotch.target = self
         menu.addItem(openNotch)
 
-        let refreshTitle = manager.isRefreshing ? "Refreshing…" : "Refresh All"
+        let refreshTitle = manager.isRefreshing ? t("Refreshing…") : t("Refresh All")
         let refreshItem = NSMenuItem(title: refreshTitle, action: #selector(refreshAllAction), keyEquivalent: "r")
         refreshItem.target = self
         refreshItem.isEnabled = !manager.isRefreshing
@@ -136,11 +142,11 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
         menu.addItem(.separator())
 
-        let settingsItem = NSMenuItem(title: "Settings…", action: #selector(settingsAction), keyEquivalent: ",")
+        let settingsItem = NSMenuItem(title: t("Settings…"), action: #selector(settingsAction), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
 
-        let quitItem = NSMenuItem(title: "Quit Dev Notch", action: #selector(quitAction), keyEquivalent: "q")
+        let quitItem = NSMenuItem(title: t("Quit Dev Notch"), action: #selector(quitAction), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
     }
@@ -152,8 +158,12 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         if snapshot.status == .ready {
             return "\(name): \(compact.value)"
         } else {
-            return "\(name): \(snapshot.status.shortDescription)"
+            return "\(name): \(L10n.key(snapshot.status.shortDescription, locale: preferences.resolvedLocale))"
         }
+    }
+
+    private func t(_ key: String) -> String {
+        L10n.key(key, locale: preferences.resolvedLocale)
     }
 
     @objc private func openNotchAction() {

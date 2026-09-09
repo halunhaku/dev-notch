@@ -31,6 +31,12 @@ struct GeneralSettingsView: View {
 
             // Interface Section
             Section(header: Text("Interface").font(.headline)) {
+                Picker("Language", selection: $preferences.appLanguage) {
+                    Text("Follow System").tag(AppLanguage.system)
+                    Text(verbatim: "English").tag(AppLanguage.english)
+                    Text(verbatim: "简体中文").tag(AppLanguage.simplifiedChinese)
+                }
+
                 Toggle("Show menu bar icon", isOn: $preferences.showMenuBarItem)
                 Toggle("Enable Task Pulse horizon animation", isOn: $preferences.taskPulseEnabled)
                 Toggle("Enable System Insights", isOn: $preferences.systemInsightsEnabled)

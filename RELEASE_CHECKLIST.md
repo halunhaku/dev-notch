@@ -1,4 +1,4 @@
-# Dev Notch v1.1.0 Release Checklist
+# Dev Notch v1.1.1 Release Checklist
 
 ## 1. Automated Verification & Builds
 
@@ -22,15 +22,15 @@
 
 ## 3. Packaging & Distribution Artifacts
 
-- PASS — DMG (`dist/DevNotch-1.1.0.dmg`)
-- PASS — SHA-256 (`f6a825c601af418fc1ca15aae8a5f570fd5fa390ee4b144d4db056414bdc0df1`)
+- PASS — DMG (`dist/DevNotch-1.1.1.dmg`)
+- PENDING — SHA-256 (filled after `release.sh github`)
 
 ## 4. Documentation & Policies
 
 - PASS — README (Includes 4-step installation & Gatekeeper Open Anyway guidance)
 - PASS — PRIVACY (Local-first architecture, Grok billing token, Now Playing metadata)
 - PASS — SECURITY (Zero embedded credentials, hook ownership isolation)
-- PASS — CHANGELOG (v1.1.0 release notes documented)
+- PASS — CHANGELOG (v1.1.1 release notes documented)
 - PASS — GitHub Release Notes (`GITHUB_RELEASE_NOTES.md`)
 
 ## 5. Non-Blocker Items / Excluded by Distribution Policy
