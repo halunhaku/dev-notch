@@ -16,6 +16,12 @@
 
 ![展开 · System](docs/screenshots/system.png)
 
+设置 · 通用 / AI 提供商：
+
+![设置 · 通用](docs/screenshots/settings-general.png)
+
+![设置 · AI 提供商](docs/screenshots/settings-providers.png)
+
 
 ## 📌 当前开发阶段
 

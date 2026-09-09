@@ -14,6 +14,10 @@ In-app language: Follow System, English, or 简体中文. Applies immediately to
 
 ![展开 · System](https://github.com/halunhaku/dev-notch/releases/download/v1.1.1/system.png)
 
+![设置 · 通用](https://github.com/halunhaku/dev-notch/releases/download/v1.1.1/settings-general.png)
+
+![设置 · AI 提供商](https://github.com/halunhaku/dev-notch/releases/download/v1.1.1/settings-providers.png)
+
 ## 本版更新
 
 - **语言**：设置 → 通用 → 语言。跟随系统 / English / 简体中文，立刻生效。
