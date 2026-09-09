@@ -36,7 +36,7 @@ This step is typically only required on the very first launch. We do **not** rec
 ## Verification & Integrity
 
 Artifact: `DevNotch-1.1.0.dmg`
-SHA-256 Checksum: `PENDING`
+SHA-256 Checksum: `f6a825c601af418fc1ca15aae8a5f570fd5fa390ee4b144d4db056414bdc0df1`
 Checksum file: `DevNotch-1.1.0.dmg.sha256`
 
 To verify the checksum in Terminal:
