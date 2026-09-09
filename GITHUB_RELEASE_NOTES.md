@@ -4,20 +4,6 @@ MacBook 物理刘海上的 AI Dynamic Island。本版去掉悬停 / 展开时岛
 
 Patch release: remove the faint black rim around hovered and expanded island edges.
 
-## 截图
-
-![收起态刘海](https://github.com/halunhaku/dev-notch/releases/download/v1.1.2/compact.png)
-
-![展开 · AI](https://github.com/halunhaku/dev-notch/releases/download/v1.1.2/expanded-ai.png)
-
-![展开 · Music](https://github.com/halunhaku/dev-notch/releases/download/v1.1.2/music.png)
-
-![展开 · System](https://github.com/halunhaku/dev-notch/releases/download/v1.1.2/system.png)
-
-![设置 · 通用](https://github.com/halunhaku/dev-notch/releases/download/v1.1.2/settings-general.png)
-
-![设置 · AI 提供商](https://github.com/halunhaku/dev-notch/releases/download/v1.1.2/settings-providers.png)
-
 ## 本版更新
 
 - **岛体边缘**：悬停 / 展开不再用全方位投影，左右和下沿不再多一圈浅黑描边；白描边改为内描。
