@@ -51,7 +51,7 @@ Dev Notch 通过 GitHub 直接分发，**没有** Apple Developer ID 签名，�
 ## 校验 / Verification
 
 Artifact: `DevNotch-1.1.1.dmg`  
-SHA-256: `PENDING`  
+SHA-256: `3fbc4d84bd680d3b9b90bbf23b55ebe78c85e23d9dcb41f5cc698ae0b1cfc21e`  
 Checksum file: `DevNotch-1.1.1.dmg.sha256`
 
 ```bash

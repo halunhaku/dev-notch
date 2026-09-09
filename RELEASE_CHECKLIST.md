@@ -23,7 +23,7 @@
 ## 3. Packaging & Distribution Artifacts
 
 - PASS — DMG (`dist/DevNotch-1.1.1.dmg`)
-- PENDING — SHA-256 (filled after `release.sh github`)
+- PASS — SHA-256 (`3fbc4d84bd680d3b9b90bbf23b55ebe78c85e23d9dcb41f5cc698ae0b1cfc21e`)
 
 ## 4. Documentation & Policies
 
