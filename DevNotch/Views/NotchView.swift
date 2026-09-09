@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Root visual container for Dev Notch, managing the black island shape,
-/// borders, shadows, generic Task Pulse, and state transitions.
+/// inner hairline, generic Task Pulse, and state transitions.
 struct NotchView: View {
     @ObservedObject var model: NotchModel
     @ObservedObject var screenManager: ScreenManager
@@ -37,19 +37,14 @@ struct NotchView: View {
         VStack(spacing: 0) {
             // Visual Notch Body (anchored flush to the top bezel)
             ZStack {
-                // Background & Hardware Bezel Connection
+                // Background flush to the bezel. No drop shadow: radius blurs
+                // left/right and reads as a faint black rim around the island.
                 notchShape
                     .fill(Color.black)
-                    .overlay(
+                    .overlay {
                         notchShape
-                            .stroke(Color.white.opacity(0.14), lineWidth: 0.5)
-                    )
-                    .shadow(
-                        color: Color.black.opacity(model.state == .compact ? 0 : 0.45),
-                        radius: 12,
-                        x: 0,
-                        y: 6
-                    )
+                            .strokeBorder(Color.white.opacity(0.14), lineWidth: 0.5)
+                    }
 
                 // State Content
                 Group {
