@@ -114,6 +114,19 @@ EOF
     hdiutil create -volname "Dev Notch ${VERSION}" -srcfolder "$STAGING_ROOT" -ov -format UDZO "$output"
 }
 
+write_checksum() {
+    local artifact="$1"
+    local directory
+    local filename
+    directory="$(dirname "$artifact")"
+    filename="$(basename "$artifact")"
+    (
+        cd "$directory"
+        shasum -a 256 "$filename" >"$filename.sha256"
+        shasum -c "$filename.sha256"
+    )
+}
+
 notarize_and_staple() {
     local artifact="$1"
     local profile="$2"
@@ -227,8 +240,7 @@ if [[ "$MODE" == "github" ]]; then
     echo "==> Package"
     create_dmg "$EXPORTED_APP" "$GITHUB_DMG"
     echo "==> Checksum"
-    shasum -a 256 "$GITHUB_DMG" >"$GITHUB_DMG.sha256"
-    (cd "$DIST_ROOT" && shasum -c "$(basename "$GITHUB_DMG.sha256")")
+    write_checksum "$GITHUB_DMG"
     echo "==> GitHub Direct Distribution release ready"
     echo "DMG: $GITHUB_DMG"
     echo "SHA-256: $GITHUB_DMG.sha256"
@@ -241,8 +253,7 @@ if [[ "$MODE" == "local" ]]; then
     echo "==> Package"
     create_dmg "$EXPORTED_APP" "$LOCAL_DMG"
     echo "==> Checksum"
-    shasum -a 256 "$LOCAL_DMG" >"$LOCAL_DMG.sha256"
-    (cd "$DIST_ROOT" && shasum -c "$(basename "$LOCAL_DMG.sha256")")
+    write_checksum "$LOCAL_DMG"
     echo "WARNING:"
     echo "This build is not Developer ID signed/notarized."
     echo "Local artifact: $LOCAL_DMG"
@@ -265,5 +276,5 @@ spctl -a -vv --type execute "$EXPORTED_APP"
 spctl -a -vv --type open "$PUBLIC_DMG"
 
 echo "==> Checksum"
-shasum -a 256 "$PUBLIC_DMG" >"$PUBLIC_DMG.sha256"
+write_checksum "$PUBLIC_DMG"
 echo "Release candidate ready: $PUBLIC_DMG"

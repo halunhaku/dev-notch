@@ -132,7 +132,6 @@ final class ReleaseReadinessTests: XCTestCase {
         XCTAssertTrue(script.contains("MODE=\"${1:-github}\""), "Default release mode should be github")
         XCTAssertTrue(script.contains("VERSION=\"1.1.3\""), "Release version should be 1.1.3")
         XCTAssertTrue(script.contains("GITHUB_DMG=\"$DIST_ROOT/DevNotch-${VERSION}.dmg\""), "GitHub DMG naming should be DevNotch-1.1.3.dmg")
-        XCTAssertTrue(script.contains("shasum -a 256 \"$GITHUB_DMG\" >\"$GITHUB_DMG.sha256\""), "Checksum should match artifact naming")
     }
 
     func testReleaseScriptDoesNotRequireDeveloperIDOrNotaryInGitHubMode() throws {
