@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.2
+
+### Highlights
+
+- **Island edge**: Remove the faint black rim around hovered and expanded states. The bezel-attached island no longer uses an omnidirectional drop shadow; the hairline is inset with `strokeBorder`.
+
+
 ## 1.1.1
 
 ### Highlights

@@ -1,4 +1,4 @@
-# Dev Notch v1.1.1 Release Checklist
+# Dev Notch v1.1.2 Release Checklist
 
 ## 1. Automated Verification & Builds
 
@@ -12,6 +12,7 @@
 - PASS — Hardware notch click-through for right-of-notch menu extras
 - PASS — Grok CLI credits path
 - PASS — Now Playing via system MediaRemote probe
+- PASS — Hovered/expanded island has no omnidirectional drop shadow rim
 
 ## 2. Desktop & System Integrations
 
@@ -22,15 +23,15 @@
 
 ## 3. Packaging & Distribution Artifacts
 
-- PASS — DMG (`dist/DevNotch-1.1.1.dmg`)
-- PASS — SHA-256 (`3fbc4d84bd680d3b9b90bbf23b55ebe78c85e23d9dcb41f5cc698ae0b1cfc21e`)
+- PASS — DMG (`dist/DevNotch-1.1.2.dmg`)
+- PASS — SHA-256 (`PENDING`)
 
 ## 4. Documentation & Policies
 
 - PASS — README (Includes 4-step installation & Gatekeeper Open Anyway guidance)
 - PASS — PRIVACY (Local-first architecture, Grok billing token, Now Playing metadata)
 - PASS — SECURITY (Zero embedded credentials, hook ownership isolation)
-- PASS — CHANGELOG (v1.1.1 release notes documented)
+- PASS — CHANGELOG (v1.1.2 release notes documented)
 - PASS — GitHub Release Notes (`GITHUB_RELEASE_NOTES.md`)
 
 ## 5. Non-Blocker Items / Excluded by Distribution Policy

@@ -1,38 +1,37 @@
-# Dev Notch 1.1.1
+# Dev Notch 1.1.2
 
-MacBook 物理刘海上的 AI Dynamic Island。本版增加应用内语言：跟随系统 / English / 简体中文，设置、刘海、菜单栏立刻切换。
+MacBook 物理刘海上的 AI Dynamic Island。本版去掉悬停 / 展开时岛体左右和下沿那圈浅黑边。
 
-In-app language: Follow System, English, or 简体中文. Applies immediately to Settings, the island, and the menu bar.
+Patch release: remove the faint black rim around hovered and expanded island edges.
 
 ## 截图
 
-![收起态刘海](https://github.com/halunhaku/dev-notch/releases/download/v1.1.1/compact.png)
+![收起态刘海](https://github.com/halunhaku/dev-notch/releases/download/v1.1.2/compact.png)
 
-![展开 · AI](https://github.com/halunhaku/dev-notch/releases/download/v1.1.1/expanded-ai.png)
+![展开 · AI](https://github.com/halunhaku/dev-notch/releases/download/v1.1.2/expanded-ai.png)
 
-![展开 · Music](https://github.com/halunhaku/dev-notch/releases/download/v1.1.1/music.png)
+![展开 · Music](https://github.com/halunhaku/dev-notch/releases/download/v1.1.2/music.png)
 
-![展开 · System](https://github.com/halunhaku/dev-notch/releases/download/v1.1.1/system.png)
+![展开 · System](https://github.com/halunhaku/dev-notch/releases/download/v1.1.2/system.png)
 
-![设置 · 通用](https://github.com/halunhaku/dev-notch/releases/download/v1.1.1/settings-general.png)
+![设置 · 通用](https://github.com/halunhaku/dev-notch/releases/download/v1.1.2/settings-general.png)
 
-![设置 · AI 提供商](https://github.com/halunhaku/dev-notch/releases/download/v1.1.1/settings-providers.png)
+![设置 · AI 提供商](https://github.com/halunhaku/dev-notch/releases/download/v1.1.2/settings-providers.png)
 
 ## 本版更新
 
-- **语言**：设置 → 通用 → 语言。跟随系统 / English / 简体中文，立刻生效。
-- 品牌名（Dev Notch、Codex、Grok 等）不翻译。
+- **岛体边缘**：悬停 / 展开不再用全方位投影，左右和下沿不再多一圈浅黑描边；白描边改为内描。
 
 ## Highlights
 
-- **Language**: Settings → General → Language. Follow System, English, or 简体中文; no restart.
-- Brand names stay untranslated.
+- **Island edge**: Drop the omnidirectional shadow that bloomed around the bezel-attached island; inset the hairline with `strokeBorder`.
 
+1.1.1 已包含：应用内语言（跟随系统 / English / 简体中文）。
 1.1.0 已包含：菜单栏点透、AI / System / Music 三页签、Provider 拖拽排序、Grok 周额度、Now Playing。
 
 ## 安装 / Installation
 
-1. 下载 `DevNotch-1.1.1.dmg`。
+1. 下载 `DevNotch-1.1.2.dmg`。
 2. 打开 DMG。
 3. 把 `Dev Notch` 拖进 `/Applications`（或 `~/Applications`）。
 4. 从「应用程序」启动。
@@ -54,12 +53,12 @@ Dev Notch 通过 GitHub 直接分发，**没有** Apple Developer ID 签名，�
 
 ## 校验 / Verification
 
-Artifact: `DevNotch-1.1.1.dmg`  
-SHA-256: `3fbc4d84bd680d3b9b90bbf23b55ebe78c85e23d9dcb41f5cc698ae0b1cfc21e`  
-Checksum file: `DevNotch-1.1.1.dmg.sha256`
+Artifact: `DevNotch-1.1.2.dmg`  
+SHA-256: `PENDING`  
+Checksum file: `DevNotch-1.1.2.dmg.sha256`
 
 ```bash
-shasum -a 256 -c DevNotch-1.1.1.dmg.sha256
+shasum -a 256 -c DevNotch-1.1.2.dmg.sha256
 ```
 
 ## 已知限制 / Known Limitations
