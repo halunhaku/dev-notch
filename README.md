@@ -2,6 +2,20 @@
 
 **Dev Notch** 是专为 macOS 设计的原生「AI Developer Dynamic Island」桌面应用。它巧妙利用 MacBook 的物理刘海区域（并在无刘海屏幕上自适应为顶部虚拟岛），为开发者提供沉浸、轻量且无打扰的 AI 运行状态、额度用量、实时任务流式光环（Task Pulse）、系统 Now Playing 与快捷控制中心。
 
+## 截图
+
+收起态（不再挡住刘海右侧菜单栏图标）：
+
+![收起态刘海](docs/screenshots/compact.png)
+
+展开态 AI / Music / System：
+
+![展开 · AI](docs/screenshots/expanded-ai.png)
+
+![展开 · Music](docs/screenshots/music.png)
+
+![展开 · System](docs/screenshots/system.png)
+
 ---
 
 ## 📌 当前开发阶段
