@@ -6,6 +6,9 @@ struct ExpandedNotchView: View {
     @ObservedObject var model: NotchModel
     @ObservedObject var screenManager: ScreenManager
     @ObservedObject var providerManager: AIProviderManager
+    @ObservedObject var preferences: PreferencesStore
+    @ObservedObject var systemMetricsStore: SystemMetricsStore
+    @ObservedObject var nowPlayingStore: NowPlayingStore
     var onOpenSettings: (() -> Void)? = nil
 
     private var versionString: String {
@@ -27,21 +30,13 @@ struct ExpandedNotchView: View {
                 HStack(spacing: 0) {
                     // Left Wing: App Logo, Title & Version
                     HStack(spacing: 6) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [Color.cyan.opacity(0.8), Color.blue.opacity(0.8)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .frame(width: 20, height: 20)
-
-                            Image(systemName: "chevron.left.forwardslash.chevron.right")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(.white)
-                        }
+                        Image(nsImage: NSApp.applicationIconImage)
+                            .resizable()
+                            .interpolation(.high)
+                            .frame(width: 24, height: 24)
+                            .frame(width: 20, height: 20)
+                            .clipped()
+                            .accessibilityHidden(true)
 
                         Text("Dev Notch")
                             .font(.system(size: 12, weight: .bold))
@@ -101,21 +96,13 @@ struct ExpandedNotchView: View {
                 // Virtual Island: Unconstrained Top Row
                 HStack {
                     HStack(spacing: 8) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [Color.cyan.opacity(0.8), Color.blue.opacity(0.8)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .frame(width: 24, height: 24)
-
-                            Image(systemName: "chevron.left.forwardslash.chevron.right")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(.white)
-                        }
+                        Image(nsImage: NSApp.applicationIconImage)
+                            .resizable()
+                            .interpolation(.high)
+                            .frame(width: 29, height: 29)
+                            .frame(width: 24, height: 24)
+                            .clipped()
+                            .accessibilityHidden(true)
 
                         Text("Dev Notch")
                             .font(.system(size: 14, weight: .bold))
@@ -166,12 +153,90 @@ struct ExpandedNotchView: View {
                 .padding(.top, 4)
             }
 
-            // Divider
             Rectangle()
                 .fill(Color.white.opacity(0.1))
                 .frame(height: 1)
 
-            // Section: AI Status Center Header
+            if availableContentModes.count > 1 {
+                contentModePicker
+            }
+
+            ZStack(alignment: .top) {
+                aiDashboard
+                    .opacity(selectedContentMode == .ai ? 1 : 0)
+                    .allowsHitTesting(selectedContentMode == .ai)
+                    .accessibilityHidden(selectedContentMode != .ai)
+
+                SystemInsightsView(store: systemMetricsStore, isVisible: selectedContentMode == .system)
+                    .opacity(selectedContentMode == .system ? 1 : 0)
+                    .allowsHitTesting(selectedContentMode == .system)
+                    .accessibilityHidden(selectedContentMode != .system)
+
+                NowPlayingView(store: nowPlayingStore)
+                    .opacity(selectedContentMode == .music ? 1 : 0)
+                    .allowsHitTesting(selectedContentMode == .music)
+                    .accessibilityHidden(selectedContentMode != .music)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 10)
+        .padding(.bottom, 8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var availableContentModes: [NotchContentMode] {
+        var modes: [NotchContentMode] = [.ai, .music]
+        if preferences.systemInsightsEnabled {
+            modes.insert(.system, at: 1)
+        }
+        return modes
+    }
+
+    private var selectedContentMode: NotchContentMode {
+        availableContentModes.contains(model.contentMode) ? model.contentMode : .ai
+    }
+
+    private var contentModePicker: some View {
+        HStack(spacing: 3) {
+            ForEach(availableContentModes) { mode in
+                let selected = selectedContentMode == mode
+                Button {
+                    withAnimation(.easeInOut(duration: 0.16)) {
+                        model.contentMode = mode
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: mode.systemImage)
+                        Text(mode.title)
+                    }
+                    .font(.system(size: 9.5, weight: .semibold))
+                    .foregroundStyle(selected ? Color.white : Color.white.opacity(0.45))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 5)
+                    .background(
+                        Capsule()
+                            .fill(selected ? Color.white.opacity(0.13) : Color.clear)
+                    )
+                    .contentShape(Capsule())
+                }
+                .buttonStyle(FullAreaPlainButtonStyle())
+                .frame(maxWidth: .infinity)
+                .contentShape(Capsule())
+                .accessibilityAddTraits(selected ? .isSelected : [])
+            }
+        }
+        .padding(3)
+        .background(Color.white.opacity(0.055))
+        .clipShape(Capsule())
+        .overlay {
+            Capsule()
+                .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+        }
+    }
+
+    private var aiDashboard: some View {
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "sparkles")
                     .font(.system(size: 11, weight: .semibold))
@@ -188,7 +253,6 @@ struct ExpandedNotchView: View {
                     .foregroundColor(.white.opacity(0.4))
             }
 
-            // Scrollable Multi-Provider Cards Container
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 8) {
                     ForEach(providerManager.enabledProviderIDs, id: \.self) { id in
@@ -205,9 +269,12 @@ struct ExpandedNotchView: View {
                                 onToggleLiveActivity: (id == .claude || id == .antigravity) ? {
                                     if id == .claude {
                                         providerManager.toggleClaudeLiveActivity()
-                                    } else if id == .antigravity {
+                                    } else {
                                         providerManager.toggleAntigravityLiveActivity()
                                     }
+                                } : nil,
+                                onSignIn: [.grok, .codex, .claude].contains(id) ? {
+                                    providerManager.signIn(providerID: id)
                                 } : nil
                             )
                         }
@@ -215,11 +282,8 @@ struct ExpandedNotchView: View {
                 }
                 .padding(.vertical, 2)
             }
-            .frame(maxHeight: 220)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            Spacer(minLength: 0)
-
-            // Bottom Hint
             HStack {
                 Spacer()
                 Text("Click ★ to set Primary • Tap outside or Esc to collapse")
@@ -228,9 +292,33 @@ struct ExpandedNotchView: View {
                 Spacer()
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 10)
-        .padding(.bottom, 8)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+}
+
+private extension NotchContentMode {
+    var title: String {
+        switch self {
+        case .ai: "AI"
+        case .system: "System"
+        case .music: "Music"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .ai: "sparkles"
+        case .system: "waveform.path.ecg"
+        case .music: "music.note"
+        }
+    }
+}
+
+/// macOS `.plain` only hits glyph/text; this makes the whole label frame tappable.
+private struct FullAreaPlainButtonStyle: PrimitiveButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .contentShape(Rectangle())
+            .onTapGesture(perform: configuration.trigger)
     }
 }

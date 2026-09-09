@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.1.0
+
+### Highlights
+
+- **Menu bar click-through**: Compact overlay no longer blocks the status items immediately right of the hardware notch.
+- **AI / System / Music tabs**: Shared expanded layout, full-capsule tab hit targets, no page jump when switching.
+- **Provider drag reorder**: Settings list order is persisted and used by the expanded AI dashboard.
+- **Grok**: Official Grok CLI (`grok login`) plus weekly SuperGrok credits via the CLI-proxy billing API.
+- **One-click CLI sign-in**: Codex, Claude, and Grok cards launch Terminal login when signed out.
+- **Now Playing**: Music tab and hover-while-playing line for system Now Playing (including custom players that publish to Control Center).
+
+### Known limitations
+
+- Compiled binaries cannot read MediaRemote on current macOS; Now Playing uses an Apple-signed `swift` probe (Xcode / CLT required on the machine).
+- Grok credits require a valid `grok login` session in `~/.grok/auth.json`.
+- Claude and Antigravity still have no public subscription quota API.
+
 ## 1.0.0
 
 Official v1.0.0 release for GitHub Direct Distribution.

@@ -11,6 +11,8 @@ Depending on the providers and integrations enabled by the user, Dev Notch may l
 - Google Antigravity CLI and Dev Notch-owned Antigravity hook configuration
 - OpenCode configuration and account metadata
 - a DeepSeek API credential already stored for OpenCode, used only to request DeepSeek account balance
+- Grok CLI `~/.grok/auth.json` identity and a short-lived bearer used only to request Grok credit usage from xAI's CLI-proxy billing endpoint
+- system Now Playing metadata (title, artist, album, artwork) from the local MediaRemote session, used only to render the Music tab
 - local AI activity metadata such as provider, model, session state, context usage, and timestamps
 
 ## Data excluded by default

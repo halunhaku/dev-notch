@@ -148,12 +148,57 @@ final class HardwareNotchLayoutTests: XCTestCase {
         }
     }
 
+    func testCompactIdleRejectsMouseOverWindowWings() {
+        let screen = NSScreen.main ?? NSScreen.screens[0]
+        let visual = NotchGeometry.visualRectInWindow(for: .compact, on: screen)
+        let inside = CGPoint(x: visual.midX, y: visual.midY)
+        XCTAssertTrue(NotchGeometry.acceptsMouse(atWindowPoint: inside, state: .compact, on: screen))
+
+        let rightWing = CGPoint(x: visual.maxX + 8, y: visual.midY)
+        XCTAssertFalse(
+            NotchGeometry.acceptsMouse(atWindowPoint: rightWing, state: .compact, on: screen),
+            "Compact idle must click through the transparent right wing onto menu bar extras"
+        )
+
+        let leftWing = CGPoint(x: visual.minX - 8, y: visual.midY)
+        XCTAssertFalse(NotchGeometry.acceptsMouse(atWindowPoint: leftWing, state: .compact, on: screen))
+
+        let belowPadding = CGPoint(x: visual.midX, y: visual.minY - 4)
+        XCTAssertFalse(NotchGeometry.acceptsMouse(atWindowPoint: belowPadding, state: .compact, on: screen))
+    }
+
+    func testCompactWindowMayOverlapRightMenuExtrasButVisualMustNot() {
+        let screen = NSScreen.main ?? NSScreen.screens[0]
+        let model = NotchGeometry.hardwareNotchModel(on: screen)
+        guard model.hasHardwareNotch else { return }
+        guard #available(macOS 12.0, *), let right = screen.auxiliaryTopRightArea, right.width > 0 else { return }
+
+        let windowFrame = NotchGeometry.windowFrame(for: .compact, on: screen)
+        let visual = NotchGeometry.visualRectInWindow(for: .compact, on: screen)
+        let visualInScreen = CGRect(
+            x: windowFrame.minX + visual.minX,
+            y: windowFrame.minY + visual.minY,
+            width: visual.width,
+            height: visual.height
+        )
+
+        XCTAssertFalse(
+            visualInScreen.intersects(right),
+            "Compact island must not cover right-of-notch menu bar icons"
+        )
+
+        let iconPoint = CGPoint(x: right.minX + 8, y: screen.frame.maxY - min(8, right.height / 2))
+        XCTAssertTrue(windowFrame.contains(iconPoint), "Precondition: compact window chrome overlaps right extras")
+        let windowPoint = CGPoint(x: iconPoint.x - windowFrame.minX, y: iconPoint.y - windowFrame.minY)
+        XCTAssertFalse(NotchGeometry.acceptsMouse(atWindowPoint: windowPoint, state: .compact, on: screen))
+    }
+
     @MainActor
     func testDisabledProviderFilteringInManager() {
         UserDefaults.standard.removeObject(forKey: "devnotch_provider_enabled_map")
         let registry = AIProviderRegistry.makeDefaultRegistry()
         let manager = AIProviderManager(registry: registry)
-        XCTAssertEqual(manager.providerIDs.count, 5)
-        XCTAssertEqual(manager.enabledProviderIDs.count, 5)
+        XCTAssertEqual(manager.providerIDs.count, 6)
+        XCTAssertEqual(manager.enabledProviderIDs.count, 6)
     }
 }

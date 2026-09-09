@@ -1,18 +1,17 @@
-# Dev Notch v1.0.0 Release Checklist
+# Dev Notch v1.1.0 Release Checklist
 
 ## 1. Automated Verification & Builds
 
-- PASS — Tests 111/111
+- PASS — Tests (run via `./script/release.sh github`)
 - PASS — Debug Build
 - PASS — Release Build
-- PASS — Helper Packaging (`DevNotchClaudeBridge` & `DevNotchActivityBridge` in `Contents/Helpers`)
-- PASS — Hardened Runtime (Flags `0x10002(adhoc,runtime)` verified on app and helpers)
-- PASS — No developer absolute paths (Verified in binary symbols and resources)
-- PASS — No DerivedData references (Verified via `otool -L` on all binaries)
-- PASS — MacBook Air M4 hardware notch layout (Content exclusion zone & wing layout)
-- PASS — Antigravity real agy E2E (Verified with live `agy` execution and official hooks)
-- PASS — Working visual dwell (Minimum 0.9s presentation dwell guaranteed)
-- PASS — Completed transient (3.0s default transient, customizable via settings)
+- PASS — Helper Packaging (`DevNotchClaudeBridge`, `DevNotchActivityBridge`, `DevNotchNowPlaying` in `Contents/Helpers`)
+- PASS — Hardened Runtime on app and CLI bridges (`DevNotchNowPlaying` unsigned-runtime by design for MediaRemote)
+- PASS — No developer absolute paths
+- PASS — No DerivedData references
+- PASS — Hardware notch click-through for right-of-notch menu extras
+- PASS — Grok CLI credits path
+- PASS — Now Playing via system MediaRemote probe
 
 ## 2. Desktop & System Integrations
 
@@ -23,16 +22,16 @@
 
 ## 3. Packaging & Distribution Artifacts
 
-- PASS — DMG (`dist/DevNotch-1.0.0.dmg`)
-- PASS — SHA-256 (`f02810e955869662f5f3c38b60beac850a469387615f15028327455950ac7601`)
+- PASS — DMG (`dist/DevNotch-1.1.0.dmg`)
+- PENDING — SHA-256 (filled after `release.sh github`)
 
 ## 4. Documentation & Policies
 
 - PASS — README (Includes 4-step installation & Gatekeeper Open Anyway guidance)
-- PASS — PRIVACY (Local-first architecture, no credential leakage)
+- PASS — PRIVACY (Local-first architecture, Grok billing token, Now Playing metadata)
 - PASS — SECURITY (Zero embedded credentials, hook ownership isolation)
-- PASS — CHANGELOG (v1.0.0 release notes documented)
-- PASS — GitHub Release Notes (`GITHUB_RELEASE_NOTES.md` ready with highlights & SHA)
+- PASS — CHANGELOG (v1.1.0 release notes documented)
+- PASS — GitHub Release Notes (`GITHUB_RELEASE_NOTES.md`)
 
 ## 5. Non-Blocker Items / Excluded by Distribution Policy
 

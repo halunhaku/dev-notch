@@ -1,6 +1,6 @@
 # Dev Notch
 
-**Dev Notch** 是专为 macOS 设计的原生「AI Developer Dynamic Island」桌面应用。它巧妙利用 MacBook 的物理刘海区域（并在无刘海屏幕上自适应为顶部虚拟岛），为开发者提供沉浸、轻量且无打扰的 AI 运行状态、额度用量、实时任务流式光环（Task Pulse）与快捷控制中心。
+**Dev Notch** 是专为 macOS 设计的原生「AI Developer Dynamic Island」桌面应用。它巧妙利用 MacBook 的物理刘海区域（并在无刘海屏幕上自适应为顶部虚拟岛），为开发者提供沉浸、轻量且无打扰的 AI 运行状态、额度用量、实时任务流式光环（Task Pulse）、系统 Now Playing 与快捷控制中心。
 
 ---
 
@@ -14,7 +14,9 @@
 - **Phase 6：Google Antigravity Provider + Generic AI Activity + Task Pulse（已完成）**
 - **Phase 7：系统全局快捷键 + 菜单栏状态图标 + 原生设置面板 + 自启动（已完成）**
 - **Phase 8：v0.9.0-rc1 发行候选审计、Bundle Helper、Hardened Runtime（已完成）**
-- **Phase 9：v1.0.0 GitHub Direct Distribution 正式发行（已就绪）**
+- **Phase 9：v1.0.0 GitHub Direct Distribution 正式发行（已完成）**
+- **Phase 10：System Insights 公共指标与 AI / System 内容路由（已完成）**
+- **Phase 11：Grok 配额、Now Playing、刘海点透与 Provider 拖拽排序（已完成）**
 
 ## Requirements
 
@@ -23,7 +25,7 @@
 
 ## Installing Dev Notch
 
-1. Download `DevNotch-1.0.0.dmg` from GitHub Releases.
+1. Download `DevNotch-1.1.0.dmg` from GitHub Releases.
 2. Open the DMG.
 3. Drag `Dev Notch` (`DevNotch.app`) into `/Applications` (or `~/Applications`).
 4. Open Dev Notch from Applications.
@@ -64,6 +66,7 @@ Dev Notch must be moved to `/Applications` or `~/Applications` before enabling C
 - **UI 框架**：SwiftUI（含原生 `Settings` 场景与多标签设置页）
 - **窗口系统**：AppKit（`NSPanel` + `NSStatusItem` + `NSWindowController`）
 - **系统底层桥接**：Apple 原生 `Carbon.HIToolbox` 全局快捷键（**0 隐私权限**，无需 Accessibility 或 Input Monitoring）
+- **系统指标**：Mach CPU/VM、SystemConfiguration 主网络接口、IOKit Power Sources、Foundation Thermal State（无新增隐私权限）
 - **自启动服务**：Apple 原生现代 `ServiceManagement.SMAppService`（macOS 14+）
 - **跨进程桥接**：100% Swift 原生编译的独立 CLI 桥接工具（`DevNotchActivityBridge` / `DevNotchClaudeBridge`，无 Node/Python/jq 依赖）
 - **构建与测试**：`xcodegen` + `xcodebuild` + `XCTest`
@@ -125,17 +128,29 @@ MIT — 见 [LICENSE](LICENSE)。项目为 100% 原创实现，无第三方代�
   - **Completed 态**：绿色完成瞬态高亮（1.2 秒后淡出）。
   - **辅助功能兼容**：严格遵循 macOS `Reduce Motion` 减弱动态效果设置，开启时自动关闭连续动画，改为静态常亮微光。
 
-### 3. 多 AI 厂商真实接入现状
+
+### 3. System Insights & Music (Phase 10–11)
+- **AI / System / Music 内容路由**：展开态三页签；默认仍为 AI 首页。
+- **公开原生指标**：CPU 总占用、内存占用与压力、主网络接口上下行、电池及系统 Thermal State。
+- **低能耗采样**：仅 System 页面可见时以 1 Hz 采样；离开页面立即停止，不维持后台轮询。
+- **60 秒趋势图**：固定容量环形历史缓冲，避免每次采样搬移数组；CPU、内存、网络使用轻量 sparkline。
+- **Now Playing**：系统正在播放（含向控制中心上报的自定义播放器）；悬停仅在真正播放时显示歌名，暂停回到 AI 配额。
+- **明确边界**：不读取私有 IOReport/SMC，不展示不稳定的 GPU 占用或精确温度。
+
+### 4. 多 AI 厂商真实接入现状
 
 | 提供商 | 认证模式 | 核心度量 / 能力 | 本机验证状态 |
 | :--- | :--- | :--- | :--- |
-| **OpenAI Codex** | ChatGPT OAuth | 5h 滚动额度 (0%)、Weekly 配额 (84%) | 官方 App-Server 进程与配额全链路已验证 |
-| **DeepSeek** | API Key (via OpenCode) | 账户余额 (¥0.73)、充值金/赠金细项 | 官方 API `GET /user/balance` 实时验证通过 |
-| **Google Antigravity** | Google Account OAuth | CLI v1.1.27 探测、官方 Hooks 真实 E2E 验证通过 | 本机 CLI 与真实 Hooks 验证通过；Desktop 未安装；配额接口未公开 |
-| **Anthropic Claude Code** | 官方 CLI v2.1.236 | 上下文占用、活动钩子桥接、Task Pulse | 本机未登录认证（认证验证待补齐）；桥接与安全融合已验证 |
-| **OpenCode Go** | 本地 CLI v1.18.20 | 多窗口模型自适应 (5h/Weekly/Monthly) | 本机 CLI 探测通过；云端订阅待配置 |
+| **OpenAI Codex** | ChatGPT OAuth | 5h 滚动额度、Weekly 配额 | 官方 App-Server 进程与配额全链路已验证；卡片支持一键 `codex login` |
+| **DeepSeek** | API Key (via OpenCode) | 账户余额、充值金/赠金细项 | 官方 API `GET /user/balance` 实时验证通过 |
+| **Google Antigravity** | Google Account OAuth | CLI 探测、官方 Hooks | 本机 CLI 与真实 Hooks 验证通过；配额接口未公开 |
+| **Anthropic Claude Code** | 官方 CLI | 上下文占用、活动钩子桥接、Task Pulse | 卡片支持一键 `claude auth login`；订阅配额无公开接口 |
+| **OpenCode Go** | 本地 CLI | 多窗口模型自适应 (5h/Weekly/Monthly) | 本机 CLI 探测通过 |
+| **xAI Grok** | `grok login` OIDC | SuperGrok 周额度 (`cli-chat-proxy` credits) | 本机 CLI + 配额接口已验证 |
 
-“已接入”表示产品代码路径存在；“实测通过”仅表示列出的本机验证已完成。Claude 需要用户登录才能完成 authenticated E2E；Antigravity 没有受支持的外部配额接口。
+设置中可拖拽排序 Provider，展开 AI 列表使用同一顺序。收起态刘海不再挡住右侧菜单栏图标。
+
+“已接入”表示产品代码路径存在；“实测通过”仅表示列出的本机验证已完成。
 
 ---
 
@@ -151,7 +166,8 @@ MIT — 见 [LICENSE](LICENSE)。项目为 100% 原创实现，无第三方代�
 ## 🧪 自动化测试套件
 
 内置全面的单元与集成回归测试，包括：
-- `PreferencesStoreTests`：默认值、迁移旧版 Primary 偏好、菜单栏持久化、Provider 启闭持久化、瞬态完成时长配置。
+- `PreferencesStoreTests`：默认值、Primary 迁移、System Insights 与 Provider 启闭等偏好持久化、瞬态完成时长配置。
+- `SystemMetricsTests`：CPU tick 差分与计数器回绕、网络速率/重置、固定容量历史顺序。
 - `KeyboardShortcutTests`：按键序列化、快捷键字符格式化、非法无修饰键拦截、Carbon 标志位双向映射。
 - `GlobalHotKeyTests`：快捷键双向切换折叠/展开、注册失败优雅处理、注销生命周期。
 - `LaunchAtLoginTests`：自启动状态抽象、系统注册异常捕获。
@@ -160,5 +176,7 @@ MIT — 见 [LICENSE](LICENSE)。项目为 100% 原创实现，无第三方代�
 - `AntigravityDiscoveryTests` & `AntigravityIntegrationTests` & `AntigravityActivityTests`：CLI 探测、真实钩子结构、脱敏审计、原子 IPC。
 - `ClaudeParsingTests` & `ClaudeIntegrationTests` & `ClaudeActivityTests`：CLI 认证模式、钩子合并、45s 超时看门狗。
 - `DeepSeekParsingTests` & `DeepSeekClientTests` & `DeepSeekCredentialTests`：官方余额 API 与 MockURLProtocol 状态码验证。
-- `AIProviderManagerTests`：五厂商并行调度、Primary 持久化、容灾回退、超时与异常隔离。
+- `GrokAuthTests`：`~/.grok/auth.json` 会话解析与 credits JSON。
+- `NowPlayingTests`：系统 Now Playing 字段解析与进度推算。
+- `AIProviderManagerTests`：多厂商并行调度、Primary 持久化、排序、容灾回退、超时与异常隔离。
 - `AIUsageWindowTests` & `GenericMetricsTests` & `CodexParsingTests` & `OpenCodeParsingTests`。

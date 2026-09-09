@@ -33,6 +33,12 @@ struct GeneralSettingsView: View {
             Section(header: Text("Interface").font(.headline)) {
                 Toggle("Show menu bar icon", isOn: $preferences.showMenuBarItem)
                 Toggle("Enable Task Pulse horizon animation", isOn: $preferences.taskPulseEnabled)
+                Toggle("Enable System Insights", isOn: $preferences.systemInsightsEnabled)
+
+                Text("CPU, memory, network, battery, and thermal metrics are sampled only while the System page is visible.")
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
+
 
                 if isSystemReduceMotionActive {
                     HStack {

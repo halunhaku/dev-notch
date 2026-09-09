@@ -172,4 +172,12 @@ struct NotchGeometry {
         let y = bottomPadding
         return CGRect(x: x, y: y, width: size.width, height: size.height)
     }
+
+    /// Whether a window-local point should hit the overlay.
+    /// Compact/hovered windows are wider than the idle island so hover animation
+    /// does not jump; those transparent wings cover menu bar extras and must
+    /// click through. `NSView.hitTest` returning nil does not pass events down.
+    static func acceptsMouse(atWindowPoint point: CGPoint, state: NotchState, on screen: NSScreen) -> Bool {
+        visualRectInWindow(for: state, on: screen).contains(point)
+    }
 }

@@ -6,6 +6,9 @@ struct NotchView: View {
     @ObservedObject var model: NotchModel
     @ObservedObject var screenManager: ScreenManager
     @ObservedObject var providerManager: AIProviderManager
+    @ObservedObject var preferences: PreferencesStore
+    @ObservedObject var systemMetricsStore: SystemMetricsStore
+    @ObservedObject var nowPlayingStore: NowPlayingStore
     var onOpenSettings: (() -> Void)? = nil
 
     private var activeScreen: NSScreen {
@@ -63,7 +66,8 @@ struct NotchView: View {
                         HoveredNotchView(
                             model: model,
                             screenManager: screenManager,
-                            providerManager: providerManager
+                            providerManager: providerManager,
+                            nowPlayingStore: nowPlayingStore
                         )
                         .transition(.opacity.combined(with: .scale(scale: 0.98)))
 
@@ -72,9 +76,12 @@ struct NotchView: View {
                             model: model,
                             screenManager: screenManager,
                             providerManager: providerManager,
+                            preferences: preferences,
+                            systemMetricsStore: systemMetricsStore,
+                            nowPlayingStore: nowPlayingStore,
                             onOpenSettings: onOpenSettings
                         )
-                        .transition(.opacity.combined(with: .scale(scale: 0.98)))
+                        .transition(.opacity)
                     }
                 }
 
@@ -95,6 +102,7 @@ struct NotchView: View {
                 model.handleHover(isHovered)
             }
             .onTapGesture {
+                guard model.state != .expanded else { return }
                 model.handleTap()
             }
 

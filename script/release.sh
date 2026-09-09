@@ -3,7 +3,7 @@ set -euo pipefail
 
 readonly MODE="${1:-github}"
 readonly PRODUCT_NAME="DevNotch"
-readonly VERSION="1.0.0"
+readonly VERSION="1.1.0"
 readonly PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly BUILD_ROOT="$PROJECT_ROOT/build/release"
 readonly ARCHIVE_PATH="$BUILD_ROOT/DevNotch.xcarchive"
@@ -55,20 +55,21 @@ verify_code() {
     local app="$1"
     local claude_helper="$app/Contents/Helpers/DevNotchClaudeBridge"
     local activity_helper="$app/Contents/Helpers/DevNotchActivityBridge"
+    local nowplaying_helper="$app/Contents/Helpers/DevNotchNowPlaying"
 
-    for item in "$claude_helper" "$activity_helper" "$app"; do
+    for item in "$claude_helper" "$activity_helper" "$nowplaying_helper" "$app"; do
         [[ -e "$item" ]] || { echo "ERROR: Missing nested code: $item" >&2; exit 1; }
         [[ -x "$item" || -d "$item" ]] || { echo "ERROR: Code artifact is not executable: $item" >&2; exit 1; }
         codesign --verify --strict --verbose=2 "$item"
         local cs_info
         cs_info="$(codesign -dvvv "$item" 2>&1)"
-        if ! echo "$cs_info" | grep -q "flags=.*runtime"; then
+        if [[ "$item" != "$nowplaying_helper" ]] && ! echo "$cs_info" | grep -q "flags=.*runtime"; then
             echo "ERROR: Hardened runtime flag missing on $item" >&2
             exit 1
         fi
     done
 
-    for bin in "$claude_helper" "$activity_helper" "$app/Contents/MacOS/DevNotch"; do
+    for bin in "$claude_helper" "$activity_helper" "$nowplaying_helper" "$app/Contents/MacOS/DevNotch"; do
         if otool -L "$bin" | grep '^[[:space:]]' | grep -E "DerivedData|/Users/"; then
             echo "ERROR: Unexpected linked library path in $bin" >&2
             exit 1
@@ -80,9 +81,11 @@ sign_local_runtime() {
     local app="$1"
     local claude_helper="$app/Contents/Helpers/DevNotchClaudeBridge"
     local activity_helper="$app/Contents/Helpers/DevNotchActivityBridge"
+    local nowplaying_helper="$app/Contents/Helpers/DevNotchNowPlaying"
 
     codesign --force --sign - --options runtime "$claude_helper"
     codesign --force --sign - --options runtime "$activity_helper"
+    codesign --force --sign - "$nowplaying_helper"
     codesign --force --sign - --options runtime \
         --entitlements "$PROJECT_ROOT/DevNotch/DevNotch.entitlements" \
         "$app"

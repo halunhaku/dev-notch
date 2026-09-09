@@ -75,9 +75,12 @@ final class AIProviderManager: ObservableObject {
 
     init(registry: AIProviderRegistry = AIProviderRegistry.makeDefaultRegistry()) {
         self.registry = registry
-        self.providerIDs = registry.allProviders.map { $0.id }
+        let registered = registry.allProviders.map(\.id)
+        self.providerIDs = PreferencesStore.resolvedProviderOrder(
+            saved: PreferencesStore.loadSavedProviderOrder(),
+            registered: registered
+        )
         self.preferredPrimaryID = Self.loadPreferredPrimaryID()
-
         // Initialize snapshot placeholders
         for provider in registry.allProviders {
             snapshots[provider.id] = AIProviderSnapshot(
@@ -191,6 +194,49 @@ final class AIProviderManager: ObservableObject {
         preferredPrimaryID = id
         UserDefaults.standard.set(id.rawValue, forKey: Self.primaryPreferenceKey)
         logger.info("Preferred Primary Provider updated to: \(id.rawValue)")
+    }
+
+    /// Reorders dashboard and Settings list. Unknown IDs are ignored; missing registered IDs append.
+    func applyProviderOrder(_ ids: [AIProviderID]) {
+        let registered = registry.allProviders.map(\.id)
+        providerIDs = PreferencesStore.resolvedProviderOrder(saved: ids, registered: registered)
+        logger.info("Provider display order applied: \(self.providerIDs.map(\.rawValue).joined(separator: ","))")
+    }
+
+    /// Opens Terminal with the provider's CLI login command.
+    func signIn(providerID: AIProviderID) {
+        switch providerID {
+        case .grok:
+            launchCLILogin(executable: GrokExecutableLocator.locate() ?? "grok", arguments: ["login", "--oauth"])
+        case .codex:
+            launchCLILogin(executable: CodexExecutableLocator.locate() ?? "codex", arguments: ["login"])
+        case .claude:
+            launchCLILogin(executable: ClaudeExecutableLocator.locate() ?? "claude", arguments: ["auth", "login"])
+        default:
+            return
+        }
+    }
+
+    func signInGrok() {
+        signIn(providerID: .grok)
+    }
+
+    private func launchCLILogin(executable: String, arguments: [String]) {
+        func quote(_ value: String) -> String {
+            let escaped = value
+                .replacingOccurrences(of: "\\", with: "\\\\")
+                .replacingOccurrences(of: "\"", with: "\\\"")
+            return "\\\"\(escaped)\\\""
+        }
+        let command = ([quote(executable)] + arguments.map(quote)).joined(separator: " ")
+        let script = "tell application \"Terminal\" to do script \"\(command)\" activate"
+        if let appleScript = NSAppleScript(source: script) {
+            var error: NSDictionary?
+            appleScript.executeAndReturnError(&error)
+            if let error {
+                logger.error("Failed to launch CLI login for \(executable): \(error)")
+            }
+        }
     }
 
     // MARK: - Lifecycle
@@ -331,6 +377,12 @@ final class AIProviderManager: ObservableObject {
                         await self?.updateSnapshot(for: pid)
                     }
                 }
+            } else if let grok = provider as? GrokProvider {
+                grok.onStateChanged = { [weak self] in
+                    Task { @MainActor [weak self] in
+                        await self?.updateSnapshot(for: pid)
+                    }
+                }
             }
         }
     }
@@ -353,6 +405,8 @@ final class AIProviderManager: ObservableObject {
         var credSource: String? = nil
         if let ds = provider as? DeepSeekProvider {
             credSource = ds.credentialSource.map { "via \($0.rawValue)" }
+        } else if let grok = provider as? GrokProvider {
+            credSource = grok.credentialSource.map { "via \($0.rawValue)" }
         }
 
         var liveActivityInstalled = false

@@ -67,11 +67,13 @@ final class AIProviderManagerTests: XCTestCase {
         super.setUp()
         UserDefaults.standard.removeObject(forKey: "devnotch_preferred_primary_id")
         UserDefaults.standard.removeObject(forKey: "devnotch_provider_enabled_map")
+        UserDefaults.standard.removeObject(forKey: "devnotch_provider_order")
     }
 
     override func tearDown() {
         UserDefaults.standard.removeObject(forKey: "devnotch_preferred_primary_id")
         UserDefaults.standard.removeObject(forKey: "devnotch_provider_enabled_map")
+        UserDefaults.standard.removeObject(forKey: "devnotch_provider_order")
         super.tearDown()
     }
 
@@ -283,5 +285,14 @@ final class AIProviderManagerTests: XCTestCase {
 
         XCTAssertEqual(manager.snapshots[.codex]?.status, .ready)
         XCTAssertEqual(manager.snapshots[.codex]?.compactMetric.value, "72%")
+    }
+
+    func testApplyProviderOrderChangesDashboardSequence() async {
+        let registry = AIProviderRegistry.makeDefaultRegistry()
+        let manager = AIProviderManager(registry: registry)
+        let reversed = Array(manager.providerIDs.reversed())
+        manager.applyProviderOrder(reversed)
+        XCTAssertEqual(manager.providerIDs, reversed)
+        XCTAssertEqual(manager.enabledProviderIDs, reversed)
     }
 }

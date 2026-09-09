@@ -17,7 +17,10 @@ final class PreferencesStore: ObservableObject {
     private static let keyCompletedDisplayDuration = "devnotch_completed_display_duration"
     private static let keyAutoCollapseEnabled = "devnotch_auto_collapse_enabled"
     private static let keyProviderEnabled = "devnotch_provider_enabled_map"
+    private static let keyProviderOrder = "devnotch_provider_order"
     private static let keyOpenCodeApiKey = "devnotch_opencode_api_key"
+    private static let keySystemInsightsEnabled = "devnotch_system_insights_enabled"
+
     /// Static accessor for bridge helpers to query user's completed duration preference.
     nonisolated static var sharedCompletedDisplayDuration: Double {
         let dur = UserDefaults.standard.double(forKey: keyCompletedDisplayDuration)
@@ -38,6 +41,10 @@ final class PreferencesStore: ObservableObject {
 
     @Published var showMenuBarItem: Bool {
         didSet { UserDefaults.standard.set(showMenuBarItem, forKey: Self.keyShowMenuBarItem) }
+    }
+
+    @Published var systemInsightsEnabled: Bool {
+        didSet { UserDefaults.standard.set(systemInsightsEnabled, forKey: Self.keySystemInsightsEnabled) }
     }
 
     @Published var openCodeApiKey: String {
@@ -92,7 +99,7 @@ final class PreferencesStore: ObservableObject {
     }
 
     @Published private(set) var providerEnabled: [AIProviderID: Bool]
-
+    @Published private(set) var providerOrder: [AIProviderID]
     private let launchManager: any LaunchAtLoginManaging
 
     init(launchManager: any LaunchAtLoginManaging = DefaultLaunchAtLoginManager()) {
@@ -105,6 +112,12 @@ final class PreferencesStore: ObservableObject {
         } else {
             self.showMenuBarItem = true
         }
+        if defaults.object(forKey: Self.keySystemInsightsEnabled) != nil {
+            self.systemInsightsEnabled = defaults.bool(forKey: Self.keySystemInsightsEnabled)
+        } else {
+            self.systemInsightsEnabled = true
+        }
+
 
         // Sync launchAtLogin with system status
         self.launchAtLogin = launchManager.isEnabled
@@ -164,6 +177,10 @@ final class PreferencesStore: ObservableObject {
             map[id] = savedMap[id.rawValue] ?? true
         }
         self.providerEnabled = map
+        self.providerOrder = Self.resolvedProviderOrder(
+            saved: Self.loadSavedProviderOrder(),
+            registered: Array(AIProviderID.allCases)
+        )
         // OpenCode Go API key
         self.openCodeApiKey = defaults.string(forKey: Self.keyOpenCodeApiKey) ?? ""
     }
@@ -189,5 +206,32 @@ final class PreferencesStore: ObservableObject {
         let clean = key.trimmingCharacters(in: .whitespacesAndNewlines)
         self.openCodeApiKey = clean
         UserDefaults.standard.set(clean, forKey: Self.keyOpenCodeApiKey)
+    }
+
+    /// Saved display order. Unknown IDs are dropped; new IDs append.
+    nonisolated static func loadSavedProviderOrder() -> [AIProviderID] {
+        let raw = UserDefaults.standard.stringArray(forKey: keyProviderOrder) ?? []
+        return raw.compactMap { AIProviderID(rawValue: $0) }
+    }
+
+    nonisolated static func resolvedProviderOrder(
+        saved: [AIProviderID],
+        registered: [AIProviderID]
+    ) -> [AIProviderID] {
+        var seen = Set<AIProviderID>()
+        var result: [AIProviderID] = []
+        for id in saved where registered.contains(id) && seen.insert(id).inserted {
+            result.append(id)
+        }
+        for id in registered where seen.insert(id).inserted {
+            result.append(id)
+        }
+        return result
+    }
+
+    func setProviderOrder(_ ids: [AIProviderID]) {
+        providerOrder = Self.resolvedProviderOrder(saved: ids, registered: Array(AIProviderID.allCases))
+        UserDefaults.standard.set(providerOrder.map(\.rawValue), forKey: Self.keyProviderOrder)
+        logger.info("Provider order updated: \(self.providerOrder.map(\.rawValue).joined(separator: ","))")
     }
 }

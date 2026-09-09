@@ -47,21 +47,32 @@ final class NotchWindowController: NSWindowController {
     let model: NotchModel
     let screenManager: ScreenManager
     let providerManager: AIProviderManager
+    let preferences: PreferencesStore
+    let systemMetricsStore: SystemMetricsStore
+    let nowPlayingStore: NowPlayingStore
     var onOpenSettings: (() -> Void)?
 
     private var cancellables = Set<AnyCancellable>()
     private var globalClickMonitor: Any?
     private var localEscMonitor: Any?
+    private var globalMouseMonitor: Any?
+    private var localMouseMonitor: Any?
 
     init(
         model: NotchModel = NotchModel(),
         screenManager: ScreenManager = ScreenManager(),
         providerManager: AIProviderManager = AIProviderManager(),
+        preferences: PreferencesStore,
+        systemMetricsStore: SystemMetricsStore = SystemMetricsStore(),
+        nowPlayingStore: NowPlayingStore = NowPlayingStore(),
         onOpenSettings: (() -> Void)? = nil
     ) {
         self.model = model
         self.screenManager = screenManager
         self.providerManager = providerManager
+        self.preferences = preferences
+        self.systemMetricsStore = systemMetricsStore
+        self.nowPlayingStore = nowPlayingStore
         self.onOpenSettings = onOpenSettings
 
         let initialScreen = screenManager.currentScreen ?? NSScreen.main ?? NSScreen.screens[0]
@@ -72,6 +83,7 @@ final class NotchWindowController: NSWindowController {
 
         setupContentView(panel: panel)
         setupObservers()
+        startClickThroughMonitoring()
     }
 
     required init?(coder: NSCoder) {
@@ -86,6 +98,9 @@ final class NotchWindowController: NSWindowController {
             model: model,
             screenManager: screenManager,
             providerManager: providerManager,
+            preferences: preferences,
+            systemMetricsStore: systemMetricsStore,
+            nowPlayingStore: nowPlayingStore,
             onOpenSettings: { [weak self] in
                 self?.onOpenSettings?()
             }
@@ -101,8 +116,7 @@ final class NotchWindowController: NSWindowController {
 
         container.hitTestChecker = { [weak self] windowPoint in
             guard let self = self, let screen = self.screenManager.currentScreen else { return true }
-            let visualRect = NotchGeometry.visualRectInWindow(for: self.model.state, on: screen)
-            return visualRect.contains(windowPoint)
+            return NotchGeometry.acceptsMouse(atWindowPoint: windowPoint, state: self.model.state, on: screen)
         }
 
         panel.contentView = container
@@ -117,6 +131,7 @@ final class NotchWindowController: NSWindowController {
                 self.updateWindowFrame(for: newState, animated: true)
                 self.handleOutsideClickMonitoring(for: newState)
                 self.handleEscapeKeyMonitoring(for: newState)
+                self.updateClickThrough()
             }
             .store(in: &cancellables)
 
@@ -126,6 +141,7 @@ final class NotchWindowController: NSWindowController {
             .sink { [weak self] _ in
                 guard let self = self else { return }
                 self.updateWindowFrame(for: self.model.state, animated: false)
+                self.updateClickThrough()
             }
             .store(in: &cancellables)
     }
@@ -133,6 +149,7 @@ final class NotchWindowController: NSWindowController {
     /// Displays the panel above all apps without stealing keyboard focus.
     func showNotchWindow() {
         window?.orderFrontRegardless()
+        updateClickThrough()
     }
 
     /// Expands the notch into full dashboard state.
@@ -167,12 +184,52 @@ final class NotchWindowController: NSWindowController {
         }
     }
 
+    private func startClickThroughMonitoring() {
+        if globalMouseMonitor == nil {
+            globalMouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseDown, .rightMouseDown]) { [weak self] _ in
+                Task { @MainActor in
+                    self?.updateClickThrough()
+                }
+            }
+        }
+        if localMouseMonitor == nil {
+            localMouseMonitor = NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved, .leftMouseDown, .rightMouseDown]) { [weak self] event in
+                Task { @MainActor in
+                    self?.updateClickThrough()
+                }
+                return event
+            }
+        }
+        updateClickThrough()
+    }
+
+    /// Transparent chrome over menu bar extras must not eat clicks.
+    /// AppKit never forwards events when `hitTest` returns nil; toggle `ignoresMouseEvents`.
+    private func updateClickThrough() {
+        guard let window, let screen = screenManager.currentScreen else { return }
+        let pointInWindow = window.convertPoint(fromScreen: NSEvent.mouseLocation)
+        let inside = NotchGeometry.acceptsMouse(atWindowPoint: pointInWindow, state: model.state, on: screen)
+        let shouldIgnore = !inside
+        if window.ignoresMouseEvents != shouldIgnore {
+            window.ignoresMouseEvents = shouldIgnore
+        }
+        if model.isHovered != inside {
+            model.handleHover(inside)
+        }
+    }
+
     private func handleOutsideClickMonitoring(for state: NotchState) {
         if state == .expanded {
             if globalClickMonitor == nil {
                 globalClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-                    guard let self = self, self.model.state == .expanded else { return }
                     Task { @MainActor in
+                        guard let self,
+                              self.model.state == .expanded,
+                              let window = self.window,
+                              let screen = self.screenManager.currentScreen else { return }
+                        let pointInWindow = window.convertPoint(fromScreen: NSEvent.mouseLocation)
+                        let visualRect = NotchGeometry.visualRectInWindow(for: .expanded, on: screen)
+                        guard !visualRect.contains(pointInWindow) else { return }
                         self.model.collapseToCompact()
                     }
                 }
@@ -212,6 +269,12 @@ final class NotchWindowController: NSWindowController {
                 NSEvent.removeMonitor(monitor)
             }
             if let monitor = self.localEscMonitor {
+                NSEvent.removeMonitor(monitor)
+            }
+            if let monitor = self.globalMouseMonitor {
+                NSEvent.removeMonitor(monitor)
+            }
+            if let monitor = self.localMouseMonitor {
                 NSEvent.removeMonitor(monitor)
             }
         }

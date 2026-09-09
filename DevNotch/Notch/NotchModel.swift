@@ -1,11 +1,20 @@
 import SwiftUI
 import Combine
 
+enum NotchContentMode: String, CaseIterable, Identifiable {
+    case ai
+    case system
+    case music
+
+    var id: Self { self }
+}
+
 /// Drives the reactive state and transition animations for Dev Notch.
 @MainActor
 final class NotchModel: ObservableObject {
     @Published var state: NotchState = .compact
     @Published var isHovered: Bool = false
+    @Published var contentMode: NotchContentMode = .ai
 
     private var autoCollapseTimer: AnyCancellable?
     private var hoverDebounceTimer: AnyCancellable?

@@ -30,6 +30,7 @@ final class PreferencesStoreTests: XCTestCase {
     private func clearUserDefaults() {
         let keys = [
             "devnotch_show_menu_bar_item",
+            "devnotch_system_insights_enabled",
             "devnotch_global_hotkey_enabled",
             "devnotch_global_hotkey_data",
             "devnotch_preferred_primary_id",
@@ -37,7 +38,8 @@ final class PreferencesStoreTests: XCTestCase {
             "devnotch_show_completed_activity",
             "devnotch_completed_display_duration",
             "devnotch_auto_collapse_enabled",
-            "devnotch_provider_enabled_map"
+            "devnotch_provider_enabled_map",
+            "devnotch_provider_order"
         ]
         for key in keys {
             UserDefaults.standard.removeObject(forKey: key)
@@ -49,6 +51,7 @@ final class PreferencesStoreTests: XCTestCase {
         let store = PreferencesStore(launchManager: mockLaunch)
 
         XCTAssertTrue(store.showMenuBarItem)
+        XCTAssertTrue(store.systemInsightsEnabled)
         XCTAssertFalse(store.launchAtLogin)
         XCTAssertTrue(store.globalHotkeyEnabled)
         XCTAssertEqual(store.globalHotkey, KeyboardShortcutDefinition.defaultToggleNotch)
@@ -89,6 +92,33 @@ final class PreferencesStoreTests: XCTestCase {
         // Re-enable
         store2.setProviderEnabled(.claude, enabled: true)
         XCTAssertTrue(store2.isProviderEnabled(.claude))
+    }
+
+    func testProviderOrderPersistsAndAppendsNewIDs() {
+        let saved: [AIProviderID] = [.deepseek, .codex]
+        let registered: [AIProviderID] = [.codex, .claude, .deepseek]
+        XCTAssertEqual(
+            PreferencesStore.resolvedProviderOrder(saved: saved, registered: registered),
+            [.deepseek, .codex, .claude]
+        )
+
+        let mockLaunch = MockLaunchAtLoginManager()
+        let store = PreferencesStore(launchManager: mockLaunch)
+        store.setProviderOrder([.claude, .deepseek, .codex, .antigravity, .openCodeGo])
+
+        let restored = PreferencesStore(launchManager: mockLaunch)
+        XCTAssertEqual(restored.providerOrder.first, .claude)
+        XCTAssertTrue(restored.providerOrder.contains(.grok), "Newly added provider IDs append")
+    }
+
+    func testSystemInsightsPreferencePersists() {
+        let mockLaunch = MockLaunchAtLoginManager()
+        let store = PreferencesStore(launchManager: mockLaunch)
+
+        store.systemInsightsEnabled = false
+
+        let restoredStore = PreferencesStore(launchManager: mockLaunch)
+        XCTAssertFalse(restoredStore.systemInsightsEnabled)
     }
 
     func testCompletedDurationValues() {

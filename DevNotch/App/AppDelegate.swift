@@ -25,6 +25,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // 1. Initialize Notch Window Controller
         let controller = NotchWindowController(
             providerManager: providerManager,
+            preferences: preferences,
             onOpenSettings: { [weak self] in
                 self?.openSettingsWindow()
             }

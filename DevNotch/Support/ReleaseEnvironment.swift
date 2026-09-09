@@ -43,6 +43,7 @@ enum AppInstallation {
 enum BundledHelper: String, CaseIterable {
     case claude = "DevNotchClaudeBridge"
     case activity = "DevNotchActivityBridge"
+    case nowPlaying = "DevNotchNowPlaying"
 }
 
 enum BundledHelperLocator {

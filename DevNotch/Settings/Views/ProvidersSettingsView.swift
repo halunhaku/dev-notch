@@ -6,7 +6,7 @@ struct ProvidersSettingsView: View {
     @State private var openCodeInputKey: String = ""
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Configure which AI providers are active and select your preferred primary provider.")
+            Text("Configure which AI providers are active and select your preferred primary provider. Drag rows to reorder; the expanded AI dashboard uses the same order.")
                 .font(.system(size: 11))
                 .foregroundColor(.secondary)
                 .padding(.horizontal, 16)
@@ -81,6 +81,11 @@ struct ProvidersSettingsView: View {
                             }
                             .buttonStyle(.plain)
                             .disabled(!isEnabled)
+
+                            Image(systemName: "line.3.horizontal")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.secondary)
+                                .help("Drag to reorder")
                         }
 
                         // Inline Login & Credential Drawer for OpenCode Go
@@ -129,9 +134,28 @@ struct ProvidersSettingsView: View {
                             .padding(.top, 4)
                             .padding(.bottom, 4)
                         }
+
+                        if id == .grok && isEnabled {
+                            HStack(spacing: 8) {
+                                Image(systemName: "person.crop.circle.badge.checkmark")
+                                    .font(.system(size: 9))
+                                    .foregroundColor(.secondary)
+                                Button(action: {
+                                    manager.signInGrok()
+                                }) {
+                                    Label("Sign in with `grok login --oauth`", systemImage: "terminal")
+                                        .font(.system(size: 10))
+                                }
+                                .buttonStyle(.link)
+                            }
+                            .padding(.leading, 32)
+                            .padding(.top, 4)
+                            .padding(.bottom, 4)
+                        }
                     }
                     .padding(.vertical, 4)
                 }
+                .onMove(perform: moveProviders)
             }
             .listStyle(.inset)
         }
@@ -156,5 +180,12 @@ struct ProvidersSettingsView: View {
             var error: NSDictionary?
             appleScript.executeAndReturnError(&error)
         }
+    }
+
+    private func moveProviders(from source: IndexSet, to destination: Int) {
+        var ids = manager.providerIDs
+        ids.move(fromOffsets: source, toOffset: destination)
+        preferences.setProviderOrder(ids)
+        manager.applyProviderOrder(ids)
     }
 }

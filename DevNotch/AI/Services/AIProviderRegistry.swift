@@ -32,7 +32,7 @@ final class AIProviderRegistry: @unchecked Sendable {
         }
     }
 
-    /// Default registry configured for the five providers shipped in v1.0.0.
+    /// Default registry of shipped providers.
     static func makeDefaultRegistry() -> AIProviderRegistry {
         let registry = AIProviderRegistry()
         registry.register(CodexProvider())
@@ -40,6 +40,7 @@ final class AIProviderRegistry: @unchecked Sendable {
         registry.register(AntigravityProvider())
         registry.register(OpenCodeGoProvider())
         registry.register(DeepSeekProvider())
+        registry.register(GrokProvider())
         return registry
     }
 }

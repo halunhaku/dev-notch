@@ -8,6 +8,7 @@ enum AICredentialSource: String, Sendable {
     case environment = "Environment"
     case openCode = "OpenCode"
     case userConfigured = "Config"
+    case grokCLI = "Grok CLI"
 }
 
 /// Ephemeral in-memory container for discovered DeepSeek API key.

@@ -48,17 +48,28 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             .store(in: &cancellables)
     }
 
+    private static let statusItemImage: NSImage? = {
+        guard
+            let url = Bundle.main.url(forResource: "MenuBarIcon", withExtension: "svg"),
+            let image = NSImage(contentsOf: url)
+        else {
+            logger.error("MenuBarIcon.svg is missing from the app bundle")
+            return nil
+        }
+
+        image.size = NSSize(width: 18, height: 18)
+        image.isTemplate = true
+        image.accessibilityDescription = "Dev Notch"
+        return image
+    }()
+
     private func updateStatusItemVisibility() {
         if preferences.showMenuBarItem {
             if statusItem == nil {
                 let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
                 if let button = item.button {
-                    let image = NSImage(
-                        systemSymbolName: "chevron.left.forwardslash.chevron.right",
-                        accessibilityDescription: "Dev Notch"
-                    )
-                    image?.isTemplate = true
-                    button.image = image
+                    button.image = Self.statusItemImage
+                    button.toolTip = "Dev Notch"
                 }
 
                 let menu = NSMenu()

@@ -5,7 +5,7 @@ struct HoveredNotchView: View {
     @ObservedObject var model: NotchModel
     @ObservedObject var screenManager: ScreenManager
     @ObservedObject var providerManager: AIProviderManager
-
+    @ObservedObject var nowPlayingStore: NowPlayingStore
     private var metric: AICompactMetric {
         providerManager.primaryCompactMetric
     }
@@ -33,15 +33,13 @@ struct HoveredNotchView: View {
                 HStack(spacing: 0) {
                     // Left Wing: Icon Badge + App Title
                     HStack(spacing: 6) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(Color.white.opacity(0.14))
-                                .frame(width: 20, height: 20)
-
-                            Image(systemName: "chevron.left.forwardslash.chevron.right")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(Color.cyan)
-                        }
+                        Image(nsImage: NSApp.applicationIconImage)
+                            .resizable()
+                            .interpolation(.high)
+                            .frame(width: 24, height: 24)
+                            .frame(width: 20, height: 20)
+                            .clipped()
+                            .accessibilityHidden(true)
 
                         Text("Dev Notch")
                             .font(.system(size: 11, weight: .semibold))
@@ -76,39 +74,31 @@ struct HoveredNotchView: View {
                 .frame(height: notchModel.hardwareNotchHeight)
 
                 // Below-Notch Area: Primary Subtitle completely clear of the physical camera
-                HStack(spacing: 4) {
-                    Text(quotaSubtitle)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.white.opacity(0.85))
-                        .lineLimit(1)
+                HStack(spacing: 8) {
+                    hoverNowPlayingLine
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 14)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             // Non-notch / External Displays: Unified Virtual Island Layout
             HStack(spacing: 12) {
                 // Icon Badge
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.white.opacity(0.12))
-                        .frame(width: 28, height: 28)
+                Image(nsImage: NSApp.applicationIconImage)
+                    .resizable()
+                    .interpolation(.high)
+                    .frame(width: 34, height: 34)
+                    .frame(width: 28, height: 28)
+                    .clipped()
+                    .accessibilityHidden(true)
 
-                    Image(systemName: "chevron.left.forwardslash.chevron.right")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(Color.cyan)
-                }
-
-                // Title & Quota Subtitle
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Dev Notch")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.white)
 
-                    Text(quotaSubtitle)
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.white.opacity(0.75))
+                    hoverNowPlayingLine
                 }
 
                 Spacer()
@@ -131,6 +121,31 @@ struct HoveredNotchView: View {
             }
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    private var hoverNowPlayingLine: some View {
+        HStack(spacing: 6) {
+            if nowPlayingStore.info.isPlaying, nowPlayingStore.info.hasTrack {
+                Button(action: { nowPlayingStore.togglePlayPause() }) {
+                    Image(systemName: "pause.fill")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 16, height: 16)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                Text("\(nowPlayingStore.info.displayTitle)  ·  \(nowPlayingStore.info.displayArtist)")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.white.opacity(0.9))
+                    .lineLimit(1)
+            } else {
+                Text(quotaSubtitle)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.white.opacity(0.85))
+                    .lineLimit(1)
+            }
         }
     }
 }

@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<defs>
+  <linearGradient id="bg" x1="125" y1="110" x2="900" y2="915" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#061D3D"/>
+    <stop offset=".27" stop-color="#123D91"/>
+    <stop offset=".56" stop-color="#312278"/>
+    <stop offset=".79" stop-color="#3D194B"/>
+    <stop offset="1" stop-color="#0B1742"/>
+  </linearGradient>
+  <radialGradient id="blueGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+    gradientTransform="translate(210 210) rotate(38) scale(455 350)">
+    <stop stop-color="#27B8FF" stop-opacity=".72"/>
+    <stop offset=".42" stop-color="#1974FF" stop-opacity=".25"/>
+    <stop offset="1" stop-color="#1974FF" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="violetGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+    gradientTransform="translate(830 220) rotate(145) scale(370 310)">
+    <stop stop-color="#B16CFF" stop-opacity=".68"/>
+    <stop offset=".48" stop-color="#A43AFF" stop-opacity=".16"/>
+    <stop offset="1" stop-color="#A43AFF" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="rim" x1="115" y1="105" x2="914" y2="918" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#4BC7FF"/>
+    <stop offset=".23" stop-color="#277AFF"/>
+    <stop offset=".58" stop-color="#755CFF"/>
+    <stop offset=".85" stop-color="#C84CFF"/>
+    <stop offset="1" stop-color="#765CFF"/>
+  </linearGradient>
+  <linearGradient id="wave" x1="90" y1="530" x2="935" y2="530" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#00BFFF"/>
+    <stop offset=".25" stop-color="#27D8FF"/>
+    <stop offset=".47" stop-color="#82A9FF"/>
+    <stop offset=".64" stop-color="#DE7CFF"/>
+    <stop offset=".82" stop-color="#FF66C8"/>
+    <stop offset="1" stop-color="#FF5798"/>
+  </linearGradient>
+  <linearGradient id="waveHi" x1="110" y1="470" x2="920" y2="580" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#fff" stop-opacity=".06"/>
+    <stop offset=".36" stop-color="#fff" stop-opacity=".70"/>
+    <stop offset=".66" stop-color="#fff" stop-opacity=".52"/>
+    <stop offset="1" stop-color="#fff" stop-opacity=".08"/>
+  </linearGradient>
+  <linearGradient id="notchRim" x1="335" y1="110" x2="690" y2="275" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#DDFBFF"/>
+    <stop offset=".27" stop-color="#70D8FF"/>
+    <stop offset=".68" stop-color="#A98AFF"/>
+    <stop offset="1" stop-color="#FFD0F7"/>
+  </linearGradient>
+  <linearGradient id="notch" x1="370" y1="120" x2="655" y2="250" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#030C1B"/>
+    <stop offset="1" stop-color="#070814"/>
+  </linearGradient>
+  <filter id="shadow" x="-25%" y="-25%" width="150%" height="165%">
+    <feDropShadow dx="0" dy="25" stdDeviation="27" flood-color="#050718" flood-opacity=".34"/>
+  </filter>
+  <filter id="waveGlow" x="-30%" y="-100%" width="160%" height="300%">
+    <feGaussianBlur stdDeviation="17" result="blur"/>
+    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="ambient" x="-50%" y="-50%" width="200%" height="200%">
+    <feGaussianBlur stdDeviation="30"/>
+  </filter>
+  <clipPath id="iconClip"><rect x="92" y="92" width="840" height="840" rx="205"/></clipPath>
+</defs>
+
+<!-- Base -->
+<g filter="url(#shadow)">
+  <rect x="92" y="92" width="840" height="840" rx="205" fill="url(#bg)"/>
+</g>
+
+<g clip-path="url(#iconClip)">
+  <rect x="92" y="92" width="840" height="840" fill="url(#blueGlow)"/>
+  <rect x="92" y="92" width="840" height="840" fill="url(#violetGlow)"/>
+
+  <!-- top glass reflection -->
+  <path d="M94 111H930V399
+           C811 300 674 244 521 240
+           C360 237 218 290 94 402Z"
+        fill="#FFFFFF" fill-opacity=".045"/>
+
+  <!-- diagonal/right reflection -->
+  <path d="M688 238C785 253 864 289 932 343V533
+           C855 452 782 380 688 322Z"
+        fill="#FFFFFF" fill-opacity=".035"/>
+
+  <!-- large curved glass layer -->
+  <path d="M92 507
+           C211 450 315 469 400 513
+           C494 562 572 624 687 645
+           C782 662 862 637 932 586
+           V738
+           C843 793 729 817 603 810
+           C408 799 230 723 92 615Z"
+        fill="#FFFFFF" fill-opacity=".047"/>
+
+  <!-- lower dark layer -->
+  <path d="M92 620
+           C250 752 420 820 612 823
+           C746 826 852 795 932 749V932H92Z"
+        fill="#04152F" fill-opacity=".58"/>
+
+  <!-- bottom violet reflection -->
+  <path d="M118 895C296 846 469 845 626 872C744 892 841 891 914 865"
+        fill="none" stroke="#654FFF" stroke-opacity=".12" stroke-width="34" stroke-linecap="round"/>
+
+  <!-- waveform ambient -->
+  <path d="M95 548
+           C166 510 222 515 282 546
+           C338 575 381 569 420 527
+           C451 493 472 439 514 414
+           C554 390 590 414 618 460
+           C651 515 667 581 712 598
+           C756 615 794 577 829 544
+           C863 512 895 507 931 520"
+        fill="none" stroke="url(#wave)" stroke-width="90"
+        stroke-linecap="round" stroke-linejoin="round" opacity=".30" filter="url(#ambient)"/>
+
+  <!-- waveform -->
+  <path d="M95 548
+           C166 510 222 515 282 546
+           C338 575 381 569 420 527
+           C451 493 472 439 514 414
+           C554 390 590 414 618 460
+           C651 515 667 581 712 598
+           C756 615 794 577 829 544
+           C863 512 895 507 931 520"
+        fill="none" stroke="url(#wave)" stroke-width="62"
+        stroke-linecap="round" stroke-linejoin="round" filter="url(#waveGlow)"/>
+
+  <!-- waveform specular highlight -->
+  <path d="M101 538
+           C168 505 220 511 277 540
+           C332 568 374 563 412 522
+           C444 487 465 438 507 415
+           C546 394 581 417 607 461
+           C639 515 655 575 700 592
+           C744 608 782 572 817 539
+           C851 507 886 502 925 514"
+        fill="none" stroke="url(#waveHi)" stroke-width="10"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- refined MacBook-style notch: wider, shallower, smooth shoulders -->
+  <path d="M332 92H692V157
+           C692 216 644 264 585 264H439
+           C380 264 332 216 332 157Z"
+        fill="url(#notchRim)"/>
+
+  <path d="M343 92H681V157
+           C681 210 638 253 585 253H439
+           C386 253 343 210 343 157Z"
+        fill="url(#notch)"/>
+
+  <!-- notch inner gloss -->
+  <path d="M363 105H661"
+        stroke="#FFFFFF" stroke-opacity=".055" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- upper bevel -->
+  <path d="M130 122C176 104 224 101 286 101H738C805 101 855 109 895 127"
+        fill="none" stroke="#FFFFFF" stroke-opacity=".14" stroke-width="7" stroke-linecap="round"/>
+</g>
+
+<!-- outer neon rim -->
+<rect x="96" y="96" width="832" height="832" rx="201"
+      fill="none" stroke="url(#rim)" stroke-width="7"/>
+
+<!-- inner glass bevel -->
+<rect x="106" y="106" width="812" height="812" rx="192"
+      fill="none" stroke="#FFFFFF" stroke-opacity=".075" stroke-width="3"/>
+</svg>

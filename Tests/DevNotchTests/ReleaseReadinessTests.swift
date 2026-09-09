@@ -29,6 +29,10 @@ final class ReleaseReadinessTests: XCTestCase {
             BundledHelperLocator.url(for: .activity, bundleURL: bundle).path,
             "/Applications/Dev Notch.app/Contents/Helpers/DevNotchActivityBridge"
         )
+        XCTAssertEqual(
+            BundledHelperLocator.url(for: .nowPlaying, bundleURL: bundle).path,
+            "/Applications/Dev Notch.app/Contents/Helpers/DevNotchNowPlaying"
+        )
     }
 
     func testStableApplicationLocations() {
@@ -72,7 +76,7 @@ final class ReleaseReadinessTests: XCTestCase {
         let registry = AIProviderRegistry.makeDefaultRegistry()
         XCTAssertEqual(
             Set(registry.allProviders.map(\.id)),
-            Set([.codex, .claude, .antigravity, .openCodeGo, .deepseek])
+            Set([.codex, .claude, .antigravity, .openCodeGo, .deepseek, .grok])
         )
     }
 
@@ -126,8 +130,8 @@ final class ReleaseReadinessTests: XCTestCase {
         let script = try String(contentsOf: scriptURL, encoding: .utf8)
 
         XCTAssertTrue(script.contains("MODE=\"${1:-github}\""), "Default release mode should be github")
-        XCTAssertTrue(script.contains("VERSION=\"1.0.0\""), "Release version should be 1.0.0")
-        XCTAssertTrue(script.contains("GITHUB_DMG=\"$DIST_ROOT/DevNotch-${VERSION}.dmg\""), "GitHub DMG naming should be DevNotch-1.0.0.dmg")
+        XCTAssertTrue(script.contains("VERSION=\"1.1.0\""), "Release version should be 1.1.0")
+        XCTAssertTrue(script.contains("GITHUB_DMG=\"$DIST_ROOT/DevNotch-${VERSION}.dmg\""), "GitHub DMG naming should be DevNotch-1.1.0.dmg")
         XCTAssertTrue(script.contains("shasum -a 256 \"$GITHUB_DMG\" >\"$GITHUB_DMG.sha256\""), "Checksum should match artifact naming")
     }
 
@@ -152,7 +156,7 @@ final class ReleaseReadinessTests: XCTestCase {
         let readmeURL = projectRoot.appendingPathComponent("README.md")
         let readme = try String(contentsOf: readmeURL, encoding: .utf8)
 
-        XCTAssertTrue(readme.contains("DevNotch-1.0.0.dmg"), "README must reference DevNotch-1.0.0.dmg")
+        XCTAssertTrue(readme.contains("DevNotch-1.1.0.dmg"), "README must reference DevNotch-1.1.0.dmg")
         XCTAssertTrue(readme.contains("System Settings"), "README must explain System Settings flow")
         XCTAssertTrue(readme.contains("Privacy & Security"), "README must explain Privacy & Security")
         XCTAssertTrue(readme.contains("Open Anyway"), "README must explain Open Anyway")
@@ -167,9 +171,10 @@ final class ReleaseReadinessTests: XCTestCase {
         let projectYmlURL = projectRoot.appendingPathComponent("project.yml")
         let projectYml = try String(contentsOf: projectYmlURL, encoding: .utf8)
 
-        XCTAssertTrue(projectYml.contains("MARKETING_VERSION: \"1.0.0\""))
+        XCTAssertTrue(projectYml.contains("MARKETING_VERSION: \"1.1.0\""))
         XCTAssertTrue(projectYml.contains("DevNotchClaudeBridge:"))
         XCTAssertTrue(projectYml.contains("DevNotchActivityBridge:"))
+        XCTAssertTrue(projectYml.contains("DevNotchNowPlaying:"))
         XCTAssertTrue(projectYml.contains("ENABLE_HARDENED_RUNTIME: YES"))
     }
 
@@ -186,12 +191,12 @@ final class ReleaseReadinessTests: XCTestCase {
 
         let notesURL = projectRoot.appendingPathComponent("GITHUB_RELEASE_NOTES.md")
         let notesText = try String(contentsOf: notesURL, encoding: .utf8)
-        XCTAssertTrue(notesText.contains("Dev Notch 1.0.0"))
+        XCTAssertTrue(notesText.contains("Dev Notch 1.1.0"))
         XCTAssertTrue(notesText.contains("Open Anyway"))
 
         let checklistURL = projectRoot.appendingPathComponent("RELEASE_CHECKLIST.md")
         let checklistText = try String(contentsOf: checklistURL, encoding: .utf8)
         XCTAssertTrue(checklistText.contains("N/A — GitHub Direct Distribution"))
-        XCTAssertTrue(checklistText.contains("DevNotch-1.0.0.dmg"))
+        XCTAssertTrue(checklistText.contains("DevNotch-1.1.0.dmg"))
     }
 }

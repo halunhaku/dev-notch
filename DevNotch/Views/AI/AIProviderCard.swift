@@ -7,6 +7,7 @@ struct AIProviderCard: View {
     var onSetPrimary: () -> Void
     var onRefresh: () -> Void
     var onToggleLiveActivity: (() -> Void)? = nil
+    var onSignIn: (() -> Void)? = nil
 
     private var statusBadgeColor: Color {
         switch snapshot.status {
@@ -140,6 +141,11 @@ struct AIProviderCard: View {
                         .font(.system(size: 9))
                         .foregroundColor(.white.opacity(0.5))
                         .padding(.vertical, 1)
+                } else if snapshot.id == .grok {
+                    Text("Signed in via Grok CLI")
+                        .font(.system(size: 9))
+                        .foregroundColor(.white.opacity(0.5))
+                        .padding(.vertical, 1)
                 } else {
                     Text("No metric data available")
                         .font(.system(size: 10))
@@ -189,7 +195,7 @@ struct AIProviderCard: View {
                 .padding(.vertical, 4)
 
             case .notAuthenticated:
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Sign in required")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(.orange)
@@ -197,6 +203,20 @@ struct AIProviderCard: View {
                     Text(authHelpHint(for: snapshot.id))
                         .font(.system(size: 9))
                         .foregroundColor(.white.opacity(0.6))
+
+                    if let onSignIn {
+                        Button(action: onSignIn) {
+                            Text("Sign in")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.white.opacity(0.14))
+                                .clipShape(Capsule())
+                                .contentShape(Capsule())
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
                 .padding(.vertical, 3)
 
@@ -256,12 +276,12 @@ struct AIProviderCard: View {
 
     private func authHelpHint(for id: AIProviderID) -> String {
         switch id {
-        case .codex: return "Run `codex login` in Terminal to authenticate"
+        case .codex: return "Click Sign in to run `codex login`"
         case .openCodeGo: return "Configure OpenCode Go in ~/.local/share/opencode/auth.json"
         case .deepseek: return "Set DEEPSEEK_API_KEY or configure in OpenCode"
-        case .claude: return "Run `claude auth login` in Terminal"
+        case .claude: return "Click Sign in to run `claude auth login`"
         case .antigravity: return "Sign in using Google Account in Antigravity CLI or Desktop"
-        default: return "Authentication required for this provider"
+        case .grok: return "Click Sign in to run `grok login --oauth`"
         }
     }
 }
