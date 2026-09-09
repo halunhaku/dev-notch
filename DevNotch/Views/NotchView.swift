@@ -35,25 +35,22 @@ struct NotchView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Visual Notch Body (anchored flush to the top bezel)
             ZStack {
-                // Background flush to the bezel. No drop shadow: radius blurs
-                // left/right and reads as a faint black rim around the island.
+                // No drop shadow: radius blurs left/right and reads as a faint black rim.
                 notchShape
-                    .fill(Color.black)
+                    .fill(DNTheme.Color.island)
                     .overlay {
                         notchShape
-                            .strokeBorder(Color.white.opacity(0.14), lineWidth: 0.5)
+                            .strokeBorder(DNTheme.Color.islandStroke, lineWidth: DNTheme.Space.hairline)
                     }
 
-                // State Content
                 Group {
                     switch model.state {
                     case .compact:
                         CompactNotchView(
-                            model: model,
                             screenManager: screenManager,
-                            providerManager: providerManager
+                            providerManager: providerManager,
+                            nowPlayingStore: nowPlayingStore
                         )
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
 
@@ -80,7 +77,6 @@ struct NotchView: View {
                     }
                 }
 
-                // Generic Task Pulse Horizon Line (indicates active working session)
                 VStack {
                     Spacer()
                     TaskPulseView(
@@ -96,16 +92,29 @@ struct NotchView: View {
             .onHover { isHovered in
                 model.handleHover(isHovered)
             }
-            .onTapGesture {
-                guard model.state != .expanded else { return }
+            .modifier(NotchCompactTapModifier(enabled: model.state != .expanded) {
                 model.handleTap()
-            }
+            })
 
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea()
         .environment(\.locale, preferences.resolvedLocale)
-        .animation(.spring(response: 0.34, dampingFraction: 0.8), value: model.state)
+        .animation(DNTheme.Motion.notchAnimation, value: model.state)
+        .animation(DNTheme.Motion.tabAnimation, value: model.contentMode)
+    }
+}
+
+private struct NotchCompactTapModifier: ViewModifier {
+    let enabled: Bool
+    let action: () -> Void
+
+    func body(content: Content) -> some View {
+        if enabled {
+            content.onTapGesture(perform: action)
+        } else {
+            content
+        }
     }
 }

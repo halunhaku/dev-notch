@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.3
+
+### Highlights
+
+- **Expanded dashboard polish**: Keep AI, System, and Music at one stable height, place the full toolbar below the physical notch, prevent AI card clipping with scrolling, balance provider and system-card grids, and give Now Playing a roomier centered layout.
+
 ## 1.1.2
 
 ### Highlights

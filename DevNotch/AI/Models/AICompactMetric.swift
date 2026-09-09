@@ -12,7 +12,7 @@ enum AICompactMetricSeverity: Equatable, Sendable {
         case .normal: return .green
         case .warning: return .orange
         case .critical: return .red
-        case .inactive: return .cyan
+        case .inactive: return Color.white.opacity(0.38)
         }
     }
 }

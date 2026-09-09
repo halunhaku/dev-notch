@@ -5,56 +5,22 @@ struct SystemInsightsView: View {
     var isVisible: Bool = true
     @Environment(\.locale) private var locale
 
-    private let columns = [
-        GridItem(.flexible(), spacing: 8),
-        GridItem(.flexible(), spacing: 8)
-    ]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: "waveform.path.ecg")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.cyan)
-
-                Text("System Insights")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.85))
-
-                Spacer()
-
-                Circle()
-                    .fill(store.isSampling ? Color.green : Color.white.opacity(0.25))
-                    .frame(width: 5, height: 5)
-
-                Text(store.isSampling ? "Live" : "Paused")
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.4))
-            }
-
-            LazyVGrid(columns: columns, spacing: 8) {
+        VStack(spacing: DNTheme.Space.section) {
+            HStack(spacing: DNTheme.Space.section) {
                 cpuCard
                 memoryCard
+            }
+            .frame(maxHeight: .infinity)
+
+            HStack(spacing: DNTheme.Space.section) {
                 networkCard
                 powerCard
             }
-
-            Spacer(minLength: 0)
-
-            HStack(spacing: 4) {
-                Image(systemName: "leaf")
-                    .font(.system(size: 8, weight: .semibold))
-                Text("1 Hz only while visible")
-                Spacer()
-                if let interfaceName = store.snapshot.networkInterfaceName {
-                    Text(interfaceName)
-                        .monospaced()
-                }
-            }
-            .font(.system(size: 8.5, weight: .medium))
-            .foregroundStyle(.white.opacity(0.32))
+            .frame(maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onChange(of: isVisible, initial: true) { _, visible in
             store.setActive(visible)
         }
@@ -69,7 +35,8 @@ struct SystemInsightsView: View {
                 ? L10n.key("Calculating delta", locale: locale)
                 : L10n.key("Total utilization", locale: locale),
             systemImage: "cpu",
-            tint: .cyan,
+            tint: DNTheme.Color.success,
+            progress: store.snapshot.cpuUsage,
             primaryHistory: store.history.cpu,
             secondaryHistory: nil,
             fixedMaximum: 1
@@ -91,6 +58,7 @@ struct SystemInsightsView: View {
             ),
             systemImage: "memorychip",
             tint: memoryTint,
+            progress: store.snapshot.memoryUsage,
             primaryHistory: store.history.memory,
             secondaryHistory: nil,
             fixedMaximum: 1
@@ -106,7 +74,8 @@ struct SystemInsightsView: View {
             value: "↓ \(Self.rate(store.snapshot.downloadBytesPerSecond))",
             detail: "↑ \(Self.rate(store.snapshot.uploadBytesPerSecond))",
             systemImage: "arrow.up.arrow.down",
-            tint: .mint,
+            tint: DNTheme.Color.success,
+            progress: nil,
             primaryHistory: store.history.download,
             secondaryHistory: store.history.upload,
             fixedMaximum: nil
@@ -117,43 +86,49 @@ struct SystemInsightsView: View {
     }
 
     private var powerCard: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            HStack {
-                Label("Power & Thermal", systemImage: powerIcon)
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.52))
-                Spacer()
-                Text(LocalizedStringKey(store.snapshot.thermalLevel.label))
-                    .font(.system(size: 8.5, weight: .semibold))
-                    .foregroundStyle(thermalTint)
-            }
+        DNCard(padding: DNTheme.Space.cardCompact, fillsHeight: true) {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Label("Battery", systemImage: powerIcon)
+                        .font(DNTheme.Typeface.caption)
+                        .foregroundStyle(DNTheme.Color.textTertiary)
+                    Spacer()
+                    Text(powerDetail)
+                        .font(DNTheme.Typeface.caption)
+                        .foregroundStyle(DNTheme.Color.textTertiary)
+                        .lineLimit(1)
+                }
 
-            HStack(alignment: .firstTextBaseline, spacing: 5) {
-                Text(powerValue)
-                    .font(.system(size: 20, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .monospacedDigit()
-                Text(powerDetail)
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.4))
-                    .lineLimit(1)
-            }
+                DNMetricText(text: powerValue, size: 22)
 
-            HStack(spacing: 4) {
-                ForEach(SystemThermalLevel.allDisplayLevels, id: \.rawValue) { level in
-                    Capsule()
-                        .fill(level == store.snapshot.thermalLevel ? thermalTint : Color.white.opacity(0.1))
-                        .frame(height: 4)
+                if let battery = store.snapshot.battery {
+                    DNProgressBar(
+                        progress: min(1, max(0, battery.level)),
+                        tint: battery.level < 0.2 ? DNTheme.Color.critical : DNTheme.Color.success,
+                        height: DNTheme.Space.progressCompact
+                    )
+                }
+
+                Spacer(minLength: 4)
+
+                HStack(spacing: 6) {
+                    Text("Temperature")
+                        .font(DNTheme.Typeface.caption)
+                        .foregroundStyle(DNTheme.Color.textMuted)
+                    Spacer()
+                    Text(LocalizedStringKey(store.snapshot.thermalLevel.label))
+                        .font(DNTheme.Typeface.caption)
+                        .foregroundStyle(thermalTint)
+                }
+
+                HStack(spacing: 4) {
+                    ForEach(SystemThermalLevel.allDisplayLevels, id: \.rawValue) { level in
+                        Capsule()
+                            .fill(level == store.snapshot.thermalLevel ? thermalTint : DNTheme.Color.track)
+                            .frame(height: 4)
+                    }
                 }
             }
-        }
-        .padding(10)
-        .frame(maxWidth: .infinity, minHeight: 78, alignment: .topLeading)
-        .background(Color.white.opacity(0.055))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Power and thermal state")
@@ -162,18 +137,18 @@ struct SystemInsightsView: View {
 
     private var memoryTint: Color {
         switch store.snapshot.memoryPressure {
-        case .normal: .purple
-        case .warning: .orange
-        case .critical: .red
+        case .normal: return DNTheme.Color.success
+        case .warning: return DNTheme.Color.warning
+        case .critical: return DNTheme.Color.critical
         }
     }
 
     private var thermalTint: Color {
         switch store.snapshot.thermalLevel {
-        case .nominal: .green
-        case .fair: .yellow
-        case .serious: .orange
-        case .critical: .red
+        case .nominal: return DNTheme.Color.success
+        case .fair: return Color.yellow
+        case .serious: return DNTheme.Color.warning
+        case .critical: return DNTheme.Color.critical
         }
     }
 
@@ -220,49 +195,46 @@ private struct SystemMetricCard: View {
     let detail: String
     let systemImage: String
     let tint: Color
+    let progress: Double?
     let primaryHistory: MetricHistory
     let secondaryHistory: MetricHistory?
     let fixedMaximum: Double?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Label(title, systemImage: systemImage)
-                .font(.system(size: 9, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.52))
+        DNCard(padding: DNTheme.Space.cardCompact, fillsHeight: true) {
+            VStack(alignment: .leading, spacing: 6) {
+                Label(title, systemImage: systemImage)
+                    .font(DNTheme.Typeface.caption)
+                    .foregroundStyle(DNTheme.Color.textTertiary)
 
-            HStack(alignment: .firstTextBaseline, spacing: 5) {
-                Text(value)
-                    .font(.system(size: 20, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.78)
+                DNMetricText(text: value, size: 22)
 
                 Text(detail)
-                    .font(.system(size: 8.5, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.38))
+                    .font(DNTheme.Typeface.caption)
+                    .foregroundStyle(DNTheme.Color.textTertiary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
-            }
 
-            ZStack {
-                SystemSparklineShape(history: primaryHistory, fixedMaximum: fixedMaximum)
-                    .stroke(tint.opacity(0.85), style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
-
-                if let secondaryHistory {
-                    SystemSparklineShape(history: secondaryHistory, fixedMaximum: fixedMaximum)
-                        .stroke(Color.blue.opacity(0.62), style: StrokeStyle(lineWidth: 1, lineCap: .round, lineJoin: .round))
+                if let progress {
+                    DNProgressBar(
+                        progress: min(1, max(0, progress)),
+                        tint: tint,
+                        height: DNTheme.Space.progressCompact
+                    )
                 }
+
+                Spacer(minLength: 4)
+
+                ZStack {
+                    SystemSparklineShape(history: primaryHistory, fixedMaximum: fixedMaximum)
+                        .stroke(tint.opacity(0.9), style: StrokeStyle(lineWidth: 1.6, lineCap: .round, lineJoin: .round))
+                    if let secondaryHistory {
+                        SystemSparklineShape(history: secondaryHistory, fixedMaximum: fixedMaximum)
+                            .stroke(DNTheme.Color.textSecondary.opacity(0.55), style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round))
+                    }
+                }
+                .frame(height: 16)
             }
-            .frame(height: 14)
-        }
-        .padding(10)
-        .frame(maxWidth: .infinity, minHeight: 78, alignment: .topLeading)
-        .background(Color.white.opacity(0.055))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
         }
     }
 }
@@ -272,22 +244,16 @@ private struct SystemSparklineShape: Shape {
     let fixedMaximum: Double?
 
     func path(in rect: CGRect) -> Path {
+        guard history.count > 1 else { return Path() }
+        let maxValue = max(fixedMaximum ?? history.maximum, 0.001)
         var path = Path()
-        guard history.count > 1 else { return path }
-
-        let maximum = max(fixedMaximum ?? history.maximum, 0.000_001)
-        let xStep = rect.width / CGFloat(history.capacity - 1)
-        let leadingEmptySamples = history.capacity - history.count
-
         for index in 0..<history.count {
-            let x = CGFloat(leadingEmptySamples + index) * xStep
-            let normalized = min(1, max(0, history[index] / maximum))
-            let y = rect.maxY - CGFloat(normalized) * rect.height
-            let point = CGPoint(x: x, y: y)
+            let x = rect.width * CGFloat(index) / CGFloat(history.count - 1)
+            let y = rect.height - (rect.height * CGFloat(min(1, max(0, history[index] / maxValue))))
             if index == 0 {
-                path.move(to: point)
+                path.move(to: CGPoint(x: x, y: y))
             } else {
-                path.addLine(to: point)
+                path.addLine(to: CGPoint(x: x, y: y))
             }
         }
         return path

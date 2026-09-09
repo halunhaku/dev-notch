@@ -1,7 +1,25 @@
+import AppKit
 import Foundation
 import os.log
 
 private let logger = Logger(subsystem: "com.halunhaku.DevNotch", category: "MediaRemote")
+
+private final class ContinuationGate<Value: Sendable>: @unchecked Sendable {
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<Value, Never>?
+
+    init(_ continuation: CheckedContinuation<Value, Never>) {
+        self.continuation = continuation
+    }
+
+    func resume(returning value: Value) {
+        let pending = lock.withLock {
+            defer { continuation = nil }
+            return continuation
+        }
+        pending?.resume(returning: value)
+    }
+}
 
 /// Reads system Now Playing via private MediaRemote. GitHub-distributed; not App Store.
 final class MediaRemoteClient: @unchecked Sendable {
@@ -9,6 +27,7 @@ final class MediaRemoteClient: @unchecked Sendable {
     private let getInfo: (@convention(c) (DispatchQueue, @escaping (NSDictionary?) -> Void) -> Void)?
     private let getPlaying: (@convention(c) (DispatchQueue, @escaping (Bool) -> Void) -> Void)?
     private let sendCommand: (@convention(c) (UInt32, AnyObject?) -> Bool)?
+    private let getPID: (@convention(c) (DispatchQueue, @escaping (Int32) -> Void) -> Void)?
     private let queue = DispatchQueue(label: "com.halunhaku.DevNotch.mediaremote")
 
     init() {
@@ -38,6 +57,12 @@ final class MediaRemoteClient: @unchecked Sendable {
         } else {
             sendCommand = nil
         }
+        typealias GetPID = @convention(c) (DispatchQueue, @escaping (Int32) -> Void) -> Void
+        if let handle, let symbol = dlsym(handle, "MRMediaRemoteGetNowPlayingApplicationPID") {
+            getPID = unsafeBitCast(symbol, to: GetPID.self)
+        } else {
+            getPID = nil
+        }
         if let handle, let symbol = dlsym(handle, "MRMediaRemoteRegisterForNowPlayingNotifications") {
             let register = unsafeBitCast(symbol, to: Register.self)
             register(queue)
@@ -45,14 +70,24 @@ final class MediaRemoteClient: @unchecked Sendable {
     }
 
     func fetch() async -> NowPlayingInfo {
+        var info: NowPlayingInfo
         if let helper = await NowPlayingHelperClient.fetch(), helper.hasTrack {
-            return helper
+            info = helper
+        } else {
+            let remote = await fetchMediaRemote()
+            if remote.hasTrack {
+                info = remote
+            } else {
+                info = await Task.detached(priority: .utility) {
+                    MusicAppleScriptClient.fetch() ?? .empty
+                }.value
+            }
         }
-        let remote = await fetchMediaRemote()
-        if remote.hasTrack { return remote }
-        return await Task.detached(priority: .utility) {
-            MusicAppleScriptClient.fetch() ?? .empty
-        }.value
+        guard info.hasTrack else { return info }
+        let source = await fetchSourceApp()
+        info.sourceAppName = source.name
+        info.sourceBundleIdentifier = source.bundle
+        return info
     }
 
     func send(_ command: NowPlayingCommand) {
@@ -65,49 +100,52 @@ final class MediaRemoteClient: @unchecked Sendable {
         }
     }
 
+    private func fetchSourceApp() async -> (name: String, bundle: String) {
+        guard let getPID else { return ("", "") }
+        let pid: Int32 = await withCheckedContinuation { continuation in
+            let gate = ContinuationGate(continuation)
+            queue.asyncAfter(deadline: .now() + 0.6) {
+                gate.resume(returning: 0)
+            }
+            getPID(queue) {
+                gate.resume(returning: $0)
+            }
+        }
+        guard pid > 0, let app = NSRunningApplication(processIdentifier: pid) else {
+            return ("", "")
+        }
+        return (app.localizedName ?? "", app.bundleIdentifier ?? "")
+    }
+
     private func fetchMediaRemote() async -> NowPlayingInfo {
         let playing = await fetchPlaying()
         return await withCheckedContinuation { continuation in
-            var resumed = false
-            func finish(_ info: NowPlayingInfo) {
-                queue.async {
-                    guard !resumed else { return }
-                    resumed = true
-                    continuation.resume(returning: info)
-                }
-            }
+            let gate = ContinuationGate(continuation)
             guard let getInfo else {
-                finish(.empty)
+                gate.resume(returning: .empty)
                 return
             }
             queue.asyncAfter(deadline: .now() + 1.0) {
-                finish(.empty)
+                gate.resume(returning: .empty)
             }
             getInfo(queue) { dict in
-                finish(Self.parse(dict: dict, isPlaying: playing))
+                gate.resume(returning: Self.parse(dict: dict, isPlaying: playing))
             }
         }
     }
 
     private func fetchPlaying() async -> Bool {
         await withCheckedContinuation { continuation in
-            var resumed = false
-            func finish(_ value: Bool) {
-                queue.async {
-                    guard !resumed else { return }
-                    resumed = true
-                    continuation.resume(returning: value)
-                }
-            }
+            let gate = ContinuationGate(continuation)
             guard let getPlaying else {
-                finish(false)
+                gate.resume(returning: false)
                 return
             }
             queue.asyncAfter(deadline: .now() + 0.6) {
-                finish(false)
+                gate.resume(returning: false)
             }
             getPlaying(queue) { playing in
-                finish(playing)
+                gate.resume(returning: playing)
             }
         }
     }

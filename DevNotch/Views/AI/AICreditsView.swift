@@ -7,18 +7,16 @@ struct AICreditsView: View {
     var body: some View {
         HStack {
             Text("API Credits")
-                .font(.system(size: 10))
-                .foregroundColor(.white.opacity(0.6))
-
+                .font(DNTheme.Typeface.caption)
+                .foregroundStyle(DNTheme.Color.textTertiary)
             Spacer()
-
             Text(credits.balance ?? (credits.unlimited ? "Unlimited" : "Active"))
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(.white.opacity(0.9))
+                .font(DNTheme.Typeface.caption)
+                .foregroundStyle(DNTheme.Color.textPrimary)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
-        .background(Color.white.opacity(0.04))
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .background(DNTheme.Color.cardFill)
+        .clipShape(RoundedRectangle(cornerRadius: DNTheme.Radius.chip, style: .continuous))
     }
 }

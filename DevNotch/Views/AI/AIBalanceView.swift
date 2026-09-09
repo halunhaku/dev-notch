@@ -5,27 +5,23 @@ struct AIBalanceView: View {
     let balance: AIBalance
 
     private var availabilityColor: Color {
-        balance.isAvailable ? .green : .red
+        balance.isAvailable ? DNTheme.Color.success : DNTheme.Color.critical
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            // Header Row: Label & Availability
             HStack {
                 Text("Account Balance (\(balance.currency))")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.75))
-
+                    .font(DNTheme.Typeface.caption)
+                    .foregroundStyle(DNTheme.Color.textTertiary)
                 Spacer()
-
                 HStack(spacing: 3) {
                     Circle()
                         .fill(availabilityColor)
                         .frame(width: 4, height: 4)
-
                     Text(balance.isAvailable ? "Available" : "Unavailable")
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundColor(availabilityColor.opacity(0.9))
+                        .font(DNTheme.Typeface.caption)
+                        .foregroundStyle(availabilityColor)
                 }
                 .padding(.horizontal, 5)
                 .padding(.vertical, 1)
@@ -33,40 +29,30 @@ struct AIBalanceView: View {
                 .clipShape(Capsule())
             }
 
-            // Primary Total Balance
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(balance.formattedTotal)
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(balance.isAvailable ? .white : .red.opacity(0.9))
+            DNMetricText(text: balance.formattedTotal, size: 20)
 
-                Spacer()
-            }
-
-            // Sub-details: Top-up vs Granted Breakdown
             HStack(spacing: 12) {
                 HStack(spacing: 3) {
                     Text("Top-up:")
-                        .font(.system(size: 9))
-                        .foregroundColor(.white.opacity(0.5))
+                        .font(DNTheme.Typeface.caption)
+                        .foregroundStyle(DNTheme.Color.textTertiary)
                     Text(balance.formattedToppedUp)
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundColor(.white.opacity(0.85))
+                        .font(DNTheme.Typeface.caption)
+                        .foregroundStyle(DNTheme.Color.textSecondary)
                 }
-
                 HStack(spacing: 3) {
                     Text("Granted:")
-                        .font(.system(size: 9))
-                        .foregroundColor(.white.opacity(0.5))
+                        .font(DNTheme.Typeface.caption)
+                        .foregroundStyle(DNTheme.Color.textTertiary)
                     Text(balance.formattedGranted)
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundColor(.white.opacity(0.85))
+                        .font(DNTheme.Typeface.caption)
+                        .foregroundStyle(DNTheme.Color.textSecondary)
                 }
-
                 Spacer()
             }
         }
         .padding(10)
-        .background(Color.white.opacity(0.05))
-        .clipShape(RoundedRectangle(cornerRadius: 9))
+        .background(DNTheme.Color.cardFill)
+        .clipShape(RoundedRectangle(cornerRadius: DNTheme.Radius.chip, style: .continuous))
     }
 }

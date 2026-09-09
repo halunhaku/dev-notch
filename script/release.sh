@@ -3,7 +3,7 @@ set -euo pipefail
 
 readonly MODE="${1:-github}"
 readonly PRODUCT_NAME="DevNotch"
-readonly VERSION="1.1.2"
+readonly VERSION="1.1.3"
 readonly PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly BUILD_ROOT="$PROJECT_ROOT/build/release"
 readonly ARCHIVE_PATH="$BUILD_ROOT/DevNotch.xcarchive"

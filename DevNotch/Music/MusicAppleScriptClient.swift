@@ -51,6 +51,29 @@ enum MusicAppleScriptClient {
         }
         _ = run("tell application \"Music\" to \(verb)")
     }
+    static func fetchQueue(limit: Int = 24) -> [(title: String, artist: String, duration: TimeInterval)] {
+        guard isMusicRunning() else { return [] }
+        let source = """
+        tell application "Music"
+          try
+            set out to ""
+            set n to 0
+            repeat with t in tracks of current playlist
+              set n to n + 1
+              if n > \(limit) then exit repeat
+              set out to out & name of t & tab & artist of t & tab & (duration of t as string) & return
+            end repeat
+            return out
+          end try
+        end tell
+        """
+        guard let result = run(source), !result.isEmpty else { return [] }
+        return result.split(whereSeparator: \.isNewline).compactMap { line in
+            let parts = line.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+            guard parts.count >= 3 else { return nil }
+            return (parts[0], parts[1], Double(parts[2]) ?? 0)
+        }
+    }
 
     private static func run(_ source: String) -> String? {
         var error: NSDictionary?

@@ -143,9 +143,21 @@ final class HardwareNotchLayoutTests: XCTestCase {
             XCTAssertEqual(compactSize.width, model.hardwareNotchWidth, "Compact idle width must equal hardware notch width to avoid blocking menu bar icons")
             XCTAssertEqual(compactSize.height, model.hardwareNotchHeight)
         } else {
-            XCTAssertEqual(compactSize.width, 180)
+            XCTAssertEqual(compactSize.width, 400)
             XCTAssertEqual(compactSize.height, 32)
         }
+    }
+
+    func testExpandedDashboardUsesStableSize() {
+        let screen = NSScreen.main ?? NSScreen.screens[0]
+        let model = NotchGeometry.hardwareNotchModel(on: screen)
+        let expanded = NotchGeometry.visualSize(for: .expanded, on: screen)
+
+        XCTAssertGreaterThanOrEqual(expanded.width, NotchGeometry.expandedWidth)
+        XCTAssertEqual(
+            expanded.height,
+            NotchGeometry.expandedHeight + model.contentTopInset
+        )
     }
 
     func testCompactIdleRejectsMouseOverWindowWings() {

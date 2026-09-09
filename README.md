@@ -45,7 +45,7 @@
 
 ## Installing Dev Notch
 
-1. Download `DevNotch-1.1.2.dmg` from GitHub Releases.
+1. Download `DevNotch-1.1.3.dmg` from GitHub Releases.
 2. Open the DMG.
 3. Drag `Dev Notch` (`DevNotch.app`) into `/Applications` (or `~/Applications`).
 4. Open Dev Notch from Applications.

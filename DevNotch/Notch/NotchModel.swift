@@ -27,7 +27,7 @@ final class NotchModel: ObservableObject {
         if hovered {
             autoCollapseTimer?.cancel()
             if state == .compact {
-                withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) {
+                withAnimation(DNTheme.Motion.notchAnimation) {
                     state = .hovered
                 }
             }
@@ -38,7 +38,7 @@ final class NotchModel: ObservableObject {
                     .delay(for: .milliseconds(350), scheduler: RunLoop.main)
                     .sink { [weak self] in
                         guard let self = self, !self.isHovered, self.state == .hovered else { return }
-                        withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) {
+                        withAnimation(DNTheme.Motion.notchAnimation) {
                             self.state = .compact
                         }
                     }
@@ -54,7 +54,7 @@ final class NotchModel: ObservableObject {
         case .compact, .hovered:
             autoCollapseTimer?.cancel()
             hoverDebounceTimer?.cancel()
-            withAnimation(.spring(response: 0.34, dampingFraction: 0.8)) {
+            withAnimation(DNTheme.Motion.notchAnimation) {
                 state = .expanded
             }
         case .expanded:
@@ -66,7 +66,7 @@ final class NotchModel: ObservableObject {
     func collapseToCompact() {
         autoCollapseTimer?.cancel()
         hoverDebounceTimer?.cancel()
-        withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) {
+        withAnimation(DNTheme.Motion.notchAnimation) {
             state = .compact
         }
     }

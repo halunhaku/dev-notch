@@ -123,7 +123,6 @@ final class NotchWindowController: NSWindowController {
     }
 
     private func setupObservers() {
-        // Observe notch state changes to update window frame and outside click listener
         model.$state
             .removeDuplicates()
             .sink { [weak self] newState in
@@ -135,7 +134,7 @@ final class NotchWindowController: NSWindowController {
             }
             .store(in: &cancellables)
 
-        // Observe screen changes to re-anchor window
+
         screenManager.$currentScreen
             .compactMap { $0 }
             .sink { [weak self] _ in
@@ -175,8 +174,8 @@ final class NotchWindowController: NSWindowController {
 
         if animated {
             NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.32
-                context.timingFunction = CAMediaTimingFunction(controlPoints: 0.16, 1.0, 0.3, 1.0)
+                context.duration = DNTheme.Motion.windowDuration
+                context.timingFunction = DNTheme.Motion.windowTiming
                 window.animator().setFrame(targetFrame, display: true)
             }
         } else {

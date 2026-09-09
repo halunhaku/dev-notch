@@ -15,7 +15,7 @@ struct TaskPulseView: View {
 
     private var pulseGradient: LinearGradient {
         LinearGradient(
-            colors: [Color.cyan.opacity(0.8), Color.blue, Color.cyan.opacity(0.8)],
+            colors: [DNTheme.Color.accent.opacity(0.8), DNTheme.Color.accent, DNTheme.Color.accent.opacity(0.8)],
             startPoint: .leading,
             endPoint: .trailing
         )
@@ -37,7 +37,7 @@ struct TaskPulseView: View {
                     RoundedRectangle(cornerRadius: 1)
                         .fill(pulseGradient)
                         .frame(height: 1.5)
-                        .shadow(color: .cyan.opacity(0.6), radius: 3, y: 1)
+                        .shadow(color: DNTheme.Color.accent.opacity(0.55), radius: 3, y: 1)
                         .opacity(isReduceMotionActive ? 0.75 : (isBreathing ? 0.95 : 0.35))
                         .animation(
                             isReduceMotionActive

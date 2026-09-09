@@ -90,59 +90,59 @@ struct NotchGeometry {
         return CGRect(x: notchX, y: notchY, width: defaultWidth, height: defaultHeight)
     }
 
+    static let expandedWidth: CGFloat = 720
+    /// Stable dashboard canvas height. Tab changes must never resize the island.
+    static let expandedHeight: CGFloat = 460
+
     /// Returns the target visual size of the black notch island for a given state.
-    static func visualSize(for state: NotchState, on screen: NSScreen) -> CGSize {
+    static func visualSize(
+        for state: NotchState,
+        on screen: NSScreen
+    ) -> CGSize {
         let model = hardwareNotchModel(on: screen)
         if model.hasHardwareNotch {
             switch state {
             case .compact:
-                // Flush with the physical camera notch so it occupies zero menu bar space and blocks no icons
                 return CGSize(
                     width: model.hardwareNotchWidth,
                     height: max(32, model.hardwareNotchHeight)
                 )
             case .hovered:
-                // Left wing (100pt) + physical notch + right wing (100pt)
-                // Height accommodates top row (hardware notch height) + below-notch subtitle (28pt)
                 return CGSize(
-                    width: max(380, model.hardwareNotchWidth + 200),
-                    height: model.hardwareNotchHeight + 28
+                    width: max(480, model.hardwareNotchWidth + 260),
+                    height: max(32, model.hardwareNotchHeight)
                 )
             case .expanded:
                 return CGSize(
-                    width: max(420, model.hardwareNotchWidth + 240),
-                    height: 340 + model.contentTopInset
+                    width: max(expandedWidth, model.hardwareNotchWidth + 240),
+                    height: expandedHeight + model.contentTopInset
                 )
             }
         } else {
-            // Non-notch / external displays: virtual island
             switch state {
             case .compact:
-                return CGSize(width: 180, height: 32)
+                return CGSize(width: 400, height: 32)
             case .hovered:
-                return CGSize(width: 280, height: 56)
+                return CGSize(width: 400, height: 32)
             case .expanded:
-                return CGSize(width: 420, height: 340)
+                return CGSize(width: expandedWidth, height: expandedHeight)
             }
         }
     }
-    /// Returns the corner radius for the bottom corners of the notch shape.
+
     static func cornerRadius(for state: NotchState) -> CGFloat {
         switch state {
-        case .compact:
-            return 12
-        case .hovered:
-            return 18
-        case .expanded:
-            return 22
+        case .compact: return 12
+        case .hovered: return 18
+        case .expanded: return 22
         }
     }
 
-    /// Calculates the full NSWindow frame in screen coordinates.
-    /// The window is anchored at the top of the screen (`screen.frame.maxY`).
-    /// Uses identical horizontal origin and width for .compact and .hovered to prevent
-    /// horizontal frame jumping and eliminate hover hysteresis/flickering.
-    static func windowFrame(for state: NotchState, on screen: NSScreen) -> CGRect {
+    /// Window is top-anchored (`screen.frame.maxY`). Height changes move the bottom edge only.
+    static func windowFrame(
+        for state: NotchState,
+        on screen: NSScreen
+    ) -> CGRect {
         let windowWidth: CGFloat
         let windowHeight: CGFloat
 
@@ -163,9 +163,10 @@ struct NotchGeometry {
         return CGRect(x: x, y: y, width: windowWidth, height: windowHeight)
     }
 
-    /// Returns the rect of the visible black notch in window-local coordinates.
-    /// In window coordinates, (0, 0) is the bottom-left corner of the window.
-    static func visualRectInWindow(for state: NotchState, on screen: NSScreen) -> CGRect {
+    static func visualRectInWindow(
+        for state: NotchState,
+        on screen: NSScreen
+    ) -> CGRect {
         let windowRect = windowFrame(for: state, on: screen)
         let size = visualSize(for: state, on: screen)
         let x = (windowRect.width - size.width) / 2
@@ -173,11 +174,12 @@ struct NotchGeometry {
         return CGRect(x: x, y: y, width: size.width, height: size.height)
     }
 
-    /// Whether a window-local point should hit the overlay.
-    /// Compact/hovered windows are wider than the idle island so hover animation
-    /// does not jump; those transparent wings cover menu bar extras and must
-    /// click through. `NSView.hitTest` returning nil does not pass events down.
-    static func acceptsMouse(atWindowPoint point: CGPoint, state: NotchState, on screen: NSScreen) -> Bool {
+    static func acceptsMouse(
+        atWindowPoint point: CGPoint,
+        state: NotchState,
+        on screen: NSScreen
+    ) -> Bool {
         visualRectInWindow(for: state, on: screen).contains(point)
     }
+
 }

@@ -4,65 +4,39 @@ import SwiftUI
 struct AIContextView: View {
     let context: AIContextMetric
 
-    private var fillGradient: LinearGradient {
-        let used = context.usedPercent
-        if used > 90 {
-            return LinearGradient(colors: [.red, .pink], startPoint: .leading, endPoint: .trailing)
-        } else if used > 70 {
-            return LinearGradient(colors: [.orange, .yellow], startPoint: .leading, endPoint: .trailing)
-        } else {
-            return LinearGradient(colors: [.cyan, .blue], startPoint: .leading, endPoint: .trailing)
-        }
+    private var tint: Color {
+        if context.usedPercent > 90 { return DNTheme.Color.critical }
+        if context.usedPercent > 70 { return DNTheme.Color.warning }
+        return DNTheme.Color.accent
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
-            // Header: Title & Used %
             HStack {
                 Text("Context Window")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.8))
-
+                    .font(DNTheme.Typeface.caption)
+                    .foregroundStyle(DNTheme.Color.textSecondary)
                 Spacer()
-
                 Text(context.formattedPercentage)
-                    .font(.system(size: 10, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white)
+                    .font(DNTheme.Typeface.caption)
+                    .monospacedDigit()
+                    .foregroundStyle(DNTheme.Color.textPrimary)
             }
 
-            // Progress Bar Track
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.white.opacity(0.12))
-                        .frame(height: 6)
+            DNProgressBar(progress: context.usedPercent / 100.0, tint: tint)
 
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(fillGradient)
-                        .frame(
-                            width: max(0, min(geo.size.width, geo.size.width * CGFloat(context.usedPercent / 100.0))),
-                            height: 6
-                        )
-                        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: context.usedPercent)
-                }
-            }
-            .frame(height: 6)
-
-            // Sub-row: Remaining percentage
             HStack {
                 Image(systemName: "cpu")
                     .font(.system(size: 8))
-                    .foregroundColor(.white.opacity(0.4))
-
+                    .foregroundStyle(DNTheme.Color.textTertiary)
                 Text("\(context.formattedRemaining) in current session")
-                    .font(.system(size: 9))
-                    .foregroundColor(.white.opacity(0.5))
-
+                    .font(DNTheme.Typeface.caption)
+                    .foregroundStyle(DNTheme.Color.textTertiary)
                 Spacer()
             }
         }
         .padding(9)
-        .background(Color.white.opacity(0.04))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .background(DNTheme.Color.cardFill)
+        .clipShape(RoundedRectangle(cornerRadius: DNTheme.Radius.chip, style: .continuous))
     }
 }

@@ -4,190 +4,133 @@ struct ProvidersSettingsView: View {
     @ObservedObject var preferences: PreferencesStore
     @ObservedObject var manager: AIProviderManager
     @Environment(\.locale) private var locale
+    @State private var detailID: AIProviderID?
 
-    @State private var openCodeInputKey: String = ""
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: DNTheme.Space.section) {
             Text("Configure which AI providers are active and select your preferred primary provider. Drag rows to reorder; the expanded AI dashboard uses the same order.")
                 .font(.system(size: 11))
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 16)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, DNTheme.Space.page)
                 .padding(.top, 10)
 
             List {
                 ForEach(manager.providerIDs, id: \.self) { id in
-                    let isEnabled = preferences.isProviderEnabled(id)
-                    let isPrimary = preferences.preferredPrimaryProviderID == id
-                    let snapshot = manager.snapshots[id]
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 10) {
-                            // Enable/Disable Toggle
-                            Toggle("", isOn: Binding(
-                                get: { preferences.isProviderEnabled(id) },
-                                set: { preferences.setProviderEnabled(id, enabled: $0) }
-                            ))
-                            .labelsHidden()
-
-                            // Provider Identity
-                            VStack(alignment: .leading, spacing: 2) {
-                                HStack(spacing: 6) {
-                                    Text(id.displayName)
-                                        .font(.system(size: 12, weight: .semibold))
-                                        .foregroundColor(isEnabled ? .primary : .secondary)
-
-                                    if let source = snapshot?.credentialSource {
-                                        Text(source)
-                                            .font(.system(size: 8))
-                                            .foregroundColor(.cyan)
-                                            .padding(.horizontal, 4)
-                                            .padding(.vertical, 1)
-                                            .background(Color.cyan.opacity(0.12))
-                                            .clipShape(Capsule())
-                                    }
-
-                                    if isPrimary {
-                                        Text("Primary")
-                                            .font(.system(size: 8, weight: .bold))
-                                            .foregroundColor(.yellow)
-                                            .padding(.horizontal, 4)
-                                            .padding(.vertical, 1)
-                                            .background(Color.yellow.opacity(0.15))
-                                            .clipShape(Capsule())
-                                    }
-                                }
-
-                                Text(statusDescription(for: id, snapshot: snapshot, isEnabled: isEnabled))
-                                    .font(.system(size: 10))
-                                    .foregroundColor(.secondary)
-                            }
-
-                            Spacer()
-
-                            // Set as Primary Action
-                            if isEnabled && !isPrimary {
-                                Button {
-                                    preferences.preferredPrimaryProviderID = id
-                                    manager.setPrimaryProvider(id)
-                                } label: {
-                                    Text("Set Primary")
-                                }
-                                .buttonStyle(.bordered)
-                                .controlSize(.small)
-                            }
-
-                            // Refresh Action
-                            Button(action: {
-                                manager.refresh(providerID: id)
-                            }) {
-                                Image(systemName: "arrow.triangle.2.circlepath")
-                                    .font(.system(size: 9))
-                            }
-                            .buttonStyle(.plain)
-                            .disabled(!isEnabled)
-
-                            Image(systemName: "line.3.horizontal")
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(.secondary)
-                                .help("Drag to reorder")
-                        }
-
-                        // Inline Login & Credential Drawer for OpenCode Go
-                        if id == .openCodeGo && isEnabled {
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "key.fill")
-                                        .font(.system(size: 9))
-                                        .foregroundColor(.secondary)
-
-                                    SecureField("OpenCode Go API Key / Token", text: $openCodeInputKey)
-                                        .textFieldStyle(.roundedBorder)
-                                        .controlSize(.small)
-                                        .frame(maxWidth: 240)
-
-                                    Button {
-                                        preferences.setOpenCodeApiKey(openCodeInputKey)
-                                        manager.refresh(providerID: .openCodeGo)
-                                    } label: {
-                                        Text("Save")
-                                    }
-                                    .buttonStyle(.borderedProminent)
-                                    .controlSize(.small)
-                                    .disabled(openCodeInputKey.isEmpty)
-
-                                    if !preferences.openCodeApiKey.isEmpty {
-                                        Button {
-                                            openCodeInputKey = ""
-                                            preferences.setOpenCodeApiKey("")
-                                            manager.refresh(providerID: .openCodeGo)
-                                        } label: {
-                                            Text("Clear")
-                                        }
-                                        .buttonStyle(.bordered)
-                                        .controlSize(.small)
-                                    }
-                                }
-
-                                HStack(spacing: 12) {
-                                    Button(action: {
-                                        openTerminalLogin()
-                                    }) {
-                                        Label("Run 'opencode auth login' in Terminal", systemImage: "terminal")
-                                            .font(.system(size: 10))
-                                    }
-                                    .buttonStyle(.link)
-                                }
-                            }
-                            .padding(.leading, 32)
-                            .padding(.top, 4)
-                            .padding(.bottom, 4)
-                        }
-
-                        if id == .grok && isEnabled {
-                            HStack(spacing: 8) {
-                                Image(systemName: "person.crop.circle.badge.checkmark")
-                                    .font(.system(size: 9))
-                                    .foregroundColor(.secondary)
-                                Button(action: {
-                                    manager.signInGrok()
-                                }) {
-                                    Label("Sign in with `grok login --oauth`", systemImage: "terminal")
-                                        .font(.system(size: 10))
-                                }
-                                .buttonStyle(.link)
-                            }
-                            .padding(.leading, 32)
-                            .padding(.top, 4)
-                            .padding(.bottom, 4)
-                        }
-                    }
-                    .padding(.vertical, 4)
+                    providerRow(id)
                 }
                 .onMove(perform: moveProviders)
             }
             .listStyle(.inset)
         }
-        .onAppear {
-            openCodeInputKey = preferences.openCodeApiKey
+        .sheet(item: Binding(
+            get: { detailID.map { IdentifiedProvider(id: $0) } },
+            set: { detailID = $0?.id }
+        )) { item in
+            ProviderDetailSheet(id: item.id, preferences: preferences, manager: manager)
         }
+    }
+
+    private func providerRow(_ id: AIProviderID) -> some View {
+        let isEnabled = preferences.isProviderEnabled(id)
+        let isPrimary = preferences.preferredPrimaryProviderID == id
+        let snapshot = manager.snapshots[id]
+
+        return HStack(spacing: DNTheme.Space.control) {
+            Image(systemName: "line.3.horizontal")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.tertiary)
+                .help("Drag to reorder")
+
+            Image(systemName: DNTheme.providerSymbol(for: id))
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(DNTheme.providerColor(for: id))
+                .frame(width: 22, height: 22)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(id.displayName)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(isEnabled ? Color.primary : Color.secondary)
+                    if let source = snapshot?.credentialSource {
+                        Text(source)
+                            .font(.system(size: 8, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 1)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(Capsule())
+                    }
+                    if isPrimary {
+                        Text("Primary")
+                            .font(DNTheme.Typeface.badge)
+                            .foregroundStyle(.orange)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 1)
+                            .background(Color.orange.opacity(0.15))
+                            .clipShape(Capsule())
+                    }
+                }
+                Text(statusDescription(for: id, snapshot: snapshot, isEnabled: isEnabled))
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            if isEnabled, let snapshot {
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(DNTheme.statusColor(for: snapshot.status))
+                        .frame(width: 6, height: 6)
+                    Text(LocalizedStringKey(snapshot.status.shortDescription))
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(DNTheme.statusColor(for: snapshot.status))
+                }
+            }
+
+            Toggle("", isOn: Binding(
+                get: { preferences.isProviderEnabled(id) },
+                set: { preferences.setProviderEnabled(id, enabled: $0) }
+            ))
+            .labelsHidden()
+            .toggleStyle(.switch)
+            .controlSize(.small)
+
+            Button("Settings") {
+                detailID = id
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
+            Menu {
+                if isEnabled && !isPrimary {
+                    Button("Set as Primary") {
+                        preferences.preferredPrimaryProviderID = id
+                        manager.setPrimaryProvider(id)
+                    }
+                }
+                Button("Refresh") {
+                    manager.refresh(providerID: id)
+                }
+                .disabled(!isEnabled)
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 11, weight: .semibold))
+                    .frame(width: 22, height: 22)
+            }
+            .menuStyle(.borderlessButton)
+            .frame(width: 22)
+        }
+        .padding(.vertical, 4)
     }
 
     private func statusDescription(for id: AIProviderID, snapshot: AIProviderSnapshot?, isEnabled: Bool) -> String {
         guard isEnabled else { return L10n.key("Disabled by user", locale: locale) }
-        guard let snapshot = snapshot else { return L10n.key("Checking…", locale: locale) }
+        guard let snapshot else { return L10n.key("Checking…", locale: locale) }
         if snapshot.status == .ready {
             return "\(L10n.key("Ready", locale: locale)) • \(snapshot.compactMetric.value)"
-        } else {
-            return L10n.key(snapshot.status.shortDescription, locale: locale)
         }
-    }
-
-    private func openTerminalLogin() {
-        let script = "tell application \"Terminal\" to do script \"opencode auth login\" activate"
-        if let appleScript = NSAppleScript(source: script) {
-            var error: NSDictionary?
-            appleScript.executeAndReturnError(&error)
-        }
+        return L10n.key(snapshot.status.shortDescription, locale: locale)
     }
 
     private func moveProviders(from source: IndexSet, to destination: Int) {
@@ -196,4 +139,8 @@ struct ProvidersSettingsView: View {
         preferences.setProviderOrder(ids)
         manager.applyProviderOrder(ids)
     }
+}
+
+private struct IdentifiedProvider: Identifiable {
+    let id: AIProviderID
 }

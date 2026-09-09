@@ -10,6 +10,8 @@ struct NowPlayingInfo: Equatable, Sendable {
     var playbackRate: Double
     var timestamp: Date
     var artworkData: Data?
+    var sourceAppName: String = ""
+    var sourceBundleIdentifier: String = ""
 
     static let empty = NowPlayingInfo(
         title: "",
